@@ -1,4 +1,4 @@
-package com.wasterec.app.presentation.components
+package com.wasterec.app.shared.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape

@@ -1,4 +1,4 @@
-package com.wasterec.app.presentation.views
+package com.wasterec.app.feature.training.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +19,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.wasterec.app.R
 import com.wasterec.app.model.Destination
-import com.wasterec.app.presentation.components.MyButton
+import com.wasterec.app.shared.components.MyButton
 import com.wasterec.app.ui.theme.Typography
 
 @Composable

@@ -1,4 +1,4 @@
-package com.wasterec.app.presentation.views
+package com.wasterec.app.feature.training.view
 
 import android.content.Context
 import android.widget.Toast
@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -23,18 +24,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.wasterec.app.R
 import com.wasterec.app.manager.EfficientNetB0
 import com.wasterec.app.model.Destination
 import com.wasterec.app.model.ModelConiguration
 import com.wasterec.app.model.TrainingModel
-import com.wasterec.app.presentation.components.GifLoader
-import com.wasterec.app.presentation.components.MyButton
+import com.wasterec.app.shared.components.GifLoader
+import com.wasterec.app.shared.components.MyButton
 import com.wasterec.app.ui.theme.Typography
 import kotlinx.coroutines.delay
 import java.lang.Integer.max
@@ -46,7 +45,7 @@ fun TrainingView(
     navController : NavHostController,
     trainingData : SnapshotStateList<TrainingModel>
 ){
-    var loadIdx by remember{ mutableStateOf(1) }
+    var loadIdx by remember{ mutableIntStateOf(1) }
 
     LaunchedEffect(Unit) {
         while (true) {

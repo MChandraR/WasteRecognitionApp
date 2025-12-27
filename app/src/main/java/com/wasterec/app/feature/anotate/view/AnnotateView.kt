@@ -1,4 +1,4 @@
-package com.wasterec.app.presentation.views
+package com.wasterec.app.feature.anotate.view
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -26,24 +26,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import android.os.Build
 import android.graphics.BitmapFactory
-import android.os.Handler
-import android.os.Looper
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.wasterec.app.manager.EfficientNetB0
 import com.wasterec.app.model.Destination
 import com.wasterec.app.model.TrainingModel
-import com.wasterec.app.presentation.components.MyButton
+import com.wasterec.app.shared.components.MyButton
 import com.wasterec.app.ui.theme.Typography
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import android.graphics.ImageDecoder as AndroidImageDecoder
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AnnotateView(
     context: Context,
@@ -52,8 +51,8 @@ fun AnnotateView(
 ) {
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var predictResult by remember { mutableStateOf<String?>(null)}
-    var confidentLevel by remember { mutableStateOf(0f)}
-    var predictedLabel by remember { mutableStateOf(0)}
+    var confidentLevel by remember { mutableFloatStateOf(0f) }
+    var predictedLabel by remember { mutableIntStateOf(0) }
 
     val efficientNetB0 : EfficientNetB0 = EfficientNetB0(context, "model.ptl" )
     val imagePickerLauncher = rememberLauncherForActivityResult(

@@ -1,4 +1,4 @@
-package com.wasterec.app.presentation.components
+package com.wasterec.app.shared.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

@@ -1,4 +1,4 @@
-package com.wasterec.app.presentation.views
+package com.wasterec.app.feature.home.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,16 +25,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.wasterec.app.R
+import com.wasterec.app.feature.home.viewmodel.HomeViewModel
 import com.wasterec.app.model.Destination
-import com.wasterec.app.presentation.components.GifLoader
+import com.wasterec.app.shared.components.GifLoader
 import com.wasterec.app.ui.theme.Typography
 import com.wasterec.app.ui.theme.lightGray
 
 @Composable
 fun HomeView(
     navController: NavHostController,
-    modifier: Modifier
+    modifier: Modifier,
+    homeViewModel: HomeViewModel = HomeViewModel()
 ){
+
+    LaunchedEffect(Unit) {
+        homeViewModel.getGlobalModelInfo()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -100,7 +108,7 @@ fun HomeView(
                         "Arch.",
                     )
                     Text(
-                        "EfficientNet-B0",
+                        (homeViewModel.globalModelInfoModel.value)?.model_name ?: "-" ,
                         fontWeight = FontWeight.Bold,
                         fontSize = Typography.titleSmall.fontSize,
                     )
@@ -124,7 +132,7 @@ fun HomeView(
                         "Last Training.",
                     )
                     Text(
-                        "25 Sep 2025",
+                        (homeViewModel.globalModelInfoModel.value)?.last_updated ?: "-" ,
                         fontWeight = FontWeight.Bold,
                         fontSize = Typography.titleSmall.fontSize,
                     )
