@@ -24,5 +24,8 @@ object Destination {
 
     @Serializable
     data object FinishTraining : Route
+
+    @Serializable
+    data object Login : Route
 }
 

@@ -10,7 +10,7 @@ class SharedPreferenceService(context : Context){
     fun storeStringValue(key : String, value : String){
         val sharedPreferencesEditor = this.sharedPreferences?.edit()
         sharedPreferencesEditor?.putString(key, value)
-        sharedPreferencesEditor?.commit()
+        sharedPreferencesEditor?.apply()
     }
 
     fun getStringValue(key : String, value : String) : String?{

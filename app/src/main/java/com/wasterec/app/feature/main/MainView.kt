@@ -1,4 +1,4 @@
-package com.wasterec.app.presentation.views
+package com.wasterec.app.feature.main
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import com.wasterec.app.R
+import com.wasterec.app.feature.home.view.HomeView
 import com.wasterec.app.model.Destination.Home
 import com.wasterec.app.model.Destination.Info
 import com.wasterec.app.model.Menu

@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.wasterec.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.wasterec.app"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -49,7 +49,7 @@ android {
 dependencies {
     val nav_version = "2.9.5"
     // Jetpack Compose integration
-    implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation(libs.androidx.navigation.compose)
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
     // Views/Fragments integration
     implementation("androidx.navigation:navigation-fragment:$nav_version")

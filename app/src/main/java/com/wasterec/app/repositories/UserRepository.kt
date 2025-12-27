@@ -1,17 +1,16 @@
-package com.wasterec.app.services
+package com.wasterec.app.repositories
 
-import android.accounts.NetworkErrorException
-import com.wasterec.app.helper.LoginAPIError
-import com.wasterec.app.interfaces.LoginInterfaceAPI
+import com.wasterec.app.services.UserService
 import com.wasterec.app.model.LoginModelAPI
+import com.wasterec.app.services.ApiService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class LoginAPIService : ApiService("http://192.168.1.4:5001") {
+class UserRepository : ApiService("http://192.168.1.4:5001") {
     //Function to send credential to login endpoint
     fun login(loginBody : LoginModelAPI) {
-        var loginAPIInterface = retrofit?.create(LoginInterfaceAPI::class.java)
+        var loginAPIInterface = retrofit?.create(UserService::class.java)
         CoroutineScope(Dispatchers.IO).launch {
             if(loginAPIInterface != null){
                 var loginResponse = loginAPIInterface.login(credential = loginBody)

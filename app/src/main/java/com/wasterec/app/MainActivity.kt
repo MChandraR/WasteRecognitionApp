@@ -9,9 +9,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.wasterec.app.feature.login.view.LoginView
+import com.wasterec.app.feature.main.DebugView
+import com.wasterec.app.feature.navigation.view.NavigationView
 import com.wasterec.app.model.Destination
-import com.wasterec.app.presentation.views.LoginView
-import com.wasterec.app.presentation.views.NavigationView
 
 class MainActivity : ComponentActivity() {
 
@@ -23,20 +24,20 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
-            LoginView(this)
-//            NavigationView(
-//                this,
-//                navController
-//            )
-//
-//            handler.postDelayed({
-//                navController.navigate(Destination.Home) {
-//                    popUpTo(navController.graph.startDestinationId) {
-//                        inclusive = true
-//                    }
-//                    launchSingleTop = true
-//                }
-//            }, 3000)
+            //DebugView(this)
+            NavigationView(
+                this,
+                navController
+            )
+
+            handler.postDelayed({
+                navController.navigate(Destination.Home) {
+                    popUpTo(navController.graph.startDestinationId) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            }, 3000)
         }
 
 
