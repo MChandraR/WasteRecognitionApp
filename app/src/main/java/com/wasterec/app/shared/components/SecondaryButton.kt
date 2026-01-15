@@ -1,5 +1,6 @@
 package com.wasterec.app.shared.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,7 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun MyButton(
+fun SecondaryButton(
     onClick : () -> Unit,
     modifier:Modifier = Modifier,
     content : @Composable () -> Unit,
@@ -22,7 +23,8 @@ fun MyButton(
             onClick()
         },
         shape = RoundedCornerShape(10.dp),
-        colors = ButtonColors(containerColor = Color.LightGray, contentColor = Color.Black, disabledContainerColor = Color.LightGray, disabledContentColor = Color.Black),
+        border = BorderStroke(1.dp , Color.DarkGray),
+        colors = ButtonColors(containerColor = Color.Transparent, contentColor = Color.Black, disabledContainerColor = Color.LightGray, disabledContentColor = Color.Black),
         modifier = modifier
     ) {
         content()

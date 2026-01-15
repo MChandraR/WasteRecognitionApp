@@ -9,9 +9,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
@@ -25,261 +22,230 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import android.os.Build
-import android.graphics.BitmapFactory
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.wasterec.app.feature.anotate.components.LabelSelectionComponent
+import com.wasterec.app.feature.anotate.viewmodel.AnotateViewModel
+import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.manager.EfficientNetB0
 import com.wasterec.app.model.Destination
-import com.wasterec.app.model.TrainingModel
+import com.wasterec.app.model.ModelConiguration
+import com.wasterec.app.model.globalmodel.GlobalWeightModel
+import com.wasterec.app.repositories.GlobalModelRepository
 import com.wasterec.app.shared.components.MyButton
+import com.wasterec.app.shared.components.SecondaryButton
 import com.wasterec.app.ui.theme.Typography
+import com.wasterec.app.utils.encodeWeightsToBase64
+import com.wasterec.app.utils.floatArrayToBase64
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import android.graphics.ImageDecoder as AndroidImageDecoder
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AnnotateView(
-    context: Context,
-    navController : NavHostController,
-    trainingData: SnapshotStateList<TrainingModel>
+    anotateViewModel: AnotateViewModel? = null,
+    importImageViewModel: ImportImageViewModel? = null,
 ) {
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    var predictResult by remember { mutableStateOf<String?>(null)}
-    var confidentLevel by remember { mutableFloatStateOf(0f) }
-    var predictedLabel by remember { mutableIntStateOf(0) }
 
-    val efficientNetB0 : EfficientNetB0 = EfficientNetB0(context, "model.ptl" )
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        selectedImageUri = uri
-    }
-    var bitMap: Bitmap? = null
-    val label = arrayOf("Glass", "Paper", "Cardboard",  "Metal","Plastic", "Trash")
-    val context = LocalContext.current
+    Box{
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Spacer(Modifier.weight(1f))
 
-    trainingData.clear()
+            Text(
+                "Proses anotasi :  ${(anotateViewModel?.currentAnotateIndex?.value ?: 0) + 1} dari ${importImageViewModel?.imageDatasetList?.size}",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 20.dp)
+            )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Spacer(Modifier.weight(1f))
-
-        Text(
-            "Training your model",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Text(
-            "Need 20 Sample",
-            fontSize = 18.sp,
-            modifier = Modifier.padding(bottom = 20.dp)
-        )
+            Text(
+                "Pilih label kelas yang benar untuk gambar dibawah",
+                fontSize = 18.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = 20.dp)
+            )
 
 
-        Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-        val scope = rememberCoroutineScope()
-
-        selectedImageUri?.let { uri ->
-            val bitmap = remember(uri) {
-                try {
-                    if (Build.VERSION.SDK_INT < 28) {
-                        BitmapFactory.decodeStream(
-                            context.contentResolver.openInputStream(uri)
-                        )
-                    } else {
-                        val source = AndroidImageDecoder.createSource(context.contentResolver, uri)
-                        AndroidImageDecoder.decodeBitmap(source)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
-                }
+            LaunchedEffect(Dispatchers.IO) {
+                anotateViewModel?.currentAnotateIndex?.value = 0
+                println("Jumlah datset diimport" + importImageViewModel?.imageDatasetList?.size.toString())
             }
 
-            bitmap?.let { bmp ->
-                // Jalankan inference di background saat URI berubah
-                bitMap = bmp
-                LaunchedEffect(uri) {
-                    predictResult = "Loading..."
-                    withContext(Dispatchers.IO) {
-                        val output = efficientNetB0.predict(
-                            bmp.copy(Bitmap.Config.ARGB_8888, false)
-                        )
-                        val outputIdx = output.first
-                        val labelResult = label.getOrNull(outputIdx)
-                        withContext(Dispatchers.Main) {
-                            predictResult = labelResult ?: "Unknown"
-                            confidentLevel = output.second
-                            if(confidentLevel == null || confidentLevel == 0.0f){
-                                predictResult = "Unknown"
 
-                            }
-                            predictedLabel = outputIdx
-                            Toast.makeText(context, "Berhasil " + confidentLevel.toString(), Toast.LENGTH_SHORT).show()
+            if(importImageViewModel?.getImageDataBitmap(anotateViewModel?.currentAnotateIndex?.value?: 0) != null) {
+                importImageViewModel.getImageDataBitmap(anotateViewModel?.currentAnotateIndex?.value?: 0)
+                    ?.let { bmp ->
+                        // Jalankan inference di background saat URI berubah
+                        LaunchedEffect(Dispatchers.IO) {
+                            anotateViewModel?.classifyImage(bmp)
+
+                        }
+                        anotateViewModel?.currentBitmap?.value = bmp
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Image(
+                                bitmap = bmp.asImageBitmap(),
+                                contentDescription = "Preview",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(300.dp)
+                                    .padding(top = 16.dp)
+                                    .background(Color.Transparent)
+                                    .clip(RoundedCornerShape(10)),
+                                contentScale = ContentScale.Crop
+                            )
+
                         }
                     }
-                }
+            }else{
+                anotateViewModel?.predictResult?.value = "Failed to convert bitmap"
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                        .height(300.dp)
+                )
+            }
 
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Image(
-                        bitmap = bmp.asImageBitmap(),
-                        contentDescription = "Preview",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(300.dp)
-                            .padding(top = 16.dp)
-                            .background(Color.Transparent)
-                            .clip(RoundedCornerShape(10)),
-                        contentScale = ContentScale.Crop
+
+
+
+            if ( anotateViewModel?.predictResult != null) {
+                Text(
+                    anotateViewModel.predictResult.value ,
+                    textAlign = TextAlign.Center,
+                    fontSize = Typography.titleLarge.fontSize,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth().padding(top = 20.dp)
+                )
+
+                Row(
+                    modifier = Modifier
+                        .padding(vertical = 20.dp)
+                ) {
+                    Text(
+                        "Confident Lv.",
+                        fontSize = Typography.titleLarge.fontSize
                     )
-
+                    Text(
+                        (anotateViewModel.confidentLevel.value?.times(100f)).toString()+"%",
+                        fontSize = Typography.titleLarge.fontSize,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
-        }
 
-        Text(
-            predictResult?: "Select Image to Classify",
-            fontSize = Typography.displayLarge.fontSize,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
+            Spacer(Modifier.weight(1f))
 
-        if ( predictResult != null) {
-            Row(
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ){
+                MyButton(
+                    onClick = {
+//                    if(currentBitmap != null){
+//                        classifyImage(currentBitmap)
+//                    }
+                    },
+                    modifier = Modifier
+                        .background(
+                            color = Color.LightGray,
+                            shape = RoundedCornerShape(10)
+                        )
+                        .fillMaxWidth()
+                ) {
+                    Text("Klasifikasi",
+                        modifier = Modifier.padding(10.dp))
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row {
+                    SecondaryButton (
+                        onClick = {
+                            importImageViewModel?.setLabelForImage(anotateViewModel?.currentAnotateIndex?.value?:0, anotateViewModel?.predictedLabel?.value?:0)
+                            println("Ditandai sebagai benar dengan label ${anotateViewModel?.predictResult?.value} index : ${anotateViewModel?.predictedLabel?.value}")
+                            if(anotateViewModel != null){
+                                anotateViewModel.currentAnotateIndex.value += 1
+                                anotateViewModel.currentBitmap.value?.let { bitmap ->
+                                    anotateViewModel.classifyImage(bitmap)
+                                }
+                            }
+                        },
+                        modifier = Modifier.weight(.5f)
+                    ) {
+                        Text("Benar",
+                            modifier = Modifier.padding(5.dp))
+                    }
+
+                    Spacer(modifier = Modifier.weight(.1f))
+
+                    SecondaryButton(
+                        onClick = {
+                            anotateViewModel?.showLabelSelectionMenu?.value = true
+                        },
+                        modifier = Modifier.weight(.5f)
+
+                    ) {
+                        Text("Salah",
+                            modifier = Modifier.padding(5.dp))
+                    }
+                }
+
+
+            }
+
+            Spacer(Modifier.weight(1f))
+
+            MyButton(
+                onClick = {
+                    anotateViewModel?.navHostController?.navigate(Destination.Training)
+                },
                 modifier = Modifier
-                    .padding(vertical = 20.dp)
+                    .fillMaxWidth(),
             ) {
                 Text(
-                    "Confident Lv.",
-                    fontSize = Typography.titleLarge.fontSize
-                )
-                Text(
-                    (confidentLevel * 100f).toString()+"%",
-                    fontSize = Typography.titleLarge.fontSize,
-                    fontWeight = FontWeight.Bold
+                    "Selanjutnya",
+                    modifier = Modifier.padding(10.dp)
                 )
             }
+
         }
 
-        Spacer(Modifier.weight(1f))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ){
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ){
-                MyButton(
-                    onClick = {
-                        imagePickerLauncher.launch("image/*")
-                    },
-                    modifier = Modifier
-                        .background(
-                            color = Color.LightGray,
-                            shape = RoundedCornerShape(10)
-                        )
-                        .fillMaxWidth()
-                ) {
-                    Text("Input")
-                }
-
-                Spacer(Modifier.height(10.dp))
-
-                MyButton(
-                    onClick = {
-                        if (bitMap != null) {
-                            trainingData.add(
-                                TrainingModel(bitMap!!.copy(Bitmap.Config.ARGB_8888,  false), predictedLabel)
-                            )
-                        }
-
-                    },
-                    modifier = Modifier
-                        .background(
-                            color = Color.LightGray,
-                            shape = RoundedCornerShape(10)
-                        )
-                        .fillMaxWidth()
-                ) {
-                    Text("Correct")
-                }
+        if(anotateViewModel?.showLabelSelectionMenu?.value == true){
+            LabelSelectionComponent(modifier = Modifier) { selectedIndex ->
+                importImageViewModel?.setLabelForImage(anotateViewModel.currentAnotateIndex.value, selectedIndex)
+                anotateViewModel.showLabelSelectionMenu.value = false
             }
-            
-            Spacer(Modifier.weight(.2f))
-
-            Column(
-                modifier = Modifier
-                    .weight(1f),
-                horizontalAlignment = Alignment.End
-            ){
-                MyButton(
-                    onClick = {
-                        imagePickerLauncher.launch("image/*")
-                    },
-                    modifier = Modifier
-                        .background(
-                            color = Color.LightGray,
-                            shape = RoundedCornerShape(10)
-                        )
-                        .fillMaxWidth()
-                ) {
-                    Text("Predict")
-                }
-
-                Spacer(Modifier.height(10.dp))
-
-                MyButton(
-                    onClick = {
-                        imagePickerLauncher.launch("image/*")
-                    },
-                    modifier = Modifier
-                        .background(
-                            color = Color.LightGray,
-                            shape = RoundedCornerShape(10)
-                        )
-                        .fillMaxWidth()
-                ) {
-                    Text("Wrong")
-                }
-            }
-        }
-
-        Spacer(Modifier.weight(1f))
-
-        MyButton(
-            onClick = {
-                navController.navigate(route = Destination.Training)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Text(
-                "Next"
-            )
         }
 
     }
+
+
 }
 
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun Prev(){
-    //AnnotateView( rememberNavController())
+    val importImageViewModel : ImportImageViewModel = viewModel()
+    val anotateViewModel : AnotateViewModel = viewModel()
+
+    AnnotateView(anotateViewModel, importImageViewModel)
 }

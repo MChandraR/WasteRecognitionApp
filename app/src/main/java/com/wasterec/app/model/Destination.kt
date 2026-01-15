@@ -27,5 +27,11 @@ object Destination {
 
     @Serializable
     data object Login : Route
+
+    @Serializable
+    data object Import : Route
+
+    @Serializable
+    data object WeightLoading : Route
 }
 

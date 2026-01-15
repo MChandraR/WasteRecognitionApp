@@ -7,10 +7,12 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.wasterec.app.model.ModelConiguration
 import com.wasterec.app.model.TrainingModel
+import com.wasterec.app.utils.forceSoftwareBitmap
 import org.pytorch.IValue
 import org.pytorch.Module
 import org.pytorch.torchvision.TensorImageUtils
 import kotlin.math.ln
+import kotlin.math.log
 
 class EfficientNetB0(val context: Context, val modelPath : String = "backbone.ptl") : ModelManager(context, modelPath) {
     val model: Module = this.loadModel()
@@ -41,7 +43,9 @@ class EfficientNetB0(val context: Context, val modelPath : String = "backbone.pt
         return Pair(outputIdx, confidence)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun train(config: ModelConiguration, dataset: List<TrainingModel>): Map<String, Any> {
+        println("Jumlah data " + dataset.size.toString())
         // Ambil parameter classifier dari model manager
         var weights = this.weights     // Array<FloatArray>
         var bias = this.bias           // FloatArray
@@ -60,8 +64,14 @@ class EfficientNetB0(val context: Context, val modelPath : String = "backbone.pt
 
             for (data in dataset) {
                 // 1️⃣ Konversi bitmap jadi tensor
+                val safeBitmap = if (data.Input.config == Bitmap.Config.HARDWARE) {
+                    data.Input.copy(Bitmap.Config.ARGB_8888, false)
+                } else {
+                    data.Input
+                }
+
                 val inputTensor = TensorImageUtils.bitmapToFloat32Tensor(
-                    data.Input,
+                   safeBitmap,
                     floatArrayOf(0.485f, 0.456f, 0.406f),
                     floatArrayOf(0.229f, 0.224f, 0.225f)
                 )
@@ -79,12 +89,18 @@ class EfficientNetB0(val context: Context, val modelPath : String = "backbone.pt
                     var sum = bias[i]
                     for (j in 0 until numFeatures) {
                         sum += features[j] * weights[i][j]
+                        //println("${i} daaan ${j}")
                     }
+                    println("Summm ${sum}")
+
                     sum
                 }
 
-                // 4️⃣ Hitung probabilitas & loss
-                val probs = softmax(logits)
+                println("Total sum : ${logits}")
+                val maxLogit = logits.maxOrNull()!!
+                val stable = logits.map { it - maxLogit }.toFloatArray()
+                val probs = softmax(stable)
+
                 val loss = -ln(probs[data.Label])
                 totalLoss += loss
 

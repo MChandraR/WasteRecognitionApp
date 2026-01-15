@@ -1,21 +1,29 @@
 package com.wasterec.app
 
+import android.app.Application
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
-import com.wasterec.app.feature.login.view.LoginView
-import com.wasterec.app.feature.main.DebugView
+import com.wasterec.app.feature.anotate.factory.AnotateViewModelFactory
+import com.wasterec.app.feature.anotate.viewmodel.AnotateViewModel
+import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.feature.navigation.view.NavigationView
+import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
+import com.wasterec.app.feature.training.viewmodelfactory.TrainingViewModelFactory
 import com.wasterec.app.model.Destination
 
 class MainActivity : ComponentActivity() {
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -24,10 +32,31 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
+            val application: Application = this.applicationContext as Application
+
+            val importImageViewModel : ImportImageViewModel = viewModel()
+            val anotateViewModel : AnotateViewModel = viewModel(
+                factory = AnotateViewModelFactory(
+                    application = application,
+                    context = this,
+                    navHostController = navController
+                )
+            )
+            val trainingViewModel : TrainingViewModel = viewModel(
+                factory = TrainingViewModelFactory(
+                    application = application,
+                    context = this,
+                    navHostController = navController,
+                    importImageViewModel = importImageViewModel
+                )
+            )
             //DebugView(this)
             NavigationView(
                 this,
-                navController
+                navController,
+                anotateViewModel,
+                importImageViewModel,
+                trainingViewModel
             )
 
             handler.postDelayed({

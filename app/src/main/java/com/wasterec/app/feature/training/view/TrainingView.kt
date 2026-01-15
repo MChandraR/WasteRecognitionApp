@@ -1,7 +1,9 @@
 package com.wasterec.app.feature.training.view
 
 import android.content.Context
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,18 +18,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.wasterec.app.R
+import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
+import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
+import com.wasterec.app.feature.training.viewmodelfactory.TrainingViewModelFactory
 import com.wasterec.app.manager.EfficientNetB0
 import com.wasterec.app.model.Destination
 import com.wasterec.app.model.ModelConiguration
@@ -38,12 +43,10 @@ import com.wasterec.app.ui.theme.Typography
 import kotlinx.coroutines.delay
 import java.lang.Integer.max
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TrainingView(
-    context:Context,
-    efficientNetB0: EfficientNetB0,
-    navController : NavHostController,
-    trainingData : SnapshotStateList<TrainingModel>
+    trainingViewModel: TrainingViewModel?
 ){
     var loadIdx by remember{ mutableIntStateOf(1) }
 
@@ -72,6 +75,33 @@ fun TrainingView(
             fontSize = Typography.displayLarge.fontSize,
             fontWeight = FontWeight.Bold
         )
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .padding(30.dp)
+        ) {
+            Text("Performa model lokal")
+            Column (
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .padding(20.dp)
+                    .background(
+                    color = Color.LightGray,
+                    shape =  RoundedCornerShape(10.dp)
+                )
+            ){
+                Text(
+                    "20%",
+                    fontSize = Typography.displayLarge.fontSize,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(50.dp,20.dp)
+                )
+                Text("Total Image")
+            }
+
+        }
 
         Spacer(Modifier.weight(1f))
 
@@ -146,7 +176,7 @@ fun TrainingView(
 
         MyButton(
             onClick = {
-                navController.navigate(route = Destination.FinishTraining)
+                trainingViewModel?.navHostController?.navigate(route = Destination.FinishTraining)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -155,16 +185,16 @@ fun TrainingView(
         }
 
         LaunchedEffect(Unit){
-            efficientNetB0.train(
-                ModelConiguration(
-                    learningRate = 0.001f,
-                    epoch = 10,
-                    batchSize = 5
-                ),
-                dataset = trainingData.toList()
-            )
-            Toast.makeText(context, "Training dengan total : ${trainingData.count()}", Toast.LENGTH_SHORT).show()
+            trainingViewModel?.startLocalTraining()
+            Toast.makeText(trainingViewModel?.context, "Training dengan total : ${trainingViewModel?.importImageViewModel?.imageDatasetList?.count()}", Toast.LENGTH_SHORT).show()
         }
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview(showBackground = true)
+@Composable
+fun TrainingViewPreview(){
+    TrainingView(null)
 }
 
