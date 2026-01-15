@@ -42,7 +42,9 @@ android {
     androidResources {
         noCompress += "ptl"
     }
-
+    composeOptions {
+        kotlinCompilerExtensionVersion = "2.3.0"
+    }
 }
 
 

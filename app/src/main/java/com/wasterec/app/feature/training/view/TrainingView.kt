@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,11 +29,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import com.wasterec.app.R
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
@@ -56,11 +66,15 @@ fun TrainingView(
     var loadIdx by remember{ mutableIntStateOf(1) }
 
     LaunchedEffect(Unit) {
+
+
         while (true) {
             loadIdx++
             loadIdx = max(1, loadIdx % 4)
             delay(1000)
         }
+
+
     }
 
 
@@ -113,7 +127,7 @@ fun TrainingView(
 
         }
 
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.weight(.3f))
 
         Column {
             Text(
@@ -136,15 +150,16 @@ fun TrainingView(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier
-                        .padding(30.dp)
+                        .padding(25.dp)
                         .constrainAs(count){
                             top.linkTo(parent.top)
                             bottom.linkTo(parent.bottom)
                             start.linkTo(parent.start)
+                            end.linkTo(label.start)
                         }
                 ) {
                     Text(
-                        "20",
+                        "${trainingViewModel?.importImageViewModel?.imageDatasetList?.size}",
                         fontSize = Typography.displayLarge.fontSize * 1.2,
                         fontWeight = FontWeight.Bold,
                     )
@@ -158,8 +173,7 @@ fun TrainingView(
                         .constrainAs(label){
                             top.linkTo(parent.top)
                             bottom.linkTo(parent.bottom)
-                            end.linkTo(parent.end)
-                            start.linkTo(count.end)
+                            end.linkTo(parent.end, 10.dp)
                         }
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
@@ -182,16 +196,41 @@ fun TrainingView(
             }
         }
 
+        if(trainingViewModel != null) {
+            CartesianChartHost(
+                modifier = Modifier.padding(top = 50.dp),
+                chart = rememberCartesianChart(
+                    rememberLineCartesianLayer(),
+                    startAxis = VerticalAxis.rememberStart(),
+                    bottomAxis = HorizontalAxis.rememberBottom(),
+                ),
+                modelProducer = trainingViewModel.modelProducer.value,
+            )
+        }
 
         Spacer(Modifier.weight(1f))
 
-        GifLoader(R.drawable.network)
+//        GifLoader(R.drawable.network)
         Text(
-            "Training" + ".".repeat(loadIdx),
+            "Loss ${trainingViewModel?.currentLoss?.value}" + ".".repeat(loadIdx),
             fontSize = Typography.titleLarge.fontSize
         )
+        
+
 
         Spacer(Modifier.weight(1f))
+
+        Text(
+            "Iterasi ${trainingViewModel?.currentEpoch?.value?:0}/${trainingViewModel?.modelConfig?.epoch}",
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.End,
+            fontSize = Typography.bodyLarge.fontSize
+        )
+
+        LinearProgressIndicator(
+            progress = { ((trainingViewModel?.currentEpoch?.value?: 0).toFloat() / ((trainingViewModel?.modelConfig?.epoch?:1).toFloat())).toFloat() },
+            modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp).height(10.dp)
+        )
 
         MyButton(
             onClick = {

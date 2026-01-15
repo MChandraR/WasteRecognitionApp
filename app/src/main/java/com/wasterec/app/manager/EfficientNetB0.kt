@@ -44,7 +44,7 @@ class EfficientNetB0(val context: Context, val modelPath : String = "backbone.pt
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun train(config: ModelConiguration, dataset: List<TrainingModel>): Map<String, Any> {
+    fun train(config: ModelConiguration, dataset: List<TrainingModel>, onProgressUpdate : (epoch:Int, loss : Float)->Unit): Map<String, Any> {
         println("Jumlah data " + dataset.size.toString())
         // Ambil parameter classifier dari model manager
         var weights = this.weights     // Array<FloatArray>
@@ -118,7 +118,7 @@ class EfficientNetB0(val context: Context, val modelPath : String = "backbone.pt
                     }
                 }
             }
-
+            onProgressUpdate(epoch, totalLoss)
             Log.i("TRAIN", "Epoch ${epoch + 1} avg loss = ${totalLoss / dataset.size}")
         }
 
