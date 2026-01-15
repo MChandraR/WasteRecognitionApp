@@ -5,14 +5,18 @@ import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +43,7 @@ import com.wasterec.app.model.ModelConiguration
 import com.wasterec.app.model.TrainingModel
 import com.wasterec.app.shared.components.GifLoader
 import com.wasterec.app.shared.components.MyButton
+import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
 import kotlinx.coroutines.delay
 import java.lang.Integer.max
@@ -82,87 +87,101 @@ fun TrainingView(
             modifier = Modifier
                 .padding(30.dp)
         ) {
-            Text("Performa model lokal")
+            Text("Performa model lokal",
+                fontSize = Typography.titleMedium.fontSize,
+                fontWeight = FontWeight.Bold
+            )
             Column (
                 verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .padding(20.dp)
+                    .padding(10.dp)
                     .background(
-                    color = Color.LightGray,
+                    color = ColorAsset.lightGray,
                     shape =  RoundedCornerShape(10.dp)
                 )
             ){
                 Text(
                     "20%",
-                    fontSize = Typography.displayLarge.fontSize,
+                    fontSize = Typography.displayLarge.fontSize * 1.2,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(50.dp,20.dp)
+                    modifier = Modifier.padding(start = 50.dp, end = 50.dp, top = 20.dp)
                 )
-                Text("Total Image")
+                Text("Total Image",
+                    modifier = Modifier.padding(bottom = 20.dp))
             }
 
         }
 
         Spacer(Modifier.weight(1f))
 
-        ConstraintLayout(
-            modifier = Modifier
-                .background(
-                    color = Color.LightGray,
-                    shape = RoundedCornerShape(10)
-                )
-                .fillMaxWidth()
-                .padding(all = 10.dp)
-        ) {
-            val (count, label ) = createRefs()
+        Column {
+            Text(
+                "Detail Dataset",
+                fontSize = Typography.titleMedium.fontSize,
+                fontWeight = FontWeight.Bold
+            )
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
+            ConstraintLayout(
                 modifier = Modifier
-                    .padding(30.dp)
-                    .constrainAs(count){
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                    }
+                    .background(
+                        color = ColorAsset.lightGray,
+                        shape = RoundedCornerShape(10)
+                    )
+                    .fillMaxWidth()
             ) {
-                Text(
-                    "20",
-                    fontSize = Typography.displayLarge.fontSize,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text("Total Image")
-            }
+                val (count, label ) = createRefs()
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .padding(30.dp)
+                        .constrainAs(count){
+                            top.linkTo(parent.top)
+                            bottom.linkTo(parent.bottom)
+                            start.linkTo(parent.start)
+                        }
+                ) {
+                    Text(
+                        "20",
+                        fontSize = Typography.displayLarge.fontSize * 1.2,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text("Total Image")
+                }
 
 
-            Column(
-                modifier = Modifier
-                    .constrainAs(label){
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                        end.linkTo(parent.end)
-                        start.linkTo(count.end)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    modifier = Modifier
+                        .constrainAs(label){
+                            top.linkTo(parent.top)
+                            bottom.linkTo(parent.bottom)
+                            end.linkTo(parent.end)
+                            start.linkTo(count.end)
+                        }
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        for(i in 0 ..< 3){
+                            Box(modifier = Modifier.border(1.dp, Color.Black, RoundedCornerShape(5.dp))){
+                                Text("Plastik : 20", modifier = Modifier.padding(10.dp,5.dp))
+                            }
+                        }
                     }
-            ) {
-                Text("Total Correct : ")
-                Text(
-                    "20",
-                    fontSize = Typography.titleLarge.fontSize,
-                    fontWeight = FontWeight.Bold
-                )
 
-                Spacer(Modifier.height(10.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                        for(i in 0 ..< 3){
+                            Box(modifier = Modifier.border(1.dp, Color.Black, RoundedCornerShape(5.dp))){
+                                Text("Plastik : 20", modifier = Modifier.padding(10.dp,5.dp))
+                            }
+                        }
+                    }
 
-                Text("Total Correct : ")
-                Text(
-                    "20",
-                    fontSize = Typography.titleLarge.fontSize,
-                    fontWeight = FontWeight.Bold
-                )
-
+                }
             }
         }
+
 
         Spacer(Modifier.weight(1f))
 
@@ -181,7 +200,8 @@ fun TrainingView(
             modifier = Modifier
                 .fillMaxWidth()
         ) { 
-            Text("Done")
+            Text("Selesai",
+                modifier = Modifier.padding(10.dp))
         }
 
         LaunchedEffect(Unit){
