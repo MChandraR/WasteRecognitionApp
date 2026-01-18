@@ -3,7 +3,7 @@ package com.wasterec.app.model.globalmodel
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GlobalModelWeightModel (
+data class ClassifierWeightModel (
     val weight : String,
     val bias : String
 )

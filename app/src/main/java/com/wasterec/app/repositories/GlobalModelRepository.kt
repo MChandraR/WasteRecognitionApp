@@ -2,6 +2,7 @@ package com.wasterec.app.repositories
 
 import com.wasterec.app.helper.AppError
 import com.wasterec.app.helper.GlobalModelError
+import com.wasterec.app.model.globalmodel.ClassifierWeightModel
 import com.wasterec.app.model.globalmodel.GlobalModelInfoModel
 import com.wasterec.app.model.globalmodel.GlobalWeightModel
 import com.wasterec.app.services.ApiService
@@ -32,11 +33,11 @@ class GlobalModelRepository : ApiService() {
     }
 
     //Fungsi to fetch model weight from server
-    fun fetchGlobalModelWeight(callback : (exception : AppError?, result : GlobalWeightModel?)->Unit){
+    fun fetchGlobalModelClassifierWeight(callback : (exception : AppError?, result : ClassifierWeightModel?)->Unit){
         val globalModelService = this.getGlobamModelService()
         if (globalModelService != null) {
             CoroutineScope(Dispatchers.IO).launch{
-                val response = globalModelService.getModelWeight()
+                val response = globalModelService.getClassifierModelWeight()
                 if(response.isSuccessful){
                     callback(null, response.body())
                 }else{

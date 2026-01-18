@@ -44,6 +44,11 @@ class EfficientNetB0(val context: Context, val modelPath : String = "backbone.pt
         return Pair(outputIdx, confidence)
     }
 
+    fun setWeightAndBias(newWeight : Array<FloatArray>, newBias : FloatArray){
+        this.setBias(newBias)
+        this.setWeight(newWeight)
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun train(config: ModelConiguration, dataset: List<TrainingModel>, onProgressUpdate : (epoch:Int, loss : Float)->Unit): Map<String, Any> {
         println("Jumlah data " + dataset.size.toString())

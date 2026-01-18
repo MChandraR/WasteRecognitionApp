@@ -1,5 +1,6 @@
 package com.wasterec.app.services
 
+import com.wasterec.app.model.globalmodel.ClassifierWeightModel
 import com.wasterec.app.model.globalmodel.GlobalModelInfoModel
 import com.wasterec.app.model.globalmodel.GlobalWeightModel
 import okhttp3.ResponseBody
@@ -14,7 +15,7 @@ interface GlobalModelService {
     suspend fun getModelInfo():Response<GlobalModelInfoModel>
 
     @GET("model/weight")
-    suspend fun getModelWeight():Response<GlobalWeightModel>
+    suspend fun getClassifierModelWeight():Response<ClassifierWeightModel>
 
     @POST("model/weight")
     suspend fun updateModelWeight(@Body globalWeight : GlobalWeightModel):Response<GlobalModelInfoModel>

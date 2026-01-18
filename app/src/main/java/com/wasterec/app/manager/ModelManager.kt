@@ -15,6 +15,13 @@ open class ModelManager(private val context : Context, private val modelPath : S
     var bias: FloatArray? = null
         private set
 
+    fun setWeight(weight : Array<FloatArray>){
+        this.weights = weight
+    }
+
+    fun setBias(bias : FloatArray){
+        this.bias = bias
+    }
     fun loadModel(): Module {
         val modelPath = IOUtils.assetFilePath(context, modelPath)
         println("Lokasi model: $modelPath")
