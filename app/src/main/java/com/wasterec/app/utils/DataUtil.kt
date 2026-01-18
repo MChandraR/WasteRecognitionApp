@@ -1,13 +1,8 @@
 package com.wasterec.app.utils
 
-import android.os.Build
 import android.util.Base64
-import androidx.annotation.RequiresApi
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
-class DataUtil {
-}
 
 fun weightsToBase64(weights: Array<FloatArray>): List<String> {
     return weights.map { floatArrayToBase64(it) }

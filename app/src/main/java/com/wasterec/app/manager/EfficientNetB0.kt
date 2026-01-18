@@ -13,7 +13,7 @@ import org.pytorch.Tensor
 import org.pytorch.torchvision.TensorImageUtils
 import kotlin.math.ln
 
-class EfficientNetB0(val context: Context, val modelPath : String = "backbone.ptl") : ModelManager(context, modelPath) {
+class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl") : ModelManager(context, modelPath) {
     val model: Module = this.loadModel()
 
     @RequiresApi(Build.VERSION_CODES.O)

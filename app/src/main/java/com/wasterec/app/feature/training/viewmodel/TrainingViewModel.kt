@@ -5,6 +5,8 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -34,8 +36,8 @@ class TrainingViewModel(
     var efficientNetB0 : EfficientNetB0 = EfficientNetB0(context)
     val modelProducer : MutableState<CartesianChartModelProducer> = mutableStateOf(
         CartesianChartModelProducer())
-    var currentEpoch : MutableState<Int>  = mutableStateOf(0)
-    var currentLoss : MutableState<Float> = mutableStateOf(0f)
+    var currentEpoch : MutableState<Int>  = mutableIntStateOf(0)
+    var currentLoss : MutableState<Float> = mutableFloatStateOf(0f)
     val lossList = mutableStateListOf<Float>()
     val classifierWeightFileManager : ClassifierWeightFileManager = ClassifierWeightFileManager(context)
     var modelConfig = ModelConiguration(

@@ -7,8 +7,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.wasterec.app.model.TrainingModel
-import kotlin.math.max
-import kotlin.math.min
+
 
 class ImportImageViewModel : ViewModel() {
     var imageDatasetList  = mutableStateListOf<TrainingModel>()
