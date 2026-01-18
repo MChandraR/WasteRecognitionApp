@@ -10,17 +10,17 @@ import kotlin.math.exp
 
 open class ModelManager(private val context : Context, private val modelPath : String) {
     private var model : Module? = null
-    var weights: Array<FloatArray>? = null
+    var classifierWeights: Array<FloatArray>? = null
         private set
-    var bias: FloatArray? = null
+    var classifierBias: FloatArray? = null
         private set
 
-    fun setWeight(weight : Array<FloatArray>){
-        this.weights = weight
+    fun setClassifierWeight(weight : Array<FloatArray>){
+        this.classifierWeights = weight
     }
 
-    fun setBias(bias : FloatArray){
-        this.bias = bias
+    fun setClassifierBias(bias : FloatArray){
+        this.classifierBias = bias
     }
     fun loadModel(): Module {
         val modelPath = IOUtils.assetFilePath(context, modelPath)
@@ -30,8 +30,8 @@ open class ModelManager(private val context : Context, private val modelPath : S
             model = LiteModuleLoader.load(modelPath)
 
             val (w, b) = loadClassifierParams(context)
-            weights = w
-            bias = b
+            classifierWeights = w
+            classifierBias = b
 
             println("✅ Model loaded, weights = [${w.size} x ${w[0].size}], bias = [${b.size}]")
         }

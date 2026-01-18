@@ -7,13 +7,11 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.wasterec.app.model.ModelConiguration
 import com.wasterec.app.model.TrainingModel
-import com.wasterec.app.utils.forceSoftwareBitmap
 import org.pytorch.IValue
 import org.pytorch.Module
 import org.pytorch.Tensor
 import org.pytorch.torchvision.TensorImageUtils
 import kotlin.math.ln
-import kotlin.math.log
 
 class EfficientNetB0(val context: Context, val modelPath : String = "backbone.ptl") : ModelManager(context, modelPath) {
     val model: Module = this.loadModel()
@@ -44,17 +42,17 @@ class EfficientNetB0(val context: Context, val modelPath : String = "backbone.pt
         return Pair(outputIdx, confidence)
     }
 
-    fun setWeightAndBias(newWeight : Array<FloatArray>, newBias : FloatArray){
-        this.setBias(newBias)
-        this.setWeight(newWeight)
+    fun setClassifierWeightAndBias(newWeight : Array<FloatArray>, newBias : FloatArray){
+        this.setClassifierBias(newBias)
+        this.setClassifierWeight(newWeight)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun train(config: ModelConiguration, dataset: List<TrainingModel>, onProgressUpdate : (epoch:Int, loss : Float)->Unit): Map<String, Any> {
         println("Jumlah data " + dataset.size.toString())
         // Ambil parameter classifier dari model manager
-        var weights = this.weights     // Array<FloatArray>
-        var bias = this.bias           // FloatArray
+        var weights = this.classifierWeights     // Array<FloatArray>
+        var bias = this.classifierBias           // FloatArray
 
         if (weights == null || bias == null) {
             Log.e("Train", "Weights or bias not initialized!")
