@@ -18,6 +18,7 @@ class EfficientNetB0(val context: Context, val modelPath : String = "backbone.pt
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun predict(bitmap: Bitmap) : Pair<Int, Float>{
+        // ... (kode bitmap to tensor Anda tetap sama)
         val safeBitmap = if (bitmap.config == Bitmap.Config.HARDWARE) {
             bitmap.copy(Bitmap.Config.ARGB_8888, false)
         } else {
@@ -27,17 +28,28 @@ class EfficientNetB0(val context: Context, val modelPath : String = "backbone.pt
         val inputTensor = TensorImageUtils.bitmapToFloat32Tensor(safeBitmap,
             TensorImageUtils.TORCHVISION_NORM_MEAN_RGB,
             TensorImageUtils.TORCHVISION_NORM_STD_RGB
-            )
+        )
         val outputTensor = model.forward(IValue.from(inputTensor)).toTensor()
         val scores = outputTensor.dataAsFloatArray
-        val output = scores.indices.maxByOrNull { scores[it] }
-        val expScores = scores.map { kotlin.math.exp(it) }
+
+        // Validasi apakah model mengeluarkan NaN
+        if (scores.any { it.isNaN() }) {
+            println("ERROR: Model output contains NaN")
+            return Pair(-1, 0f)
+        }
+
+        // STABLE SOFTMAX IMPLEMENTATION
+        val maxLogit = scores.maxOrNull() ?: 0f
+        val expScores = scores.map { kotlin.math.exp(it - maxLogit) }
         val sumExp = expScores.sum()
+
         val probabilities = expScores.map { it / sumExp }
 
-        // Ambil index dengan nilai tertinggi
         val outputIdx = probabilities.indices.maxByOrNull { probabilities[it] } ?: -1
         val confidence = if (outputIdx != -1) probabilities[outputIdx] else 0f
+
+        println("LOGITS: ${scores.joinToString(", ")}")
+        println("CONFIDENCE: $confidence")
 
         return Pair(outputIdx, confidence)
     }

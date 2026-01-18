@@ -40,7 +40,7 @@ class TrainingViewModel(
     val classifierWeightFileManager : ClassifierWeightFileManager = ClassifierWeightFileManager(context)
     var modelConfig = ModelConiguration(
         learningRate = 0.001f,
-        epoch = 30,
+        epoch = 50,
         batchSize = 2
     )
 

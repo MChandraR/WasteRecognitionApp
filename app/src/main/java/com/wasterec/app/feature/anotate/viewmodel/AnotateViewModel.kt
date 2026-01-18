@@ -9,6 +9,8 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.AndroidViewModel
@@ -25,11 +27,11 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 class AnotateViewModel(application : Application,val context: Context, val navHostController: NavHostController): AndroidViewModel(application = application) {
-    var currentAnotateIndex : MutableState<Int> = mutableStateOf(0)
+    var currentAnotateIndex : MutableState<Int> = mutableIntStateOf(0)
     var showLabelSelectionMenu : MutableState<Boolean> = mutableStateOf(false)
     var predictResult : MutableState<String> = mutableStateOf("")
-    var confidentLevel : MutableState<Float> = mutableStateOf(0f)
-    var predictedLabel : MutableState<Int> = mutableStateOf(0)
+    var confidentLevel : MutableState<Float> = mutableFloatStateOf(0f)
+    var predictedLabel : MutableState<Int> = mutableIntStateOf(0)
     var currentBitmap : MutableState<Bitmap?> = mutableStateOf(null)
     var efficientNetB0 : EfficientNetB0? = EfficientNetB0(context, "model.ptl" )
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
@@ -48,6 +50,8 @@ class AnotateViewModel(application : Application,val context: Context, val navHo
             efficientNetB0 = EfficientNetB0(context, "GlobalModel.ptl")
         }
     }
+
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun classifyImage(bmp : Bitmap){

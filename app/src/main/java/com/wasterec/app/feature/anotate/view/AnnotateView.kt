@@ -1,7 +1,5 @@
 package com.wasterec.app.feature.anotate.view
 
-import android.content.Context
-import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +32,7 @@ import com.wasterec.app.shared.components.SecondaryButton
 import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
 import kotlinx.coroutines.Dispatchers
+import kotlin.math.min
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -133,7 +132,7 @@ fun AnnotateView(
                         fontSize = Typography.titleLarge.fontSize
                     )
                     Text(
-                        (anotateViewModel.confidentLevel.value?.times(100f)).toString()+"%",
+                        (anotateViewModel.confidentLevel.value.times(100f)).toString()+"%",
                         fontSize = Typography.titleLarge.fontSize,
                         fontWeight = FontWeight.Bold
                     )
@@ -172,10 +171,16 @@ fun AnnotateView(
                             importImageViewModel?.setLabelForImage(anotateViewModel?.currentAnotateIndex?.value?:0, anotateViewModel?.predictedLabel?.value?:0)
                             println("Ditandai sebagai benar dengan label ${anotateViewModel?.predictResult?.value} index : ${anotateViewModel?.predictedLabel?.value}")
                             if(anotateViewModel != null){
-                                anotateViewModel.currentAnotateIndex.value += 1
+                                anotateViewModel.currentAnotateIndex.value = min((importImageViewModel?.imageDatasetList?.size?:0) - 1 ,anotateViewModel.currentAnotateIndex.value+1 )
                                 importImageViewModel?.imageDatasetList?.get(anotateViewModel.currentAnotateIndex.value)?.Input?.let { bitmap ->
                                     anotateViewModel.classifyImage(bitmap)
                                 }
+                            }
+                            //Validasi jika index terakhir / gambar terakhir maka lanjut ke halaman selanjutnya
+                            if( (anotateViewModel?.currentAnotateIndex?.value
+                                    ?: 0) >= (importImageViewModel?.imageDatasetList?.size?:0)
+                            ){
+                                anotateViewModel?.navHostController?.navigate(Destination.Training)
                             }
                         },
                         modifier = Modifier.weight(.5f)
@@ -203,19 +208,6 @@ fun AnnotateView(
 
             Spacer(Modifier.weight(1f))
 
-            MyButton(
-                onClick = {
-                    anotateViewModel?.navHostController?.navigate(Destination.Training)
-                },
-                modifier = Modifier
-                    .fillMaxWidth(),
-            ) {
-                Text(
-                    "Selanjutnya",
-                    modifier = Modifier.padding(10.dp)
-                )
-            }
-
         }
 
         if(anotateViewModel?.showLabelSelectionMenu?.value == true){
@@ -225,12 +217,18 @@ fun AnnotateView(
                 modifier = Modifier.fillMaxSize().background(ColorAsset.alertMainBg)
             ) {
                 LabelSelectionComponent(modifier = Modifier.background(Color.White, shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))) { selectedIndex ->
-                    println("Label yang benar sudah diperbaiki ${selectedIndex}")
+                    println("Label yang benar sudah paperbacking $selectedIndex")
                     importImageViewModel?.setLabelForImage(anotateViewModel.currentAnotateIndex.value, selectedIndex)
-                    anotateViewModel.currentAnotateIndex.value += 1
+                    anotateViewModel.currentAnotateIndex.value = min((importImageViewModel?.imageDatasetList?.size?:0) - 1 ,anotateViewModel.currentAnotateIndex.value+1 )
                     anotateViewModel.showLabelSelectionMenu.value = false
                     importImageViewModel?.imageDatasetList?.get(anotateViewModel.currentAnotateIndex.value)?.Input?.let { bitmap ->
                         anotateViewModel.classifyImage(bitmap)
+                    }
+                    //Validasi , jika sudah di akhir index / gambar , lanjut ke training
+                    if( (anotateViewModel.currentAnotateIndex.value
+                            ) >= (importImageViewModel?.imageDatasetList?.size?:0)
+                    ){
+                        anotateViewModel.navHostController.navigate(Destination.Training)
                     }
                 }
             }
