@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import com.wasterec.app.feature.anotate.components.LabelSelectionComponent
+import com.wasterec.app.feature.anotate.components.ModelLoadingComponent
 import com.wasterec.app.feature.anotate.viewmodel.AnotateViewModel
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.model.Destination
@@ -47,172 +48,189 @@ fun AnnotateView(
     }
 
     Box{
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Spacer(Modifier.weight(1f))
-
-            Text(
-                "Proses anotasi :  ${(anotateViewModel?.currentAnotateIndex?.value ?: 0) + 1} dari ${importImageViewModel?.imageDatasetList?.size}",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 20.dp)
-            )
-
-            Text(
-                "Pilih label kelas yang benar untuk gambar dibawah",
-                fontSize = 18.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 20.dp)
-            )
-
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            LaunchedEffect(Dispatchers.IO) {
-                anotateViewModel?.currentAnotateIndex?.value = 0
-                println("Jumlah datset diimport" + importImageViewModel?.imageDatasetList?.size.toString())
-            }
-
-
-            if(importImageViewModel?.getImageDataBitmap(anotateViewModel?.currentAnotateIndex?.value?: 0) != null) {
-                importImageViewModel.getImageDataBitmap(anotateViewModel?.currentAnotateIndex?.value?: 0)
-                    ?.let { bmp ->
-                        // Jalankan inference di background saat URI berubah
-                        LaunchedEffect(Dispatchers.IO) {
-                            anotateViewModel?.classifyImage(bmp)
-
-                        }
-                        anotateViewModel?.currentBitmap?.value = bmp
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Image(
-                                bitmap = bmp.asImageBitmap(),
-                                contentDescription = "Preview",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(300.dp)
-                                    .padding(top = 16.dp)
-                                    .background(Color.Transparent)
-                                    .clip(RoundedCornerShape(10)),
-                                contentScale = ContentScale.Crop
-                            )
-
-                        }
-                    }
-            }else{
-                anotateViewModel?.predictResult?.value = "Failed to convert bitmap"
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                        .height(300.dp)
-                )
-            }
-
-
-
-
-            if ( anotateViewModel?.predictResult != null) {
-                Text(
-                    anotateViewModel.predictResult.value ,
-                    textAlign = TextAlign.Center,
-                    fontSize = Typography.titleLarge.fontSize,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.fillMaxWidth().padding(top = 20.dp)
-                )
-
-                Row(
-                    modifier = Modifier
-                        .padding(vertical = 20.dp)
-                ) {
-                    Text(
-                        "Confident Lv.",
-                        fontSize = Typography.titleLarge.fontSize
-                    )
-                    Text(
-                        (anotateViewModel.confidentLevel.value.times(100f)).toString()+"%",
-                        fontSize = Typography.titleLarge.fontSize,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-
-            Spacer(Modifier.weight(1f))
-
+        if(!(anotateViewModel?.isModelLoading?.value?:false)) {
             Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ){
-                MyButton(
-                    onClick = {
-//                    if(currentBitmap != null){
-//                        classifyImage(currentBitmap)
-//                    }
-                    },
-                    modifier = Modifier
-                        .background(
-                            color = Color.LightGray,
-                            shape = RoundedCornerShape(10)
-                        )
-                        .fillMaxWidth()
-                ) {
-                    Text("Klasifikasi",
-                        modifier = Modifier.padding(10.dp))
-                }
+                verticalArrangement = Arrangement.Center
+            ) {
+                Spacer(Modifier.weight(1f))
+
+                Text(
+                    "Proses anotasi :  ${(anotateViewModel?.currentAnotateIndex?.value ?: 0) + 1} dari ${importImageViewModel?.imageDatasetList?.size}",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 20.dp)
+                )
+
+                Text(
+                    "Pilih label kelas yang benar untuk gambar dibawah",
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 20.dp)
+                )
+
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Row {
-                    SecondaryButton (
-                        onClick = {
-                            importImageViewModel?.setLabelForImage(anotateViewModel?.currentAnotateIndex?.value?:0, anotateViewModel?.predictedLabel?.value?:0)
-                            println("Ditandai sebagai benar dengan label ${anotateViewModel?.predictResult?.value} index : ${anotateViewModel?.predictedLabel?.value}")
-                            val nextIndex = min(
-                                (importImageViewModel?.imageDatasetList?.size ?: 0) - 1,
-                                (anotateViewModel?.currentAnotateIndex?.value?:0) + 1
-                            )
-                            if (anotateViewModel != null) {
-
-                                importImageViewModel?.imageDatasetList?.get(nextIndex)?.Input?.let { bitmap ->
-                                    anotateViewModel.classifyImage(bitmap)
-                                }
-                            }
-                            //Validasi jika index terakhir / gambar terakhir maka lanjut ke halaman selanjutnya
-                            if( (anotateViewModel?.currentAnotateIndex?.value
-                                    ?: 0) >= (importImageViewModel?.imageDatasetList?.size?:0) - 1
-                            ){
-                                anotateViewModel?.navHostController?.navigate(Destination.Training)
-                            }
-                            anotateViewModel?.currentAnotateIndex?.value = nextIndex
-                        },
-                        modifier = Modifier.weight(.5f)
-                    ) {
-                        Text("Benar",
-                            modifier = Modifier.padding(5.dp))
-                    }
-
-                    Spacer(modifier = Modifier.weight(.1f))
-
-                    SecondaryButton(
-                        onClick = {
-                            anotateViewModel?.showLabelSelectionMenu?.value = true
-                        },
-                        modifier = Modifier.weight(.5f)
-
-                    ) {
-                        Text("Salah",
-                            modifier = Modifier.padding(5.dp))
-                    }
+                LaunchedEffect(Dispatchers.IO) {
+                    anotateViewModel?.currentAnotateIndex?.value = 0
+                    println("Jumlah datset diimport" + importImageViewModel?.imageDatasetList?.size.toString())
                 }
 
 
+                if (importImageViewModel?.getImageDataBitmap(
+                        anotateViewModel?.currentAnotateIndex?.value ?: 0
+                    ) != null
+                ) {
+                    importImageViewModel.getImageDataBitmap(
+                        anotateViewModel?.currentAnotateIndex?.value ?: 0
+                    )
+                        ?.let { bmp ->
+                            // Jalankan inference di background saat URI berubah
+                            LaunchedEffect(Dispatchers.IO) {
+                                anotateViewModel?.classifyImage(bmp)
+
+                            }
+                            anotateViewModel?.currentBitmap?.value = bmp
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Image(
+                                    bitmap = bmp.asImageBitmap(),
+                                    contentDescription = "Preview",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(300.dp)
+                                        .padding(top = 16.dp)
+                                        .background(Color.Transparent)
+                                        .clip(RoundedCornerShape(10)),
+                                    contentScale = ContentScale.Crop
+                                )
+
+                            }
+                        }
+                } else {
+                    anotateViewModel?.predictResult?.value = "Failed to convert bitmap"
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                            .height(300.dp)
+                    )
+                }
+
+
+
+
+                if (anotateViewModel?.predictResult != null) {
+                    Text(
+                        anotateViewModel.predictResult.value,
+                        textAlign = TextAlign.Center,
+                        fontSize = Typography.titleLarge.fontSize,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.fillMaxWidth().padding(top = 20.dp)
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .padding(vertical = 20.dp)
+                    ) {
+                        Text(
+                            "Confident Lv.",
+                            fontSize = Typography.titleLarge.fontSize
+                        )
+                        Text(
+                            (anotateViewModel.confidentLevel.value.times(100f)).toString() + "%",
+                            fontSize = Typography.titleLarge.fontSize,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Spacer(Modifier.weight(1f))
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    MyButton(
+                        onClick = {
+//                    if(currentBitmap != null){
+//                        classifyImage(currentBitmap)
+//                    }
+                        },
+                        modifier = Modifier
+                            .background(
+                                color = Color.LightGray,
+                                shape = RoundedCornerShape(10)
+                            )
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            "Klasifikasi",
+                            modifier = Modifier.padding(10.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Row {
+                        SecondaryButton(
+                            onClick = {
+                                importImageViewModel?.setLabelForImage(
+                                    anotateViewModel?.currentAnotateIndex?.value ?: 0,
+                                    anotateViewModel?.predictedLabel?.value ?: 0
+                                )
+                                println("Ditandai sebagai benar dengan label ${anotateViewModel?.predictResult?.value} index : ${anotateViewModel?.predictedLabel?.value}")
+                                val nextIndex = min(
+                                    (importImageViewModel?.imageDatasetList?.size ?: 0) - 1,
+                                    (anotateViewModel?.currentAnotateIndex?.value ?: 0) + 1
+                                )
+                                if (anotateViewModel != null) {
+
+                                    importImageViewModel?.imageDatasetList?.get(nextIndex)?.Input?.let { bitmap ->
+                                        anotateViewModel.classifyImage(bitmap)
+                                    }
+                                }
+                                //Validasi jika index terakhir / gambar terakhir maka lanjut ke halaman selanjutnya
+                                if ((anotateViewModel?.currentAnotateIndex?.value
+                                        ?: 0) >= (importImageViewModel?.imageDatasetList?.size
+                                        ?: 0) - 1
+                                ) {
+                                    anotateViewModel?.navHostController?.navigate(Destination.Training)
+                                }
+                                anotateViewModel?.currentAnotateIndex?.value = nextIndex
+                            },
+                            modifier = Modifier.weight(.5f)
+                        ) {
+                            Text(
+                                "Benar",
+                                modifier = Modifier.padding(5.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.weight(.1f))
+
+                        SecondaryButton(
+                            onClick = {
+                                anotateViewModel?.showLabelSelectionMenu?.value = true
+                            },
+                            modifier = Modifier.weight(.5f)
+
+                        ) {
+                            Text(
+                                "Salah",
+                                modifier = Modifier.padding(5.dp)
+                            )
+                        }
+                    }
+
+
+                }
+
+                Spacer(Modifier.weight(1f))
+
             }
-
-            Spacer(Modifier.weight(1f))
-
         }
 
         if(anotateViewModel?.showLabelSelectionMenu?.value == true){
@@ -246,6 +264,10 @@ fun AnnotateView(
                 }
             }
 
+        }
+
+        if(anotateViewModel?.isModelLoading?.value == true){
+            ModelLoadingComponent()
         }
 
     }

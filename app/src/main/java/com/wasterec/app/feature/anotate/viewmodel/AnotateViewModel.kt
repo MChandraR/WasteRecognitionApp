@@ -28,8 +28,11 @@ class AnotateViewModel(application : Application,val context: Context, val navHo
     var currentBitmap : MutableState<Bitmap?> = mutableStateOf(null)
     var efficientNetB0 : EfficientNetB0? = EfficientNetB0(context, "model.ptl" )
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
+    var isModelLoading : MutableState<Boolean> = mutableStateOf(true)
 
+    //Deklarasikan ulang semua nilai variabel
     fun reInit(){
+        isModelLoading.value = true
         currentBitmap.value = null
         currentAnotateIndex.value = 0
         showLabelSelectionMenu.value = false
@@ -42,6 +45,7 @@ class AnotateViewModel(application : Application,val context: Context, val navHo
             println("Ada file ${globalModelFile.absolutePath}")
             efficientNetB0 = EfficientNetB0(context, "GlobalModel.ptl")
         }
+        isModelLoading.value = false
     }
 
 
