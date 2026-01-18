@@ -244,7 +244,7 @@ fun TrainingView(
         }
 
         LaunchedEffect(Unit){
-            trainingViewModel?.startLocalTraining()
+            trainingViewModel?.reInit()
             Toast.makeText(trainingViewModel?.context, "Training dengan total : ${trainingViewModel?.importImageViewModel?.imageDatasetList?.count()}", Toast.LENGTH_SHORT).show()
         }
     }

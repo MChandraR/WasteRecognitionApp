@@ -12,7 +12,9 @@ import androidx.navigation.NavHostController
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
+import com.wasterec.app.manager.ClassifierWeightFileManager
 import com.wasterec.app.manager.EfficientNetB0
+import com.wasterec.app.model.ClassifierWeightModel
 import com.wasterec.app.model.ModelConiguration
 import com.wasterec.app.model.globalmodel.GlobalWeightModel
 import com.wasterec.app.repositories.GlobalModelRepository
@@ -21,6 +23,7 @@ import com.wasterec.app.utils.floatArrayToBase64
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 
 class TrainingViewModel(
     application : Application,
@@ -28,17 +31,39 @@ class TrainingViewModel(
     val navHostController: NavHostController,
     val importImageViewModel: ImportImageViewModel
 ) : AndroidViewModel(application) {
-    val efficientNetB0 : EfficientNetB0 = EfficientNetB0(context)
+    var efficientNetB0 : EfficientNetB0 = EfficientNetB0(context)
     val modelProducer : MutableState<CartesianChartModelProducer> = mutableStateOf(
         CartesianChartModelProducer())
     var currentEpoch : MutableState<Int>  = mutableStateOf(0)
     var currentLoss : MutableState<Float> = mutableStateOf(0f)
     val lossList = mutableStateListOf<Float>()
+    val classifierWeightFileManager : ClassifierWeightFileManager = ClassifierWeightFileManager(context)
     var modelConfig = ModelConiguration(
         learningRate = 0.001f,
         epoch = 30,
         batchSize = 2
     )
+
+    //Fungsi untuk reinit nilai atau reset variabel
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun reInit(){
+        val backboneModelFile = File(context.filesDir, "Backbone.ptl")
+        if(backboneModelFile.exists()){
+            efficientNetB0 = EfficientNetB0(context, "Backbone.ptl")
+            println("Berhasil mengupdate backbone terbaru ")
+        }
+        CoroutineScope(Dispatchers.IO).launch {
+            val newClassifierParam : ClassifierWeightModel? = classifierWeightFileManager.loadClassifierParamFromFile()
+            newClassifierParam?.let{ newParam ->
+                efficientNetB0.setClassifierWeightAndBias(newParam.weights, newParam.bias)
+                println("Berhasil memuat classifier param tebaru")
+            }
+            startLocalTraining()
+        }
+    }
+
+
+
     @RequiresApi(Build.VERSION_CODES.O)
     //Fungsi buat memanggil model dan mulai training local
     fun startLocalTraining(){
