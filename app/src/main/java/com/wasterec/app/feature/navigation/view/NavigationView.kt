@@ -28,6 +28,8 @@ import com.wasterec.app.manager.EfficientNetB0
 import com.wasterec.app.model.Destination
 import com.wasterec.app.model.TrainingModel
 import com.wasterec.app.feature.importimage.view.ImportImageView
+import com.wasterec.app.feature.modelload.view.ModelLoadView
+import com.wasterec.app.feature.modelload.viewmodel.ModelLoadViewModel
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -37,7 +39,8 @@ fun NavigationView(
     navController : NavHostController,
     anotateViewModel: AnotateViewModel,
     importImageViewModel: ImportImageViewModel,
-    trainingViewModel: TrainingViewModel
+    trainingViewModel: TrainingViewModel,
+    modelLoadViewModel: ModelLoadViewModel
 ) {
     val startDestination = Destination.Splash
     var selectedDestination by rememberSaveable { mutableIntStateOf(0) }
@@ -56,7 +59,7 @@ fun NavigationView(
         composable<Destination.Training>{ TrainingView(trainingViewModel) }
         composable<Destination.Annotate>{ AnnotateView(anotateViewModel, importImageViewModel) }
         composable<Destination.FinishTraining>{ FinishTrainingView(navController) }
-        composable<Destination.WeightLoading>{ LoadGlobalWeightLoadingView(navController) }
+        composable<Destination.WeightLoading>{ ModelLoadView(modelLoadViewModel) }
 
     }
 

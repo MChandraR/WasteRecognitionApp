@@ -4,5 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class GlobalModelWeightModel (
-    val weight : String
+    val weight : String,
+    val bias : String
 )

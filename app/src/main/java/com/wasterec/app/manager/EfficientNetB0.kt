@@ -10,6 +10,7 @@ import com.wasterec.app.model.TrainingModel
 import com.wasterec.app.utils.forceSoftwareBitmap
 import org.pytorch.IValue
 import org.pytorch.Module
+import org.pytorch.Tensor
 import org.pytorch.torchvision.TensorImageUtils
 import kotlin.math.ln
 import kotlin.math.log
@@ -128,5 +129,37 @@ class EfficientNetB0(val context: Context, val modelPath : String = "backbone.pt
             "bias" to bias
         )
     }
+
+    fun updateClassifierWeight(weights: Array<FloatArray>, bias: FloatArray) {
+        // 1. Validasi dimensi (Opsional tapi bagus untuk debugging)
+        val rows = weights.size        // 6
+        val cols = weights[0].size     // 1280
+
+        // 2. RATAKAN (FLATTEN) Array<FloatArray> menjadi satu FloatArray panjang
+        // Kita buat wadah kosong dengan ukuran total (6 * 1280)
+        val flatWeights = FloatArray(rows * cols)
+
+        // Salin data baris per baris ke array datar
+        for (i in weights.indices) {
+            // System.arraycopy(sumber, mulai_sumber, tujuan, mulai_tujuan, panjang)
+            System.arraycopy(weights[i], 0, flatWeights, i * cols, cols)
+        }
+
+        // 3. Buat Tensor dari Array yang sudah datar
+        // Masukkan flatWeights, tapi berikan shape [6, 1280] agar PyTorch tahu cara melipatnya
+        val weightTensor = Tensor.fromBlob(flatWeights, longArrayOf(rows.toLong(), cols.toLong()))
+
+        // Bias biasanya sudah flat, jadi aman
+        val biasTensor = Tensor.fromBlob(bias, longArrayOf(rows.toLong()))
+
+        // 4. Eksekusi Method
+        // Perbaikan: IValue.from() tidak boleh kosong, harus diisi Tensor
+        this.model.runMethod(
+            "update_last_layer",
+            IValue.from(weightTensor), // Masukkan Tensor Bobot
+            IValue.from(biasTensor)    // Masukkan Tensor Bias
+        )
+    }
+
 
 }

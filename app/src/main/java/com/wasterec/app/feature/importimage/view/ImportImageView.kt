@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.wasterec.app.R
+import com.wasterec.app.feature.importimage.components.ConfirmationDialog
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.model.Destination
 import com.wasterec.app.model.TrainingModel
@@ -72,116 +73,148 @@ fun ImportImageView(
         println("Jumlah data dari picker : " + importImageViewModel?.imageDatasetList?.size.toString())
     }
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
+    Box(Modifier.fillMaxSize().padding(16.dp)) {
+        Column(Modifier.fillMaxSize()) {
 
-        Spacer(modifier = Modifier.weight(.25f))
+            Spacer(modifier = Modifier.weight(.25f))
 
-        Text(
-            "Pilih 100 Gambar sebagai dataset pelatihan",
-            modifier = Modifier.fillMaxWidth().padding(20.dp),
-            textAlign = TextAlign.Center,
-            fontSize = Typography.titleLarge.fontSize,
-            fontWeight = FontWeight.Medium
-        )
-        Text(
-            "Jumlah gambar yang dipilih ${importImageViewModel?.imageDatasetList?.size}/100",
-            modifier = Modifier.fillMaxWidth().padding(20.dp),
-            textAlign = TextAlign.Center,
-            fontSize = Typography.bodyLarge.fontSize,
-            fontWeight = FontWeight.Medium
-        )
+            Text(
+                "Pilih 100 Gambar sebagai dataset pelatihan",
+                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                textAlign = TextAlign.Center,
+                fontSize = Typography.titleLarge.fontSize,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                "Jumlah gambar yang dipilih ${importImageViewModel?.imageDatasetList?.size}/100",
+                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                textAlign = TextAlign.Center,
+                fontSize = Typography.bodyLarge.fontSize,
+                fontWeight = FontWeight.Medium
+            )
 
 
-        if((importImageViewModel?.imageDatasetList?.size ?: 0) > 0){
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
-                modifier = Modifier.weight(.5f)
-            ) {
-                items(importImageViewModel?.imageDatasetList?.size?:0) { index ->
-                    importImageViewModel?.getImageDataBitmap(index)?.let{ bitmap ->
-                        Box{
-                            Image(
-                                bitmap = bitmap.asImageBitmap(),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .padding(4.dp)
-                                    .aspectRatio(1f)
-                                    .clip(RoundedCornerShape(8.dp))
-                            )
-
-                            Button(
-                                onClick = {
-
-                                },
-                                shape = CircleShape,
-                                colors = ButtonColors(containerColor = Color.Transparent, contentColor = Color.Black, disabledContentColor = Color.Black, disabledContainerColor = Color.LightGray)
-                            ) {
+            if ((importImageViewModel?.imageDatasetList?.size ?: 0) > 0) {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier.weight(.5f)
+                ) {
+                    items(importImageViewModel?.imageDatasetList?.size ?: 0) { index ->
+                        importImageViewModel?.getImageDataBitmap(index)?.let { bitmap ->
+                            Box {
                                 Image(
-                                    painter = painterResource(R.drawable.baseline_auto_delete_24),
-                                    "Delete Icon"
+                                    bitmap = bitmap.asImageBitmap(),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .padding(4.dp)
+                                        .aspectRatio(1f)
+                                        .clip(RoundedCornerShape(8.dp))
                                 )
+
+                                Button(
+                                    onClick = {
+                                        importImageViewModel.selectedImageIndex.value = index
+                                        importImageViewModel.showConfirmImageDeletionDialog.value = true
+                                    },
+                                    shape = CircleShape,
+                                    colors = ButtonColors(
+                                        containerColor = Color.Transparent,
+                                        contentColor = Color.Black,
+                                        disabledContentColor = Color.Black,
+                                        disabledContainerColor = Color.LightGray
+                                    )
+                                ) {
+                                    Image(
+                                        painter = painterResource(R.drawable.baseline_auto_delete_24),
+                                        "Delete Icon"
+                                    )
+                                }
                             }
                         }
+
+
                     }
+                }
+            } else {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1f).fillMaxWidth()
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.add_photo_alternate_24),
+                        "Image Empty",
+                        modifier = Modifier.width(80.dp).height(80.dp),
+                        alpha = 0.5f
+                    )
+                    Text(
+                        "Belum ada gambar",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
+            }
 
+            Spacer(modifier = Modifier.weight(.1f))
+
+            Column {
+                Button(
+                    onClick = {
+                        launcher.launch("image/*")
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    border = BorderStroke(1.dp, Color.Black),
+                    colors = ButtonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.Black,
+                        disabledContentColor = Color.LightGray,
+                        disabledContainerColor = Color.LightGray
+                    )
+                ) {
+                    Text(
+                        "Import gambar",
+                        modifier = Modifier.padding(10.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Button(
+                    onClick = {
+                        navHostControlelr?.navigate(Destination.Annotate)
+                    },
+                    enabled = (importImageViewModel?.imageDatasetList?.size ?: 0) >= 1,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonColors(
+                        containerColor = Color.LightGray,
+                        contentColor = Color.Black,
+                        disabledContentColor = Color.Black,
+                        disabledContainerColor = Color.LightGray
+                    )
+                ) {
+                    Text(
+                        "Selanjutnya",
+                        modifier = Modifier.padding(10.dp)
+                    )
                 }
             }
-        }else{
-            Column (
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.weight(1f).fillMaxWidth()
-            ){
-                Image(
-                    painter = painterResource(R.drawable.add_photo_alternate_24),
-                    "Image Empty",
-                    modifier = Modifier.width(80.dp).height(80.dp),
-                    alpha = 0.5f
-                    )
-                Text("Belum ada gambar",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
         }
 
-        Spacer(modifier = Modifier.weight(.1f))
-
-        Column{
-            Button(
-                onClick = {
-                    launcher.launch("image/*")
+        //Menampilkan konfirmasi dialog ketika menghapus data
+        if(importImageViewModel?.showConfirmImageDeletionDialog?.value == true) {
+            ConfirmationDialog(
+                onConfirm = {
+                    importImageViewModel.deleteDataFromDataset(importImageViewModel.selectedImageIndex.value)
+                    importImageViewModel.showConfirmImageDeletionDialog.value = false
                 },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(10.dp),
-                border = BorderStroke(1.dp, Color.Black),
-                colors = ButtonColors(containerColor = Color.Transparent, contentColor = Color.Black, disabledContentColor = Color.LightGray, disabledContainerColor = Color.LightGray)
-            ) {
-                Text(
-                    "Import gambar",
-                    modifier = Modifier.padding(10.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Button(
-                onClick = {
-                    navHostControlelr?.navigate(Destination.Annotate)
-                },
-                enabled = (importImageViewModel?.imageDatasetList?.size?:0) >= 1,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonColors(containerColor = Color.LightGray, contentColor = Color.Black, disabledContentColor = Color.Black, disabledContainerColor = Color.LightGray)
-            ) {
-                Text(
-                    "Selanjutnya",
-                    modifier = Modifier.padding(10.dp)
-                )
-            }
+                onDismiss = {
+                    importImageViewModel.showConfirmImageDeletionDialog.value = false
+                }
+            )
         }
     }
 }

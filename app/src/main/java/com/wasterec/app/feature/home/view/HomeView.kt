@@ -145,7 +145,7 @@ fun HomeView(
                 colors = ButtonDefaults.buttonColors(Color.Transparent),
                 onClick = {
                     println("Hallo")
-                    navController.navigate(route = Destination.Import)
+                    navController.navigate(route = Destination.WeightLoading)
                 },
                 modifier = Modifier
                     .background(

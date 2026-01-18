@@ -76,6 +76,8 @@ class TrainingViewModel(
             println(data.get("weights"))
 
             GlobalModelRepository().uploadModelWeight(globalWeightModel = GlobalWeightModel(
+                num_sample = importImageViewModel.imageDatasetList.size,
+                label_count = importImageViewModel.getEachLabelCount(),
                 weights = encodeWeightsToBase64(data.get("weights") as Array<FloatArray>),
                 bias = floatArrayToBase64(data.getValue("bias") as FloatArray),
             )

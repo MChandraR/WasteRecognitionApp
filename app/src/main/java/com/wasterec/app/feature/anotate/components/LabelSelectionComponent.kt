@@ -10,13 +10,17 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.wasterec.app.ui.theme.Typography
 
 @Composable
 fun LabelSelectionComponent(modifier : Modifier, onSelect : (selectedIndex : Int) -> Unit ){
@@ -24,6 +28,12 @@ fun LabelSelectionComponent(modifier : Modifier, onSelect : (selectedIndex : Int
     val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[0]) }
 
     Column(modifier.selectableGroup()) {
+        Text("Pilih label yang benar",
+            fontWeight = FontWeight.Bold,
+            fontSize = Typography.bodyLarge.fontSize,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top=25.dp, bottom = 10.dp).fillMaxWidth())
+
         radioOptions.forEach { text ->
             Row(
                 Modifier

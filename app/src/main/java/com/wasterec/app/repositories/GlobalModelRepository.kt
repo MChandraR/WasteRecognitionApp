@@ -3,13 +3,13 @@ package com.wasterec.app.repositories
 import com.wasterec.app.helper.AppError
 import com.wasterec.app.helper.GlobalModelError
 import com.wasterec.app.model.globalmodel.GlobalModelInfoModel
-import com.wasterec.app.model.globalmodel.GlobalModelWeightModel
 import com.wasterec.app.model.globalmodel.GlobalWeightModel
 import com.wasterec.app.services.ApiService
 import com.wasterec.app.services.GlobalModelService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.ResponseBody
 
 class GlobalModelRepository : ApiService() {
     fun getGlobamModelService() : GlobalModelService?{
@@ -32,7 +32,7 @@ class GlobalModelRepository : ApiService() {
     }
 
     //Fungsi to fetch model weight from server
-    fun fetchGlobalModelWeight(callback : (exception : AppError?, result : GlobalModelWeightModel?)->Unit){
+    fun fetchGlobalModelWeight(callback : (exception : AppError?, result : GlobalWeightModel?)->Unit){
         val globalModelService = this.getGlobamModelService()
         if (globalModelService != null) {
             CoroutineScope(Dispatchers.IO).launch{
@@ -60,6 +60,30 @@ class GlobalModelRepository : ApiService() {
                         println("Gagal ${response.errorBody().toString()} ${response.body().toString()}")
                     }
                 }
+            }
+        }
+    }
+
+    fun donwloadGlobalModelFile(onResponse : (response : ResponseBody)->Unit, onFailure : (message:String)->Unit){
+        val globalModelService: GlobalModelService? = this.getGlobamModelService()
+        CoroutineScope(Dispatchers.IO).launch {
+            val downloadResponse = globalModelService?.downloadGlobalModelStream()
+            if(downloadResponse?.body() != null){
+                onResponse(downloadResponse.body()!!)
+            }else{
+                onFailure(downloadResponse?.message().toString())
+            }
+        }
+    }
+
+    fun donwloadBackboneModelFile(onResponse : (response : ResponseBody)->Unit, onFailure : (message:String)->Unit){
+        val globalModelService: GlobalModelService? = this.getGlobamModelService()
+        CoroutineScope(Dispatchers.IO).launch {
+            val downloadResponse = globalModelService?.downloadBackboneModelStream()
+            if(downloadResponse?.body() != null){
+                onResponse(downloadResponse.body()!!)
+            }else{
+                onFailure(downloadResponse?.message().toString())
             }
         }
     }

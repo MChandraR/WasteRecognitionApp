@@ -16,37 +16,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import android.os.Build
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.wasterec.app.feature.anotate.components.LabelSelectionComponent
 import com.wasterec.app.feature.anotate.viewmodel.AnotateViewModel
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
-import com.wasterec.app.manager.EfficientNetB0
 import com.wasterec.app.model.Destination
-import com.wasterec.app.model.ModelConiguration
-import com.wasterec.app.model.globalmodel.GlobalWeightModel
-import com.wasterec.app.repositories.GlobalModelRepository
 import com.wasterec.app.shared.components.MyButton
 import com.wasterec.app.shared.components.SecondaryButton
+import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
-import com.wasterec.app.utils.encodeWeightsToBase64
-import com.wasterec.app.utils.floatArrayToBase64
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -54,6 +41,11 @@ fun AnnotateView(
     anotateViewModel: AnotateViewModel? = null,
     importImageViewModel: ImportImageViewModel? = null,
 ) {
+
+    LaunchedEffect(Dispatchers.IO) {
+        //anotateViewModel?.getLatestGlobalWeight()
+        anotateViewModel?.reInit()
+    }
 
     Box{
         Column(
@@ -181,7 +173,7 @@ fun AnnotateView(
                             println("Ditandai sebagai benar dengan label ${anotateViewModel?.predictResult?.value} index : ${anotateViewModel?.predictedLabel?.value}")
                             if(anotateViewModel != null){
                                 anotateViewModel.currentAnotateIndex.value += 1
-                                anotateViewModel.currentBitmap.value?.let { bitmap ->
+                                importImageViewModel?.imageDatasetList?.get(anotateViewModel.currentAnotateIndex.value)?.Input?.let { bitmap ->
                                     anotateViewModel.classifyImage(bitmap)
                                 }
                             }
@@ -227,10 +219,22 @@ fun AnnotateView(
         }
 
         if(anotateViewModel?.showLabelSelectionMenu?.value == true){
-            LabelSelectionComponent(modifier = Modifier) { selectedIndex ->
-                importImageViewModel?.setLabelForImage(anotateViewModel.currentAnotateIndex.value, selectedIndex)
-                anotateViewModel.showLabelSelectionMenu.value = false
+            Column(
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxSize().background(ColorAsset.alertMainBg)
+            ) {
+                LabelSelectionComponent(modifier = Modifier.background(Color.White, shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))) { selectedIndex ->
+                    println("Label yang benar sudah diperbaiki ${selectedIndex}")
+                    importImageViewModel?.setLabelForImage(anotateViewModel.currentAnotateIndex.value, selectedIndex)
+                    anotateViewModel.currentAnotateIndex.value += 1
+                    anotateViewModel.showLabelSelectionMenu.value = false
+                    importImageViewModel?.imageDatasetList?.get(anotateViewModel.currentAnotateIndex.value)?.Input?.let { bitmap ->
+                        anotateViewModel.classifyImage(bitmap)
+                    }
+                }
             }
+
         }
 
     }
@@ -244,8 +248,5 @@ fun AnnotateView(
 @Preview(showBackground = true)
 @Composable
 fun Prev(){
-    val importImageViewModel : ImportImageViewModel = viewModel()
-    val anotateViewModel : AnotateViewModel = viewModel()
-
-    AnnotateView(anotateViewModel, importImageViewModel)
+    AnnotateView()
 }
