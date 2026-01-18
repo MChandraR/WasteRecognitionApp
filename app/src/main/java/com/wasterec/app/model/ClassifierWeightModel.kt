@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class ClassifierWeightModel(
     @SerializedName("weights")
-    val weight : Array<FloatArray>,
+    val weights : Array<FloatArray>,
 
     @SerializedName("bias")
     val bias : FloatArray
@@ -12,7 +12,7 @@ data class ClassifierWeightModel(
 
 
     override fun hashCode(): Int {
-        var result = weight.contentDeepHashCode()
+        var result = weights.contentDeepHashCode()
         result = 31 * result + bias.contentHashCode()
         return result
     }
@@ -23,7 +23,7 @@ data class ClassifierWeightModel(
 
         other as ClassifierWeightModel
 
-        if (!weight.contentDeepEquals(other.weight)) return false
+        if (!weights.contentDeepEquals(other.weights)) return false
         if (!bias.contentEquals(other.bias)) return false
 
         return true

@@ -26,6 +26,7 @@ class ClassifierWeightFileManager(val context : Context) {
                 writer.close()
                 println("Berhasil menyimpan file json dari param classifier")
             }catch(e : Exception){
+                println(e.message)
                 println("Gagal menyimpan classifier param ke json")
             }
         }

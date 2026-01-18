@@ -79,6 +79,7 @@ class ModelLoadViewModel(
             if(result != null) {
                 CoroutineScope(Dispatchers.IO).launch {
                     classifierWeightDownloadProgress.value = 1f
+                    println("Size ${result.weights.size} x ${result.weights.get(0).size}")
                     classifierWeightFileManager.saveClassifierParamToFile(
                         result.weights,
                         result.bias
