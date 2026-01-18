@@ -16,7 +16,6 @@ import androidx.navigation.compose.rememberNavController
 import com.wasterec.app.feature.anotate.factory.AnotateViewModelFactory
 import com.wasterec.app.feature.anotate.viewmodel.AnotateViewModel
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
-import com.wasterec.app.feature.loading.viewmodel.LoadGlobalWeightLoadingViewModel
 import com.wasterec.app.feature.modelload.factory.ModelLoadViewModelFactory
 import com.wasterec.app.feature.modelload.viewmodel.ModelLoadViewModel
 import com.wasterec.app.feature.navigation.view.NavigationView
@@ -58,7 +57,8 @@ class MainActivity : ComponentActivity() {
                 factory = ModelLoadViewModelFactory(
                     application = application,
                     context = this,
-                    navHostController = navController
+                    navHostController = navController,
+                    trainingViewModel = trainingViewModel
                 )
             )
 

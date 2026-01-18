@@ -26,6 +26,7 @@ fun ModelLoadView(modelLoadViewModel: ModelLoadViewModel?){
     LaunchedEffect(Dispatchers.IO) {
         modelLoadViewModel?.downloadGlobalModel()
         modelLoadViewModel?.downloadBackboneModel()
+        modelLoadViewModel?.loadClassifierParam()
     }
 
     Column(
@@ -56,6 +57,21 @@ fun ModelLoadView(modelLoadViewModel: ModelLoadViewModel?){
         LinearProgressIndicator(
             progress = {
                 modelLoadViewModel?.backboneModelDownloadProgress?.value?:0f
+            },
+            modifier = Modifier.height(10.dp)
+        )
+
+
+        //Section untuk menampilkan status classifier weight yang udah diload
+        Text("Load Classifier Weight (${(modelLoadViewModel?.classifierWeightDownloadProgress?.value?:0f).times(100).roundToInt() }%)",
+            fontSize = Typography.bodyLarge.fontSize,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(20.dp)
+        )
+
+        LinearProgressIndicator(
+            progress = {
+                modelLoadViewModel?.classifierWeightDownloadProgress?.value?:0f
             },
             modifier = Modifier.height(10.dp)
         )

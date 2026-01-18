@@ -18,7 +18,6 @@ import androidx.navigation.compose.rememberNavController
 import com.wasterec.app.feature.anotate.view.AnnotateView
 import com.wasterec.app.feature.anotate.viewmodel.AnotateViewModel
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
-import com.wasterec.app.feature.loading.view.LoadGlobalWeightLoadingView
 import com.wasterec.app.feature.login.view.LoginView
 import com.wasterec.app.feature.splash.view.SplashView
 import com.wasterec.app.feature.training.view.FinishTrainingView
