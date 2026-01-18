@@ -72,14 +72,7 @@ fun AnnotateView(
                     modifier = Modifier.padding(bottom = 20.dp)
                 )
 
-
                 Spacer(modifier = Modifier.height(20.dp))
-
-                LaunchedEffect(Dispatchers.IO) {
-                    anotateViewModel?.currentAnotateIndex?.value = 0
-                    println("Jumlah datset diimport" + importImageViewModel?.imageDatasetList?.size.toString())
-                }
-
 
                 if (importImageViewModel?.getImageDataBitmap(
                         anotateViewModel?.currentAnotateIndex?.value ?: 0
@@ -92,7 +85,6 @@ fun AnnotateView(
                             // Jalankan inference di background saat URI berubah
                             LaunchedEffect(Dispatchers.IO) {
                                 anotateViewModel?.classifyImage(bmp)
-
                             }
                             anotateViewModel?.currentBitmap?.value = bmp
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -117,9 +109,6 @@ fun AnnotateView(
                             .height(300.dp)
                     )
                 }
-
-
-
 
                 if (anotateViewModel?.predictResult != null) {
                     Text(
@@ -155,9 +144,9 @@ fun AnnotateView(
                 ) {
                     MyButton(
                         onClick = {
-//                    if(currentBitmap != null){
-//                        classifyImage(currentBitmap)
-//                    }
+                            anotateViewModel?.currentBitmap?.value?.let{ bmp->
+                                anotateViewModel.classifyImage(bmp)
+                            }
                         },
                         modifier = Modifier
                             .background(

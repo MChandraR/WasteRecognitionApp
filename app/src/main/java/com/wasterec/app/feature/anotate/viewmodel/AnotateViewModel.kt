@@ -31,6 +31,7 @@ class AnotateViewModel(application : Application,val context: Context, val navHo
     var isModelLoading : MutableState<Boolean> = mutableStateOf(true)
 
     //Deklarasikan ulang semua nilai variabel
+    @RequiresApi(Build.VERSION_CODES.O)
     fun reInit(){
         isModelLoading.value = true
         currentBitmap.value = null
@@ -44,6 +45,10 @@ class AnotateViewModel(application : Application,val context: Context, val navHo
         if(globalModelFile.exists()){
             println("Ada file ${globalModelFile.absolutePath}")
             efficientNetB0 = EfficientNetB0(context, "GlobalModel.ptl")
+            this.currentBitmap.value?.let { bmp ->
+                this.classifyImage(bmp)
+
+            }
         }
         isModelLoading.value = false
     }
@@ -51,7 +56,8 @@ class AnotateViewModel(application : Application,val context: Context, val navHo
 
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun classifyImage(bmp : Bitmap){
+    fun classifyImage(bmp : Bitmap ){
+        currentBitmap.value = bmp
         efficientNetB0?.let { efficientNetB0 ->
             CoroutineScope(Dispatchers.IO).launch{
                 predictResult.value = "Loading..."

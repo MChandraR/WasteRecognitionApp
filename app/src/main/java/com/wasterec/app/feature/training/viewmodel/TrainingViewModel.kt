@@ -61,9 +61,12 @@ class TrainingViewModel(
                 println("Berhasil memuat classifier param tebaru")
             }
             startLocalTraining()
+            modelProducer.value.runTransaction {
+
+            }
         }
         lossList.clear()
-        updateLossChartData()
+
     }
 
     fun updateLossChartData(){
