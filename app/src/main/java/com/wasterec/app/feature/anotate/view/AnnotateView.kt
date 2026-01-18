@@ -170,22 +170,23 @@ fun AnnotateView(
                         onClick = {
                             importImageViewModel?.setLabelForImage(anotateViewModel?.currentAnotateIndex?.value?:0, anotateViewModel?.predictedLabel?.value?:0)
                             println("Ditandai sebagai benar dengan label ${anotateViewModel?.predictResult?.value} index : ${anotateViewModel?.predictedLabel?.value}")
+                            val nextIndex = min(
+                                (importImageViewModel?.imageDatasetList?.size ?: 0) - 1,
+                                (anotateViewModel?.currentAnotateIndex?.value?:0) + 1
+                            )
+                            if (anotateViewModel != null) {
+
+                                importImageViewModel?.imageDatasetList?.get(nextIndex)?.Input?.let { bitmap ->
+                                    anotateViewModel.classifyImage(bitmap)
+                                }
+                            }
+                            //Validasi jika index terakhir / gambar terakhir maka lanjut ke halaman selanjutnya
                             if( (anotateViewModel?.currentAnotateIndex?.value
                                     ?: 0) >= (importImageViewModel?.imageDatasetList?.size?:0) - 1
                             ){
                                 anotateViewModel?.navHostController?.navigate(Destination.Training)
-                            }else {
-                                if (anotateViewModel != null) {
-                                    anotateViewModel.currentAnotateIndex.value = min(
-                                        (importImageViewModel?.imageDatasetList?.size ?: 0) - 1,
-                                        anotateViewModel.currentAnotateIndex.value + 1
-                                    )
-                                    importImageViewModel?.imageDatasetList?.get(anotateViewModel.currentAnotateIndex.value)?.Input?.let { bitmap ->
-                                        anotateViewModel.classifyImage(bitmap)
-                                    }
-                                }
-                                //Validasi jika index terakhir / gambar terakhir maka lanjut ke halaman selanjutnya
                             }
+                            anotateViewModel?.currentAnotateIndex?.value = nextIndex
                         },
                         modifier = Modifier.weight(.5f)
                     ) {
@@ -226,21 +227,22 @@ fun AnnotateView(
                         anotateViewModel.currentAnotateIndex.value,
                         selectedIndex
                     )
+                   val nextIndex = min(
+                        (importImageViewModel?.imageDatasetList?.size ?: 0) - 1,
+                        anotateViewModel.currentAnotateIndex.value + 1
+                    )
+                    anotateViewModel.showLabelSelectionMenu.value = false
+                    importImageViewModel?.imageDatasetList?.get(nextIndex)?.Input?.let { bitmap ->
+                        anotateViewModel.classifyImage(bitmap)
+                    }
+
+                    //Validasi , jika sudah di akhir index / gambar , lanjut ke training
                     if ((anotateViewModel.currentAnotateIndex.value
                                 ) >= (importImageViewModel?.imageDatasetList?.size ?: 0) - 1
                     ) {
                         anotateViewModel.navHostController.navigate(Destination.Training)
-                    } else {
-                        anotateViewModel.currentAnotateIndex.value = min(
-                            (importImageViewModel?.imageDatasetList?.size ?: 0) - 1,
-                            anotateViewModel.currentAnotateIndex.value + 1
-                        )
-                        anotateViewModel.showLabelSelectionMenu.value = false
-                        importImageViewModel?.imageDatasetList?.get(anotateViewModel.currentAnotateIndex.value)?.Input?.let { bitmap ->
-                            anotateViewModel.classifyImage(bitmap)
-                        }
-                        //Validasi , jika sudah di akhir index / gambar , lanjut ke training
                     }
+                    anotateViewModel.currentAnotateIndex.value = nextIndex
                 }
             }
 
