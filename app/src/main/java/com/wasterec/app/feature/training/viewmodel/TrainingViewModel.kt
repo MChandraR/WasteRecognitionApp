@@ -62,9 +62,23 @@ class TrainingViewModel(
             }
             startLocalTraining()
         }
+        lossList.clear()
+        updateLossChartData()
     }
 
-
+    fun updateLossChartData(){
+        CoroutineScope(Dispatchers.IO).launch {
+            modelProducer.value.runTransaction {
+                lineSeries {
+                    // Vico menerima List untuk X dan List untuk Y
+                    series(
+                        x = lossList.indices.toList(), // x = 0, 1, 2, ...
+                        y = lossList                   // y = nilai loss
+                    )
+                }
+            }
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     //Fungsi buat memanggil model dan mulai training local
@@ -79,23 +93,8 @@ class TrainingViewModel(
                     currentLoss.value = loss
                     if (!loss.isNaN() && !loss.isInfinite()) {
                         lossList.add(loss)
-                        CoroutineScope(Dispatchers.IO).launch {
-                            modelProducer.value.runTransaction {
-                                lineSeries {
-                                    // Vico menerima List untuk X dan List untuk Y
-                                    series(
-                                        x = lossList.indices.toList(), // x = 0, 1, 2, ...
-                                        y = lossList                   // y = nilai loss
-                                    )
-                                }
-                            }
-                        }
+                        updateLossChartData()
                     }
-
-                    // 3. Update Vico Chart
-                    // Gunakan tryRunTransaction agar thread-safe dan efisien
-
-
 
                 }
             )
