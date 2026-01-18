@@ -222,6 +222,7 @@ fun TrainingView(
 
         MyButton(
             onClick = {
+                trainingViewModel?.reInit()
                 trainingViewModel?.navHostController?.navigate(route = Destination.FinishTraining)
             },
             modifier = Modifier
