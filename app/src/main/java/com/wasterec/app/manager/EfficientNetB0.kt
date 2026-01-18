@@ -48,8 +48,8 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
         val outputIdx = probabilities.indices.maxByOrNull { probabilities[it] } ?: -1
         val confidence = if (outputIdx != -1) probabilities[outputIdx] else 0f
 
-        println("LOGITS: ${scores.joinToString(", ")}")
-        println("CONFIDENCE: $confidence")
+        //println("LOGITS: ${scores.joinToString(", ")}")
+        //println("CONFIDENCE: $confidence")
 
         return Pair(outputIdx, confidence)
     }
@@ -61,88 +61,76 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun train(config: ModelConiguration, dataset: List<TrainingModel>, onProgressUpdate : (epoch:Int, loss : Float)->Unit): Map<String, Any> {
-        println("Jumlah data " + dataset.size.toString())
-        // Ambil parameter classifier dari model manager
-        var weights = this.classifierWeights     // Array<FloatArray>
-        var bias = this.classifierBias           // FloatArray
+        var weights = this.classifierWeights
+        var bias = this.classifierBias
 
-        if (weights == null || bias == null) {
-            Log.e("Train", "Weights or bias not initialized!")
-            return emptyMap()
-        }
+        if (weights == null || bias == null) return emptyMap()
 
-        val numClasses = weights.size          // baris = jumlah kelas
-        val numFeatures = weights[0].size      // kolom = jumlah fitur dari backbone
+        val smoothingValue = 0.1f
+        val weightDecay = 0.01f
+        val numClasses = weights.size
+        val numFeatures = weights[0].size
         val learningRate = config.learningRate
+
+        // 1. Ekstraksi fitur (Caching) - Backbone Frozen
+        val featureList = dataset.map { data ->
+            val safeBitmap = if (data.Input.config == Bitmap.Config.HARDWARE) {
+                data.Input.copy(Bitmap.Config.ARGB_8888, false)
+            } else { data.Input }
+
+            val inputTensor = TensorImageUtils.bitmapToFloat32Tensor(
+                safeBitmap,
+                TensorImageUtils.TORCHVISION_NORM_MEAN_RGB,
+                TensorImageUtils.TORCHVISION_NORM_STD_RGB
+            )
+            val feat = this.model.forward(IValue.from(inputTensor)).toTensor().dataAsFloatArray
+            Pair(feat, data.Label)
+        }
 
         repeat(config.epoch) { epoch ->
             var totalLoss = 0f
 
-            for (data in dataset) {
-                // 1️⃣ Konversi bitmap jadi tensor
-                val safeBitmap = if (data.Input.config == Bitmap.Config.HARDWARE) {
-                    data.Input.copy(Bitmap.Config.ARGB_8888, false)
-                } else {
-                    data.Input
-                }
-
-                val inputTensor = TensorImageUtils.bitmapToFloat32Tensor(
-                   safeBitmap,
-                    floatArrayOf(0.485f, 0.456f, 0.406f),
-                    floatArrayOf(0.229f, 0.224f, 0.225f)
-                )
-
-                // 2️⃣ Dapatkan fitur dari model backbone
-                val outputTensor = this.model.forward(IValue.from(inputTensor)).toTensor()
-                val features = outputTensor.dataAsFloatArray
-
-                System.out.println("Panjang feature ${features.size}")
-                System.out.println("Panjang feature ${weights.size}")
-                System.out.println("Panjang feature ${weights[0].size}")
-
-                // 3️⃣ Forward ke classifier manual
+            for ((features, label) in featureList) {
+                // 2. Forward Pass (Classifier Layer)
                 val logits = FloatArray(numClasses) { i ->
                     var sum = bias[i]
                     for (j in 0 until numFeatures) {
                         sum += features[j] * weights[i][j]
-                        //println("${i} daaan ${j}")
                     }
-                    println("Summm ${sum}")
-
                     sum
                 }
 
-                println("Total sum : ${logits}")
-                val maxLogit = logits.maxOrNull()!!
-                val stable = logits.map { it - maxLogit }.toFloatArray()
-                val probs = softmax(stable)
+                // 3. Stable Softmax
+                val maxLogit = logits.maxOrNull() ?: 0f
+                val expScore = logits.map { kotlin.math.exp(it - maxLogit) }
+                val sumExp = expScore.sum().toFloat()
+                val probs = expScore.map { (it / sumExp).toFloat() }
 
-                val loss = -ln(probs[data.Label])
-                totalLoss += loss
+                // 4. Cross Entropy Loss (Natural Log)
+                totalLoss += -kotlin.math.ln(probs[label].coerceAtLeast(1e-10f))
 
-                // 5️⃣ Hitung gradien output
-                val gradOut = FloatArray(numClasses)
+                // 5. Backpropagation
                 for (i in 0 until numClasses) {
-                    gradOut[i] = probs[i] - if (i == data.Label) 1f else 0f
-                }
+                    // Label Smoothing target
+                    val target = if (i == label) (1f - smoothingValue + (smoothingValue / numClasses)) else (smoothingValue / numClasses)
+                    val gradOut = probs[i] - target
 
-                // 6️⃣ Update parameter classifier (SGD)
-                for (i in 0 until numClasses) {
-                    bias[i] -= learningRate * gradOut[i]
+                    // Update Bias
+                    bias[i] -= learningRate * gradOut
+
+                    // Update Weights with Weight Decay (L2)
                     for (j in 0 until numFeatures) {
-                        weights[i][j] -= learningRate * gradOut[i] * features[j]
+                        val l2Reg = weightDecay * weights[i][j]
+                        weights[i][j] -= learningRate * (gradOut * features[j] + l2Reg)
                     }
                 }
             }
-            onProgressUpdate(epoch, totalLoss)
-            Log.i("TRAIN", "Epoch ${epoch + 1} avg loss = ${totalLoss / dataset.size}")
+            val avgLoss = totalLoss / dataset.size
+            onProgressUpdate(epoch, avgLoss)
+            //Log.i("TRAIN", "Epoch ${epoch + 1} Done. Avg Loss: $avgLoss")
         }
 
-        // 7️⃣ Return parameter classifier hasil update (untuk federated update ke server)
-        return mapOf(
-            "weights" to weights,
-            "bias" to bias
-        )
+        return mapOf("weights" to weights, "bias" to bias)
     }
 
     fun updateClassifierWeight(weights: Array<FloatArray>, bias: FloatArray) {

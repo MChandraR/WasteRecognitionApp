@@ -24,7 +24,7 @@ open class ModelManager(private val context : Context, private val modelPath : S
     }
     fun loadModel(): Module {
         val modelPath = IOUtils.assetFilePath(context, modelPath)
-        println("Lokasi model: $modelPath")
+        //println("Lokasi model: $modelPath")
 
         if (model == null) {
             model = LiteModuleLoader.load(modelPath)
@@ -33,7 +33,7 @@ open class ModelManager(private val context : Context, private val modelPath : S
             classifierWeights = w
             classifierBias = b
 
-            println("✅ Model loaded, weights = [${w.size} x ${w[0].size}], bias = [${b.size}]")
+            //println("✅ Model loaded, weights = [${w.size} x ${w[0].size}], bias = [${b.size}]")
         }
 
         return model!!

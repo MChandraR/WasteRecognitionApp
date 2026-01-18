@@ -42,7 +42,7 @@ class TrainingViewModel(
     val classifierWeightFileManager : ClassifierWeightFileManager = ClassifierWeightFileManager(context)
     var modelConfig = ModelConiguration(
         learningRate = 0.001f,
-        epoch = 5,
+        epoch = 15,
         batchSize = 2
     )
 
@@ -102,8 +102,7 @@ class TrainingViewModel(
                 }
             )
 
-            println(data.get("weights"))
-
+            print("SENDING CLASSIFIER WEIGHT")
             GlobalModelRepository().uploadModelWeight(globalWeightModel = GlobalWeightModel(
                 num_sample = importImageViewModel.imageDatasetList.size,
                 label_count = importImageViewModel.getEachLabelCount(),
