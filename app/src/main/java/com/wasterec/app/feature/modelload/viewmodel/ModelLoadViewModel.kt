@@ -3,6 +3,7 @@ package com.wasterec.app.feature.modelload.viewmodel
 import android.app.Application
 import android.content.Context
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.navigation.NavHostController
@@ -22,8 +23,8 @@ class ModelLoadViewModel(
     val trainingViewModel: TrainingViewModel
     ) : AndroidViewModel(application) {
 
-    val globalModelDownloadProgress : MutableState<Float> = mutableStateOf(0f)
-    val backboneModelDownloadProgress : MutableState<Float> = mutableStateOf(0f)
+    val globalModelDownloadProgress : MutableState<Float> = mutableFloatStateOf(0f)
+    val backboneModelDownloadProgress : MutableState<Float> = mutableFloatStateOf(0f)
     val classifierWeightDownloadProgress : MutableState<Float> = mutableStateOf(0f)
     val globalModelRepository : GlobalModelRepository = GlobalModelRepository()
     val fileManager: FileManager = FileManager(context = context)

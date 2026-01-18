@@ -2,6 +2,7 @@ package com.wasterec.app.feature.importimage.viewmodel
 
 import android.graphics.Bitmap
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -12,7 +13,7 @@ import kotlin.math.min
 class ImportImageViewModel : ViewModel() {
     var imageDatasetList  = mutableStateListOf<TrainingModel>()
     var showConfirmImageDeletionDialog : MutableState<Boolean> = mutableStateOf(false)
-    val selectedImageIndex : MutableState<Int> = mutableStateOf(0)
+    val selectedImageIndex : MutableState<Int> = mutableIntStateOf(0)
 
     fun reInit(){
         imageDatasetList = mutableStateListOf()
