@@ -66,11 +66,6 @@ class AnotateViewModel(application : Application,val context: Context, val navHo
                             predictResult.value = "Unknown"
                         }
                         predictedLabel.value = outputIdx
-                        Toast.makeText(
-                            context,
-                            "Berhasil " + confidentLevel.toString(),
-                            Toast.LENGTH_SHORT
-                        ).show()
                     }
                 }
             }
