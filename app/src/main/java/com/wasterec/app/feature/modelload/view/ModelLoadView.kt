@@ -34,18 +34,6 @@ fun ModelLoadView(modelLoadViewModel: ModelLoadViewModel?){
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
-        Text("Load Global Model (${(modelLoadViewModel?.globalModelDownloadProgress?.value?:0f).times(100).roundToInt() }%)",
-            fontSize = Typography.bodyLarge.fontSize,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(20.dp)
-        )
-
-        LinearProgressIndicator(
-            progress = {
-                modelLoadViewModel?.globalModelDownloadProgress?.value?:0f
-            },
-            modifier = Modifier.height(10.dp)
-        )
 
 
         Text("Load Backbone Model (${(modelLoadViewModel?.backboneModelDownloadProgress?.value?:0f).times(100).roundToInt() }%)",

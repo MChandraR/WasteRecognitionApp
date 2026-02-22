@@ -30,26 +30,6 @@ class ModelLoadViewModel(
     val fileManager: FileManager = FileManager(context = context)
     val classifierWeightFileManager: ClassifierWeightFileManager = ClassifierWeightFileManager(context)
     //FUngsi untuk download global model dari server sebelum proses anotasi
-    fun downloadGlobalModel(){
-        globalModelRepository.donwloadGlobalModelFile(
-            onResponse = { response ->
-                CoroutineScope(Dispatchers.IO).launch {
-                    fileManager.saveDownloadFileToDisk(
-                        "GlobalModel.ptl",
-                        response,
-                        onProgress = {
-                            globalModelDownloadProgress.value = it
-                            CoroutineScope(Dispatchers.Main).launch{
-                                navigateToDatasetImport()
-                            }                        }
-                    )
-                }
-            },
-            onFailure = {
-
-            }
-        )
-    }
 
     //Fungsi untuk mendownload backbone model terbaru dari server untuk proses training
     fun downloadBackboneModel(){

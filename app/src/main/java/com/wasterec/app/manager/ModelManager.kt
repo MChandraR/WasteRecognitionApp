@@ -3,6 +3,9 @@ package com.wasterec.app.manager
 import android.content.Context
 import android.util.Log
 import com.wasterec.app.utils.IOUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import org.pytorch.LiteModuleLoader
 import org.pytorch.Module
@@ -10,6 +13,7 @@ import kotlin.math.exp
 
 open class ModelManager(private val context : Context, private val modelPath : String) {
     private var model : Module? = null
+    private var classifierWeightFileManager = ClassifierWeightFileManager(context)
     var classifierWeights: Array<FloatArray>? = null
         private set
     var classifierBias: FloatArray? = null
@@ -29,9 +33,10 @@ open class ModelManager(private val context : Context, private val modelPath : S
         if (model == null) {
             model = LiteModuleLoader.load(modelPath)
 
-            val (w, b) = loadClassifierParams(context)
-            classifierWeights = w
-            classifierBias = b
+            loadClassifierParams(context){
+                classifierWeights = it.first
+                classifierBias = it.second
+            }
 
             //println("✅ Model loaded, weights = [${w.size} x ${w[0].size}], bias = [${b.size}]")
         }
@@ -47,27 +52,13 @@ open class ModelManager(private val context : Context, private val modelPath : S
         return expValues.map { it / sumExp }.toFloatArray()
     }
 
-    fun loadClassifierParams(context: Context): Pair<Array<FloatArray>, FloatArray> {
-        val jsonStr = context.assets.open("param.json")
-            .bufferedReader().use { it.readText() }
-
-        val json = JSONObject(jsonStr)
-
-        // Ambil array bobot (2D)
-        val weightArray = json.getJSONArray("weight")
-        val weights = Array(weightArray.length()) { i ->
-            val row = weightArray.getJSONArray(i)
-            FloatArray(row.length()) { j -> row.getDouble(j).toFloat() }
+    fun loadClassifierParams(context: Context, result : (Pair<Array<FloatArray>, FloatArray>) -> Unit ) {
+        CoroutineScope(Dispatchers.IO).launch{
+            val classifierParam = classifierWeightFileManager.loadClassifierParamFromFile()
+            if(classifierParam != null){
+                result(classifierParam.weights to classifierParam.bias)
+            }
         }
-
-        // Ambil array bias (1D)
-        val biasArray = json.getJSONArray("bias")
-        val bias = FloatArray(biasArray.length()) { i -> biasArray.getDouble(i).toFloat() }
-
-        Log.d("ModelParam", "Loaded weights shape: [${weights.size}, ${weights[0].size}]")
-        Log.d("ModelParam", "Loaded bias shape: [${bias.size}]")
-
-        return weights to bias
     }
 
 
