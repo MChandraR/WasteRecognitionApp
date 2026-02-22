@@ -42,7 +42,9 @@ android {
     androidResources {
         noCompress += "ptl"
     }
-
+    composeOptions {
+        kotlinCompilerExtensionVersion = "2.3.0"
+    }
 }
 
 
@@ -93,5 +95,9 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
-
+    //Chart
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
+    implementation(libs.vico.multiplatform)
+    implementation(libs.vico.views)
 }
