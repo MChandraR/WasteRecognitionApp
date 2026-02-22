@@ -9,7 +9,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.navigation.NavHostController
 import com.wasterec.app.model.Destination
-import com.wasterec.app.model.LoginModelAPI
+import com.wasterec.app.model.api_request.LoginModelRequestAPI
 import com.wasterec.app.repositories.UserRepository
 import com.wasterec.app.services.SharedPreferenceService
 
@@ -25,7 +25,8 @@ class LoginViewModel(application : Application, val context: Context, navControl
     fun login(){
         if(username.value.text.isNotEmpty() && password.value.text.isNotEmpty()){
             try{
-                loginAPIService.login(LoginModelAPI(username = username.value.text, password = password.value.text))
+                val response = loginAPIService.login(LoginModelRequestAPI(username = username.value.text, password = password.value.text))
+                if(response.is)
                 showAlert.value = true
             }catch(e : Exception){
                 println("Error : ${e.message}")

@@ -1,7 +1,7 @@
 package com.wasterec.app.repositories
 
 import com.wasterec.app.services.UserService
-import com.wasterec.app.model.LoginModelAPI
+import com.wasterec.app.model.api_request.LoginModelRequestAPI
 import com.wasterec.app.services.ApiService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 
 class UserRepository : ApiService() {
     //Function to send credential to login endpoint
-    fun login(loginBody : LoginModelAPI) {
+    fun login(loginBody : LoginModelRequestAPI, onSuccess: ()->Unit) {
         var loginAPIInterface = retrofit?.create(UserService::class.java)
         CoroutineScope(Dispatchers.IO).launch {
             if(loginAPIInterface != null){
