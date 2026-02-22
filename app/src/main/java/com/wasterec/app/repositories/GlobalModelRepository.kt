@@ -1,5 +1,6 @@
 package com.wasterec.app.repositories
 
+import android.content.Context
 import com.wasterec.app.helper.AppError
 import com.wasterec.app.helper.GlobalModelError
 import com.wasterec.app.model.globalmodel.ClassifierWeightModel
@@ -12,21 +13,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 
-class GlobalModelRepository : ApiService() {
+class GlobalModelRepository(val context: Context?) : ApiService() {
     fun getGlobamModelService() : GlobalModelService?{
        return this.retrofit?.create(GlobalModelService::class.java)
     }
 
     //Function to fetch data related to Global Model Info from server
     fun fetchGlobalModel(callback : (exception : AppError?, result : GlobalModelInfoModel?) -> Unit) {
-        val fetchGlobalModelService = this.getGlobamModelService()
-        if (fetchGlobalModelService != null){
-            CoroutineScope(Dispatchers.IO).launch {
-                val response = fetchGlobalModelService.getModelInfo()
-                if(response.isSuccessful){
-                     callback(null, response.body())
-                }else{
-                    callback(GlobalModelError.NoInternet(), null)
+        context?.let {
+            val fetchGlobalModelService = this.getGlobamModelService()
+            if (fetchGlobalModelService != null){
+                CoroutineScope(Dispatchers.IO).launch {
+                    val response = fetchGlobalModelService.getModelInfo()
+                    if(response.isSuccessful){
+                        callback(null, response.body())
+                    }else{
+                        callback(GlobalModelError.NoInternet(), null)
+                    }
                 }
             }
         }
