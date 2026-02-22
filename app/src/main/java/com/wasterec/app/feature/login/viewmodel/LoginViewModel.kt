@@ -25,8 +25,11 @@ class LoginViewModel(application : Application, val context: Context, navControl
     fun login(){
         if(username.value.text.isNotEmpty() && password.value.text.isNotEmpty()){
             try{
-                val response = loginAPIService.login(LoginModelRequestAPI(username = username.value.text, password = password.value.text))
-                if(response.is)
+                val response = loginAPIService.login(LoginModelRequestAPI(username = username.value.text, password = password.value.text),
+                    onSuccess = {
+                        sharedPreferenceService.storeStringValue("authToken", it.data.authToken)
+                    }
+                )
                 showAlert.value = true
             }catch(e : Exception){
                 println("Error : ${e.message}")
