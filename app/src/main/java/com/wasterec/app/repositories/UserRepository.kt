@@ -7,7 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class UserRepository : ApiService("http://192.168.1.4:5001") {
+class UserRepository : ApiService() {
     //Function to send credential to login endpoint
     fun login(loginBody : LoginModelAPI) {
         var loginAPIInterface = retrofit?.create(UserService::class.java)
