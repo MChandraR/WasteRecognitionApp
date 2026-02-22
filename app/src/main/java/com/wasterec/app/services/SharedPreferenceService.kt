@@ -14,7 +14,7 @@ class SharedPreferenceService(context : Context){
         }
     }
 
-    fun getStringValue(key : String, value : String) : String?{
+    fun getStringValue(key : String) : String?{
         return this.sharedPreferences.getString(key, "")
     }
 }
