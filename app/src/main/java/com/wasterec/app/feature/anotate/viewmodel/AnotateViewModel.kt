@@ -26,7 +26,7 @@ class AnotateViewModel(application : Application,val context: Context, val navHo
     var confidentLevel : MutableState<Float> = mutableFloatStateOf(0f)
     var predictedLabel : MutableState<Int> = mutableIntStateOf(0)
     var currentBitmap : MutableState<Bitmap?> = mutableStateOf(null)
-    var efficientNetB0 : EfficientNetB0? = EfficientNetB0(context, "model.ptl" )
+    var efficientNetB0 : EfficientNetB0? = EfficientNetB0(context, "Backbone.ptl" )
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
     var isModelLoading : MutableState<Boolean> = mutableStateOf(true)
 
@@ -41,13 +41,12 @@ class AnotateViewModel(application : Application,val context: Context, val navHo
         confidentLevel.value = 0f
         predictedLabel.value = 0
         currentBitmap.value = null
-        val globalModelFile = File(context.filesDir, "GlobalModel.ptl")
+        val globalModelFile = File(context.filesDir, "Backbone.ptl")
         if(globalModelFile.exists()){
             println("Ada file ${globalModelFile.absolutePath}")
-            efficientNetB0 = EfficientNetB0(context, "GlobalModel.ptl")
+            efficientNetB0 = EfficientNetB0(context, "Backbone.ptl")
             this.currentBitmap.value?.let { bmp ->
                 this.classifyImage(bmp)
-
             }
         }
         isModelLoading.value = false
@@ -62,7 +61,7 @@ class AnotateViewModel(application : Application,val context: Context, val navHo
             CoroutineScope(Dispatchers.IO).launch{
                 predictResult.value = "Loading..."
                 withContext(Dispatchers.IO) {
-                    val output = efficientNetB0.predict(
+                    val output = efficientNetB0.backbonePredict(
                         bmp.copy(Bitmap.Config.ARGB_8888, false)
                     )
                     val outputIdx = output.first

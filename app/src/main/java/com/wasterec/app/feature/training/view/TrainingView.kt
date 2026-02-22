@@ -222,7 +222,7 @@ fun TrainingView(
 
         MyButton(
             onClick = {
-                //trainingViewModel?.reInit() //THIS CAUSE DOUBLE LOCAL TRAINING 
+                //trainingViewModel?.reInit() //THIS CAUSE DOUBLE LOCAL TRAINING
                 trainingViewModel?.navHostController?.navigate(route = Destination.FinishTraining)
             },
             modifier = Modifier

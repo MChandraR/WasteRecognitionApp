@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.wasterec.app.model.ModelConiguration
 import com.wasterec.app.model.TrainingModel
+import com.wasterec.app.utils.forceSoftwareBitmap
 import org.pytorch.IValue
 import org.pytorch.Module
 import org.pytorch.Tensor
@@ -19,11 +20,7 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
     @RequiresApi(Build.VERSION_CODES.O)
     fun predict(bitmap: Bitmap) : Pair<Int, Float>{
         // ... (kode bitmap to tensor Anda tetap sama)
-        val safeBitmap = if (bitmap.config == Bitmap.Config.HARDWARE) {
-            bitmap.copy(Bitmap.Config.ARGB_8888, false)
-        } else {
-            bitmap
-        }
+        val safeBitmap = forceSoftwareBitmap(bitmap)
 
         val inputTensor = TensorImageUtils.bitmapToFloat32Tensor(safeBitmap,
             TensorImageUtils.TORCHVISION_NORM_MEAN_RGB,
@@ -31,6 +28,10 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
         )
         val outputTensor = model.forward(IValue.from(inputTensor)).toTensor()
         val scores = outputTensor.dataAsFloatArray
+
+        scores.forEach{
+            println(it)
+        }
 
         // Validasi apakah model mengeluarkan NaN
         if (scores.any { it.isNaN() }) {
@@ -48,8 +49,42 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
         val outputIdx = probabilities.indices.maxByOrNull { probabilities[it] } ?: -1
         val confidence = if (outputIdx != -1) probabilities[outputIdx] else 0f
 
-        //println("LOGITS: ${scores.joinToString(", ")}")
-        //println("CONFIDENCE: $confidence")
+
+        return Pair(outputIdx, confidence)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun backbonePredict(bitmap: Bitmap) : Pair<Int, Float>{
+        // ... (kode bitmap to tensor Anda tetap sama)
+        val safeBitmap = forceSoftwareBitmap(bitmap)
+
+        val inputTensor = TensorImageUtils.bitmapToFloat32Tensor(safeBitmap,
+            TensorImageUtils.TORCHVISION_NORM_MEAN_RGB,
+            TensorImageUtils.TORCHVISION_NORM_STD_RGB
+        )
+        val outputTensor = model.forward(IValue.from(inputTensor)).toTensor()
+        val scores = outputTensor.dataAsFloatArray
+
+        scores.forEach{
+            println(it)
+        }
+
+        // Validasi apakah model mengeluarkan NaN
+        if (scores.any { it.isNaN() }) {
+            println("ERROR: Model output contains NaN")
+            return Pair(-1, 0f)
+        }
+
+        // STABLE SOFTMAX IMPLEMENTATION
+        val maxLogit = scores.maxOrNull() ?: 0f
+        val expScores = scores.map { kotlin.math.exp(it - maxLogit) }
+        val sumExp = expScores.sum()
+
+        val probabilities = expScores.map { it / sumExp }
+
+        val outputIdx = probabilities.indices.maxByOrNull { probabilities[it] } ?: -1
+        val confidence = if (outputIdx != -1) probabilities[outputIdx] else 0f
+
 
         return Pair(outputIdx, confidence)
     }
@@ -103,11 +138,11 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
                 // 3. Stable Softmax
                 val maxLogit = logits.maxOrNull() ?: 0f
                 val expScore = logits.map { kotlin.math.exp(it - maxLogit) }
-                val sumExp = expScore.sum().toFloat()
-                val probs = expScore.map { (it / sumExp).toFloat() }
+                val sumExp = expScore.sum()
+                val probs = expScore.map { (it / sumExp) }
 
                 // 4. Cross Entropy Loss (Natural Log)
-                totalLoss += -kotlin.math.ln(probs[label].coerceAtLeast(1e-10f))
+                totalLoss += -ln(probs[label].coerceAtLeast(1e-10f))
 
                 // 5. Backpropagation
                 for (i in 0 until numClasses) {
