@@ -23,7 +23,6 @@ class ModelLoadViewModel(
     val trainingViewModel: TrainingViewModel
     ) : AndroidViewModel(application) {
 
-    val globalModelDownloadProgress : MutableState<Float> = mutableFloatStateOf(0f)
     val backboneModelDownloadProgress : MutableState<Float> = mutableFloatStateOf(0f)
     val classifierWeightDownloadProgress : MutableState<Float> = mutableFloatStateOf(0f)
     val globalModelRepository : GlobalModelRepository = GlobalModelRepository()
@@ -71,7 +70,7 @@ class ModelLoadViewModel(
     }
 
     fun navigateToDatasetImport(){
-        if(globalModelDownloadProgress.value >= 1f && backboneModelDownloadProgress.value >= 1f){
+        if(backboneModelDownloadProgress.value >= 1f){
             navHostController.navigate(Destination.Import)
         }
     }

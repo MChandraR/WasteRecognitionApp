@@ -4,9 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class GlobalModelInfoModel (
+    val id : String,
     val model_name : String,
-    val num_parameters : Int,
-    var input_size : IntArray,
-    val num_classes : Int,
-    val last_updated : String
+    val model_version : String,
+    var last_updated : String,
 )
