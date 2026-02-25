@@ -14,7 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 
-class GlobalModelRepository(val context: Context?) : ApiService() {
+class GlobalModelRepository(val context: Context? = null) : ApiService() {
     fun getGlobamModelService() : GlobalModelService?{
         //If there's context get stored AuthToken from SP and inject to Request Header
         context?.let{

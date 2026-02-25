@@ -44,6 +44,7 @@ class MainActivity : ComponentActivity() {
                     navHostController = navController
                 )
             )
+
             val trainingViewModel : TrainingViewModel = viewModel(
                 factory = TrainingViewModelFactory(
                     application = application,

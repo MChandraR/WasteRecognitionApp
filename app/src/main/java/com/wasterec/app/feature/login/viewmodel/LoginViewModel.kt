@@ -17,9 +17,12 @@ class LoginViewModel(application : Application, val context: Context, navControl
     var username : MutableState<TextFieldValue> = mutableStateOf(TextFieldValue(""))
     var password : MutableState<TextFieldValue> = mutableStateOf(TextFieldValue(""))
     var showAlert : MutableState<Boolean> = mutableStateOf(false)
+    val alertMessage : MutableState<String> = mutableStateOf("")
     var loginAPIService = UserRepository()
     var sharedPreferenceService : SharedPreferenceService = SharedPreferenceService(context)
     val navController : NavHostController = navController
+    var isSuccess : MutableState<Boolean> = mutableStateOf(false)
+
 
     //Function to handle login and validate user input
     fun login(){
@@ -28,9 +31,16 @@ class LoginViewModel(application : Application, val context: Context, navControl
                 val response = loginAPIService.login(LoginModelRequestAPI(username = username.value.text, password = password.value.text),
                     onSuccess = {
                         sharedPreferenceService.storeStringValue("authToken", it.data.authToken)
+                        alertMessage.value = it.message
+                        isSuccess.value = true
+                        showAlert.value = true
+                    },
+                    onFailed = {
+                        alertMessage.value = it
+                        isSuccess.value = false
+                        showAlert.value = true
                     }
                 )
-                showAlert.value = true
             }catch(e : Exception){
                 println("Error : ${e.message}")
             }
@@ -42,6 +52,6 @@ class LoginViewModel(application : Application, val context: Context, navControl
     //Function for redirect user to next page after succesfully logged=in
     fun dismissAlert(){
         this.showAlert.value = false
-        this.navController.navigate(Destination.Home)
+        if(isSuccess.value)this.navController.navigate(Destination.Home)
     }
 }
