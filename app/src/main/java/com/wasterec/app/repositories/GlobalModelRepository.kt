@@ -4,7 +4,7 @@ import android.content.Context
 import com.wasterec.app.helper.AppError
 import com.wasterec.app.helper.GlobalModelError
 import com.wasterec.app.model.globalmodel.ClassifierWeightModel
-import com.wasterec.app.model.globalmodel.GlobalModelInfoModel
+import com.wasterec.app.model.api_response.model_info.GlobalModelInfoModel
 import com.wasterec.app.model.globalmodel.GlobalWeightModel
 import com.wasterec.app.services.ApiService
 import com.wasterec.app.services.GlobalModelService
@@ -30,8 +30,9 @@ class GlobalModelRepository(val context: Context? = null) : ApiService() {
             CoroutineScope(Dispatchers.IO).launch {
                 val response = fetchGlobalModelService.getModelInfo()
                 if(response.isSuccessful){
-                    callback(null, response.body())
+                    callback(null, response.body()?.data)
                 }else{
+                    if(response != null && response.body()?.status == 401)
                     callback(GlobalModelError.NoInternet(), null)
                 }
             }
