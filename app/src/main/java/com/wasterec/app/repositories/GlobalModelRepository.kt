@@ -17,8 +17,10 @@ import okhttp3.ResponseBody
 class GlobalModelRepository(val context: Context? = null) : ApiService() {
     fun getGlobamModelService() : GlobalModelService?{
         //If there's context get stored AuthToken from SP and inject to Request Header
+        println("Create global model service ")
         context?.let{
             val authToken = SharedPreferenceService(context).getStringValue("authToken")
+            println("Add auth token")
             authToken?.let{addAuthorizationBerer(authToken)}
         }
        return this.retrofit?.create(GlobalModelService::class.java)
@@ -32,7 +34,7 @@ class GlobalModelRepository(val context: Context? = null) : ApiService() {
                 if(response.isSuccessful){
                     callback(null, response.body()?.data)
                 }else{
-                    if(response != null && response.body()?.status == 401)
+                    if(response.body()?.status == 401)
                     callback(GlobalModelError.NoInternet(), null)
                 }
             }

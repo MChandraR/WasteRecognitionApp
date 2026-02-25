@@ -9,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 open class ApiService(
-    val baseUrl : String = "http://23.0.0.159:8000/",
+    val baseUrl : String = "http://192.168.1.11:8000/",
     var retrofit: Retrofit? = null,
     val authToken : String? = null,
 ){
@@ -24,10 +24,12 @@ open class ApiService(
         val retrofit  =  Retrofit.Builder().baseUrl(baseUrl)
         authToken.let{ token ->
             val authInterceptor = AuthInterceptor(token)
+            println("INterceptor injected ")
             val client = OkHttpClient.Builder().addInterceptor(authInterceptor).build()
             retrofit.client(client)
         }
-        retrofit.addConverterFactory(GsonConverterFactory.create()).build()
+        retrofit.addConverterFactory(GsonConverterFactory.create())
+        this.retrofit = retrofit.build()
     }
 
 }
