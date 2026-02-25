@@ -33,9 +33,8 @@ import com.wasterec.app.ui.theme.lightGray
 
 @Composable
 fun HomeView(
-    navController: NavHostController,
-    modifier: Modifier,
-    homeViewModel: HomeViewModel = HomeViewModel()
+    homeViewModel: HomeViewModel,
+    modifier: Modifier
 ){
 
     LaunchedEffect(Unit) {
@@ -145,7 +144,7 @@ fun HomeView(
                 colors = ButtonDefaults.buttonColors(Color.Transparent),
                 onClick = {
                     println("Hallo")
-                    navController.navigate(route = Destination.WeightLoading)
+                    homeViewModel.navHostController.navigate(route = Destination.WeightLoading)
                 },
                 modifier = Modifier
                     .background(
