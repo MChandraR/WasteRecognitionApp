@@ -8,28 +8,31 @@ import com.wasterec.app.model.globalmodel.GlobalModelInfoModel
 import com.wasterec.app.model.globalmodel.GlobalWeightModel
 import com.wasterec.app.services.ApiService
 import com.wasterec.app.services.GlobalModelService
+import com.wasterec.app.services.SharedPreferenceService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 
-class GlobalModelRepository(val context: Context?) : ApiService() {
+class GlobalModelRepository(val context: Context? = null) : ApiService() {
     fun getGlobamModelService() : GlobalModelService?{
+        //If there's context get stored AuthToken from SP and inject to Request Header
+        context?.let{
+            val authToken = SharedPreferenceService(context).getStringValue("authToken")
+            authToken?.let{addAuthorizationBerer(authToken)}
+        }
        return this.retrofit?.create(GlobalModelService::class.java)
     }
 
     //Function to fetch data related to Global Model Info from server
     fun fetchGlobalModel(callback : (exception : AppError?, result : GlobalModelInfoModel?) -> Unit) {
-        context?.let {
-            val fetchGlobalModelService = this.getGlobamModelService()
-            if (fetchGlobalModelService != null){
-                CoroutineScope(Dispatchers.IO).launch {
-                    val response = fetchGlobalModelService.getModelInfo()
-                    if(response.isSuccessful){
-                        callback(null, response.body())
-                    }else{
-                        callback(GlobalModelError.NoInternet(), null)
-                    }
+        this.getGlobamModelService()?.let{ fetchGlobalModelService ->
+            CoroutineScope(Dispatchers.IO).launch {
+                val response = fetchGlobalModelService.getModelInfo()
+                if(response.isSuccessful){
+                    callback(null, response.body())
+                }else{
+                    callback(GlobalModelError.NoInternet(), null)
                 }
             }
         }

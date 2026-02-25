@@ -17,6 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import com.wasterec.app.R
 import com.wasterec.app.feature.home.view.HomeView
+import com.wasterec.app.feature.home.viewmodel.HomeViewModel
 import com.wasterec.app.model.Destination.Home
 import com.wasterec.app.model.Destination.Info
 import com.wasterec.app.model.Menu
@@ -24,7 +25,8 @@ import com.wasterec.app.model.Menu
 
 @Composable
 fun MainView(
-    navController : NavHostController
+    navController : NavHostController,
+    homeViewModel: HomeViewModel
 ){
     val entries = arrayOf(
         Menu("Home", Home, R.drawable.baseline_home_24),
@@ -56,7 +58,7 @@ fun MainView(
     ) { contentPadding ->
         if (selectedTab == 0){
             HomeView(
-                navController = navController,
+                homeViewModel,
                 modifier = Modifier.padding(contentPadding)
             )
         }

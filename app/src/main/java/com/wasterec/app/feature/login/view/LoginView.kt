@@ -89,8 +89,8 @@ fun LoginView(navHostController: NavHostController){
 
         //Alert to show information about login status
         Alert(
-            title = "Sukses",
-            message = "Berhasil login",
+            title = if (loginViewModel.isSuccess.value) "Login Sukses" else "Login Gagal",
+            message = loginViewModel.alertMessage.value,
             showAlert = loginViewModel.showAlert.value,
         ) {
             loginViewModel.dismissAlert()

@@ -15,6 +15,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.wasterec.app.feature.anotate.factory.AnotateViewModelFactory
 import com.wasterec.app.feature.anotate.viewmodel.AnotateViewModel
+import com.wasterec.app.feature.home.view_model_factory.HomeViewModelFactory
+import com.wasterec.app.feature.home.viewmodel.HomeViewModel
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.feature.modelload.factory.ModelLoadViewModelFactory
 import com.wasterec.app.feature.modelload.viewmodel.ModelLoadViewModel
@@ -44,6 +46,7 @@ class MainActivity : ComponentActivity() {
                     navHostController = navController
                 )
             )
+
             val trainingViewModel : TrainingViewModel = viewModel(
                 factory = TrainingViewModelFactory(
                     application = application,
@@ -62,14 +65,23 @@ class MainActivity : ComponentActivity() {
                 )
             )
 
+            val homeViewModel : HomeViewModel = viewModel(
+                factory = HomeViewModelFactory(
+                    application = application,
+                    context = this,
+                    navHostController = navController
+                )
+            )
+
             //DebugView(this)
             NavigationView(
                 this,
                 navController,
+                homeViewModel,
                 anotateViewModel,
                 importImageViewModel,
                 trainingViewModel,
-                modelLoadViewModel
+                modelLoadViewModel,
             )
 
             handler.postDelayed({
