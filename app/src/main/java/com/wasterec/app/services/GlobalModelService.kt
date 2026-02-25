@@ -1,8 +1,9 @@
 package com.wasterec.app.services
 
 import com.wasterec.app.model.globalmodel.ClassifierWeightModel
-import com.wasterec.app.model.globalmodel.GlobalModelInfoModel
+import com.wasterec.app.model.api_response.model_info.GlobalModelInfoModel
 import com.wasterec.app.model.globalmodel.GlobalWeightModel
+import com.wasterec.app.model.api_response.ResponseBody as ResponsesBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -12,7 +13,7 @@ import retrofit2.http.Streaming
 
 interface GlobalModelService {
     @GET("model/info")
-    suspend fun getModelInfo():Response<GlobalModelInfoModel>
+    suspend fun getModelInfo():Response<ResponsesBody<GlobalModelInfoModel>>
 
     @GET("model/weight")
     suspend fun getClassifierModelWeight():Response<ClassifierWeightModel>
