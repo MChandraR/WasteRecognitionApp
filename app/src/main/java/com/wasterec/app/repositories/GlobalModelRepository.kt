@@ -4,7 +4,7 @@ import android.content.Context
 import com.wasterec.app.helper.AppError
 import com.wasterec.app.helper.GlobalModelError
 import com.wasterec.app.model.globalmodel.ClassifierWeightModel
-import com.wasterec.app.model.globalmodel.GlobalModelInfoModel
+import com.wasterec.app.model.api_response.model_info.GlobalModelInfoModel
 import com.wasterec.app.model.globalmodel.GlobalWeightModel
 import com.wasterec.app.services.ApiService
 import com.wasterec.app.services.GlobalModelService
@@ -14,7 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 
-class GlobalModelRepository(val context: Context?) : ApiService() {
+class GlobalModelRepository(val context: Context? = null) : ApiService() {
     fun getGlobamModelService() : GlobalModelService?{
         //If there's context get stored AuthToken from SP and inject to Request Header
         context?.let{
@@ -30,9 +30,10 @@ class GlobalModelRepository(val context: Context?) : ApiService() {
             CoroutineScope(Dispatchers.IO).launch {
                 val response = fetchGlobalModelService.getModelInfo()
                 if(response.isSuccessful){
-                    callback(null, response.body())
+                    if(response.body()?.status == 401)  callback(GlobalModelError.Unauthorized(), null)
+                    else callback(null, response.body()?.data)
                 }else{
-                    callback(GlobalModelError.NoInternet(), null)
+                    if(response.code() == 401)  callback(GlobalModelError.Unauthorized(), null)
                 }
             }
         }

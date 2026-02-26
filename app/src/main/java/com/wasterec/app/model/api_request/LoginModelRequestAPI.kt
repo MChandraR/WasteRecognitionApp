@@ -1,9 +1,9 @@
-package com.wasterec.app.model
+package com.wasterec.app.model.api_request
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class LoginModelAPI(
+data class LoginModelRequestAPI(
     val username : String,
     val password : String
 )

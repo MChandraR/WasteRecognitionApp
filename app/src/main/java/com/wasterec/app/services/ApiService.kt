@@ -27,7 +27,8 @@ open class ApiService(
             val client = OkHttpClient.Builder().addInterceptor(authInterceptor).build()
             retrofit.client(client)
         }
-        retrofit.addConverterFactory(GsonConverterFactory.create()).build()
+        retrofit.addConverterFactory(GsonConverterFactory.create())
+        this.retrofit = retrofit.build()
     }
 
 }

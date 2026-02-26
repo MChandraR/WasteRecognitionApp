@@ -17,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.wasterec.app.feature.anotate.view.AnnotateView
 import com.wasterec.app.feature.anotate.viewmodel.AnotateViewModel
+import com.wasterec.app.feature.home.viewmodel.HomeViewModel
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.feature.login.view.LoginView
 import com.wasterec.app.feature.splash.view.SplashView
@@ -36,6 +37,7 @@ import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
 fun NavigationView(
     context: Context,
     navController : NavHostController,
+    homeViewModel : HomeViewModel,
     anotateViewModel: AnotateViewModel,
     importImageViewModel: ImportImageViewModel,
     trainingViewModel: TrainingViewModel,
@@ -50,7 +52,7 @@ fun NavigationView(
         navController = navController,
         startDestination = startDestination,
     ) {
-        composable<Destination.Home> { MainView(navController) }
+        composable<Destination.Home> { MainView(navController,homeViewModel) }
         composable<Destination.Info>{  }
         composable<Destination.Login>{ LoginView(navHostController = navController) }
         composable<Destination.Splash>{ SplashView() }
@@ -66,8 +68,8 @@ fun NavigationView(
 
 
 
-@Preview(showBackground = false)
-@Composable
-fun MainPreview(){
-    MainView(rememberNavController())
-}
+//@Preview(showBackground = false)
+//@Composable
+//fun MainPreview(){
+//    MainView(rememberNavController())
+//}
