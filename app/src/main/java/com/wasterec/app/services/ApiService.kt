@@ -24,7 +24,6 @@ open class ApiService(
         val retrofit  =  Retrofit.Builder().baseUrl(baseUrl)
         authToken.let{ token ->
             val authInterceptor = AuthInterceptor(token)
-            println("INterceptor injected ")
             val client = OkHttpClient.Builder().addInterceptor(authInterceptor).build()
             retrofit.client(client)
         }
