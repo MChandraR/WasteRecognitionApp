@@ -25,7 +25,7 @@ class ModelLoadViewModel(
 
     val backboneModelDownloadProgress : MutableState<Float> = mutableFloatStateOf(0f)
     val classifierWeightDownloadProgress : MutableState<Float> = mutableFloatStateOf(0f)
-    val globalModelRepository : GlobalModelRepository = GlobalModelRepository()
+    val globalModelRepository : GlobalModelRepository = GlobalModelRepository(context)
     val fileManager: FileManager = FileManager(context = context)
     val classifierWeightFileManager: ClassifierWeightFileManager = ClassifierWeightFileManager(context)
     //FUngsi untuk download global model dari server sebelum proses anotasi
