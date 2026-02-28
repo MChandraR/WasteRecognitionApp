@@ -22,24 +22,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.wasterec.app.R
 import com.wasterec.app.feature.home.viewmodel.HomeViewModel
 import com.wasterec.app.model.Destination
 import com.wasterec.app.shared.components.GifLoader
+import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
 import com.wasterec.app.ui.theme.lightGray
 
 @Composable
 fun HomeView(
-    homeViewModel: HomeViewModel,
+    homeViewModel: HomeViewModel? = null,
     modifier: Modifier
 ){
 
     LaunchedEffect(Unit) {
 
-        homeViewModel.getGlobalModelInfo()
+        homeViewModel?.getGlobalModelInfo()
     }
 
     Column(
@@ -61,33 +63,35 @@ fun HomeView(
             Spacer(modifier = Modifier.weight(1f))
             GifLoader(R.drawable.network)
 
-            Text(
-                "Waste Rect",
-                fontSize = Typography.titleLarge.fontSize,
-                fontFamily = Typography.titleLarge.fontFamily,
-                fontWeight = FontWeight.Bold
-            )
+//            Text(
+//                "Waste Rec",
+//                fontSize = Typography.displaySmall.fontSize,
+//                fontFamily = Typography.titleLarge.fontFamily,
+//                fontWeight = FontWeight.Bold,
+//                color = ColorAsset.primaryBlue
+//            )
 
             Spacer(modifier = Modifier.weight(1f))
 
             Text(
-                "Model State",
+                "Statistik Global Model",
                 textAlign = TextAlign.Start,
-                fontSize = Typography.bodyLarge.fontSize,
+                fontSize = Typography.titleMedium.fontSize,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 10.dp)
+                    .padding(bottom = 10.dp),
+                color = ColorAsset.darkBg75
             )
 
             Row(
                 modifier = Modifier
                     .background(
-                        color = lightGray,
+                        color = ColorAsset.alpha5,
                         shape = RoundedCornerShape(10)
                     )
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(10.dp),
                 horizontalArrangement = Arrangement.SpaceAround
             ){
                 Column(
@@ -95,22 +99,27 @@ fun HomeView(
                         .weight(1f)
                 ) {
                     Text(
-                        "Accuracy",
+                        "Akurasi :",
                     )
                     Text(
                         "80%",
                         fontWeight = FontWeight.Bold,
-                        fontSize = Typography.titleSmall.fontSize,
+                        fontSize = Typography.titleLarge.fontSize,
                         modifier = Modifier
-                            .padding(bottom = 20.dp)
+                            .padding(top=2.dp)
+                            .padding(bottom = 20.dp),
+                        color = ColorAsset.primaryBlue
                     )
                     Text(
-                        "Arch.",
+                        "Model :",
                     )
                     Text(
-                        (homeViewModel.globalModelInfoModel.value)?.model_name ?: "-" ,
+                        (homeViewModel?.globalModelInfoModel?.value)?.model_name ?: "EfficientNet-B0" ,
                         fontWeight = FontWeight.Bold,
                         fontSize = Typography.titleSmall.fontSize,
+                        modifier = Modifier
+                            .padding(top=2.dp),
+                        color = ColorAsset.primaryBlue
                     )
                 }
 
@@ -119,22 +128,27 @@ fun HomeView(
                         .weight(1f)
                 ) {
                     Text(
-                        "Loss",
+                        "Round :",
                     )
                     Text(
-                        "0.1",
+                        "1 (On Queue)",
                         fontWeight = FontWeight.Bold,
                         fontSize = Typography.titleSmall.fontSize,
                         modifier = Modifier
-                            .padding(bottom = 20.dp)
+                            .padding(top=2.dp)
+                            .padding(bottom = 20.dp),
+                        color = ColorAsset.primaryBlue
                     )
                     Text(
-                        "Last Training.",
+                        "Terakhir Diperbarui :",
                     )
                     Text(
-                        (homeViewModel.globalModelInfoModel.value)?.last_updated ?: "-" ,
+                        (homeViewModel?.globalModelInfoModel?.value)?.last_updated ?: "-" ,
                         fontWeight = FontWeight.Bold,
                         fontSize = Typography.titleSmall.fontSize,
+                        modifier = Modifier
+                                 .padding(top=2.dp),
+                        color = ColorAsset.primaryBlue
                     )
                 }
             }
@@ -142,22 +156,18 @@ fun HomeView(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                colors = ButtonDefaults.buttonColors(Color.Transparent),
+                colors = ButtonDefaults.buttonColors(ColorAsset.primaryBlue),
+                shape = RoundedCornerShape(10.dp),
                 onClick = {
                     println("Hallo")
-                    homeViewModel.navHostController.navigate(route = Destination.WeightLoading)
+                    homeViewModel?.navHostController?.navigate(route = Destination.WeightLoading)
                 },
                 modifier = Modifier
-                    .background(
-                        color = Color.Gray,
-                        shape = RoundedCornerShape(20)
-                    )
                     .fillMaxWidth()
             ) {
                 Text(
                     "Start Training",
-                    modifier = Modifier
-
+                    modifier = Modifier.padding(10.dp)
                 )
             }
 
@@ -166,4 +176,10 @@ fun HomeView(
 
 
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun homeViewPreview(){
+    HomeView(modifier = Modifier)
 }
