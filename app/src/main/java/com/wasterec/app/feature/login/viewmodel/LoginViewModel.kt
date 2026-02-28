@@ -14,21 +14,22 @@ import com.wasterec.app.repositories.UserRepository
 import com.wasterec.app.services.SharedPreferenceService
 
 class LoginViewModel(application : Application, val context: Context, navController : NavHostController) : AndroidViewModel(application) {
-    var username : MutableState<TextFieldValue> = mutableStateOf(TextFieldValue(""))
-    var password : MutableState<TextFieldValue> = mutableStateOf(TextFieldValue(""))
+    var username : MutableState<String> = mutableStateOf("")
+    var password : MutableState<String> = mutableStateOf("")
     var showAlert : MutableState<Boolean> = mutableStateOf(false)
     val alertMessage : MutableState<String> = mutableStateOf("")
     var loginAPIService = UserRepository()
     var sharedPreferenceService : SharedPreferenceService = SharedPreferenceService(context)
     val navController : NavHostController = navController
     var isSuccess : MutableState<Boolean> = mutableStateOf(false)
+    var showPassword : MutableState<Boolean> = mutableStateOf(false)
 
 
     //Function to handle login and validate user input
     fun login(){
-        if(username.value.text.isNotEmpty() && password.value.text.isNotEmpty()){
+        if(username.value.isNotEmpty() && password.value.isNotEmpty()){
             try{
-                val response = loginAPIService.login(LoginModelRequestAPI(username = username.value.text, password = password.value.text),
+                val response = loginAPIService.login(LoginModelRequestAPI(username = username.value, password = password.value),
                     onSuccess = {
                         sharedPreferenceService.storeStringValue("authToken", it.data.authToken)
                         alertMessage.value = it.message
