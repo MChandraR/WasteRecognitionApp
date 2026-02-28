@@ -18,6 +18,8 @@ import com.wasterec.app.feature.anotate.viewmodel.AnotateViewModel
 import com.wasterec.app.feature.home.view_model_factory.HomeViewModelFactory
 import com.wasterec.app.feature.home.viewmodel.HomeViewModel
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
+import com.wasterec.app.feature.login.factory.LoginViewModelFactory
+import com.wasterec.app.feature.login.viewmodel.LoginViewModel
 import com.wasterec.app.feature.modelload.factory.ModelLoadViewModelFactory
 import com.wasterec.app.feature.modelload.viewmodel.ModelLoadViewModel
 import com.wasterec.app.feature.navigation.view.NavigationView
@@ -73,10 +75,19 @@ class MainActivity : ComponentActivity() {
                 )
             )
 
+            val loginViewModel : LoginViewModel = viewModel(
+                factory = LoginViewModelFactory(
+                    app = application,
+                    context = this,
+                    navHostController = navController
+                )
+            )
+
             //DebugView(this)
             NavigationView(
                 this,
                 navController,
+                loginViewModel,
                 homeViewModel,
                 anotateViewModel,
                 importImageViewModel,
@@ -85,7 +96,7 @@ class MainActivity : ComponentActivity() {
             )
 
             handler.postDelayed({
-                navController.navigate(Destination.Home) {
+                navController.navigate(Destination.Login) {
                     popUpTo(navController.graph.startDestinationId) {
                         inclusive = true
                     }

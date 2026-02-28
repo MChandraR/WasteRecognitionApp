@@ -28,6 +28,7 @@ import com.wasterec.app.manager.EfficientNetB0
 import com.wasterec.app.model.Destination
 import com.wasterec.app.model.TrainingModel
 import com.wasterec.app.feature.importimage.view.ImportImageView
+import com.wasterec.app.feature.login.viewmodel.LoginViewModel
 import com.wasterec.app.feature.modelload.view.ModelLoadView
 import com.wasterec.app.feature.modelload.viewmodel.ModelLoadViewModel
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
@@ -37,6 +38,7 @@ import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
 fun NavigationView(
     context: Context,
     navController : NavHostController,
+    loginViewModel : LoginViewModel,
     homeViewModel : HomeViewModel,
     anotateViewModel: AnotateViewModel,
     importImageViewModel: ImportImageViewModel,
@@ -54,7 +56,7 @@ fun NavigationView(
     ) {
         composable<Destination.Home> { MainView(navController,homeViewModel) }
         composable<Destination.Info>{  }
-        composable<Destination.Login>{ LoginView(navHostController = navController) }
+        composable<Destination.Login>{ LoginView(loginViewModel) }
         composable<Destination.Splash>{ SplashView() }
         composable<Destination.Import>{ ImportImageView(navController, importImageViewModel) }
         composable<Destination.Training>{ TrainingView(trainingViewModel) }
