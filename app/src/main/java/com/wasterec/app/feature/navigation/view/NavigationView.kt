@@ -54,7 +54,7 @@ fun NavigationView(
         navController = navController,
         startDestination = startDestination,
     ) {
-        composable<Destination.Home> { MainView(navController,homeViewModel) }
+        composable<Destination.Home> { MainView(homeViewModel) }
         composable<Destination.Info>{  }
         composable<Destination.Login>{ LoginView(loginViewModel) }
         composable<Destination.Splash>{ SplashView() }
