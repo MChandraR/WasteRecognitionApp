@@ -38,6 +38,7 @@ fun HomeView(
 ){
 
     LaunchedEffect(Unit) {
+
         homeViewModel.getGlobalModelInfo()
     }
 

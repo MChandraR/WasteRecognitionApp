@@ -30,10 +30,10 @@ class GlobalModelRepository(val context: Context? = null) : ApiService() {
             CoroutineScope(Dispatchers.IO).launch {
                 val response = fetchGlobalModelService.getModelInfo()
                 if(response.isSuccessful){
-                    callback(null, response.body()?.data)
+                    if(response.body()?.status == 401)  callback(GlobalModelError.Unauthorized(), null)
+                    else callback(null, response.body()?.data)
                 }else{
-                    if(response != null && response.body()?.status == 401)
-                    callback(GlobalModelError.NoInternet(), null)
+                    if(response.code() == 401)  callback(GlobalModelError.Unauthorized(), null)
                 }
             }
         }
