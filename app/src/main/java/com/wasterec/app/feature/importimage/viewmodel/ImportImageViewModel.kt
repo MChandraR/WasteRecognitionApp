@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import com.wasterec.app.feature.importdataset.data.DatasetClass
+import com.wasterec.app.feature.importdataset.data.datasetClassList
 import com.wasterec.app.model.TrainingModel
 
 
@@ -68,5 +69,13 @@ class ImportImageViewModel(
 
     fun getSelectedLabel():String{
         return label.get(selectedLabelIndex.value)
+    }
+
+    fun increaseItemCountForSelectedLabelinDataset(){
+        datasetClassList[selectedLabelIndex.value].currentCount += 1
+    }
+
+    fun decreaseItemCountForSelectedLabelinDataset(){
+        datasetClassList[selectedLabelIndex.value].currentCount -= 1
     }
 }

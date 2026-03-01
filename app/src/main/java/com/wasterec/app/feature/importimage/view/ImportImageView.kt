@@ -61,6 +61,7 @@ fun ImportImageView(
         uris.forEach { uri ->
             val bitmap = uriToBitmap(context, uri)
             bitmap?.let {
+                importImageViewModel?.increaseItemCountForSelectedLabelinDataset()
                 importImageViewModel?.imageDatasetList?.add(
                     TrainingModel(
                         resizeAndCropCenter(it),
@@ -215,6 +216,8 @@ fun ImportImageView(
                 onConfirm = {
                     importImageViewModel.deleteDataFromDataset(importImageViewModel.selectedImageIndex.value)
                     importImageViewModel.showConfirmImageDeletionDialog.value = false
+                    importImageViewModel.increaseItemCountForSelectedLabelinDataset()
+
                 },
                 onDismiss = {
                     importImageViewModel.showConfirmImageDeletionDialog.value = false

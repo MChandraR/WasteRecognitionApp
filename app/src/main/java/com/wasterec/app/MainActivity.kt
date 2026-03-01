@@ -56,6 +56,53 @@ class MainActivity : ComponentActivity() {
                 datasetClassList[0]
             )}
 
+            var datasetClassList : SnapshotStateList<DatasetClass> = remember {
+                mutableStateListOf(
+                    DatasetClass(
+                        R.drawable.plastic_waste,
+                        "Plastik",
+                        12,
+                        currentCount = 0,
+                        maximumCount = 22
+                    ),
+                    DatasetClass(
+                        R.drawable.paper_waste,
+                        "Kertas",
+                        12,
+                        currentCount = 0,
+                        maximumCount = 22
+                    ),
+                    DatasetClass(
+                        R.drawable.glass_waste,
+                        "Kaca",
+                        12,
+                        currentCount = 0,
+                        maximumCount = 22
+                    ),
+                    DatasetClass(
+                        R.drawable.metal_waste,
+                        "Logam",
+                        12,
+                        currentCount = 0,
+                        maximumCount = 22
+                    ),
+                    DatasetClass(
+                        R.drawable.cardboard_waste,
+                        "Kardus",
+                        12,
+                        currentCount = 0,
+                        maximumCount = 22
+                    ),
+                    DatasetClass(
+                        R.drawable.trash_waste,
+                        "Sampah",
+                        12,
+                        currentCount = 0,
+                        maximumCount = 22
+                    ),
+                )
+            }
+
             val importImageViewModel : ImportImageViewModel = viewModel(
                 factory = ImportImageViewModelFactory(
                     application = application,
@@ -111,8 +158,10 @@ class MainActivity : ComponentActivity() {
                     application = application,
                     context = this,
                     navHostController = navController,
+                    trainingData,
                     selectedLabelIndex,
-                    selectedLabel
+                    selectedLabel,
+                    datasetClassList
                 )
             )
 
