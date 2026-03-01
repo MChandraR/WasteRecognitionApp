@@ -32,6 +32,10 @@ object Destination {
     data object Import : Route
 
     @Serializable
+    data object ImportDataset : Route
+
+
+    @Serializable
     data object WeightLoading : Route
 }
 

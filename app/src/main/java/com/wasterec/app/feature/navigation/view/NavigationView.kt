@@ -18,6 +18,8 @@ import androidx.navigation.compose.rememberNavController
 import com.wasterec.app.feature.anotate.view.AnnotateView
 import com.wasterec.app.feature.anotate.viewmodel.AnotateViewModel
 import com.wasterec.app.feature.home.viewmodel.HomeViewModel
+import com.wasterec.app.feature.importdataset.view.ImportDatasetView
+import com.wasterec.app.feature.importdataset.viewmodel.ImportDatasetViewModel
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.feature.login.view.LoginView
 import com.wasterec.app.feature.splash.view.SplashView
@@ -40,6 +42,7 @@ fun NavigationView(
     navController : NavHostController,
     loginViewModel : LoginViewModel,
     homeViewModel : HomeViewModel,
+    importDatasetViewModel: ImportDatasetViewModel,
     anotateViewModel: AnotateViewModel,
     importImageViewModel: ImportImageViewModel,
     trainingViewModel: TrainingViewModel,
@@ -59,6 +62,7 @@ fun NavigationView(
         composable<Destination.Login>{ LoginView(loginViewModel) }
         composable<Destination.Splash>{ SplashView() }
         composable<Destination.Import>{ ImportImageView(navController, importImageViewModel) }
+        composable<Destination.ImportDataset>{ ImportDatasetView(importDatasetViewModel) }
         composable<Destination.Training>{ TrainingView(trainingViewModel) }
         composable<Destination.Annotate>{ AnnotateView(anotateViewModel, importImageViewModel) }
         composable<Destination.FinishTraining>{ FinishTrainingView(navController) }

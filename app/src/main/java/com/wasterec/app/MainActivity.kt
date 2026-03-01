@@ -17,6 +17,8 @@ import com.wasterec.app.feature.anotate.factory.AnotateViewModelFactory
 import com.wasterec.app.feature.anotate.viewmodel.AnotateViewModel
 import com.wasterec.app.feature.home.view_model_factory.HomeViewModelFactory
 import com.wasterec.app.feature.home.viewmodel.HomeViewModel
+import com.wasterec.app.feature.importdataset.viewmodel.ImportDatasetViewModel
+import com.wasterec.app.feature.importdataset.viewmodel_factory.ImportDatasetViewModelFactory
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.feature.login.factory.LoginViewModelFactory
 import com.wasterec.app.feature.login.viewmodel.LoginViewModel
@@ -83,12 +85,20 @@ class MainActivity : ComponentActivity() {
                 )
             )
 
+            val importDatasetViewModel: ImportDatasetViewModel = viewModel(
+                factory = ImportDatasetViewModelFactory(
+                    application = application,
+                    navHostController = navController
+                )
+            )
+
             //DebugView(this)
             NavigationView(
                 this,
                 navController,
                 loginViewModel,
                 homeViewModel,
+                importDatasetViewModel,
                 anotateViewModel,
                 importImageViewModel,
                 trainingViewModel,
