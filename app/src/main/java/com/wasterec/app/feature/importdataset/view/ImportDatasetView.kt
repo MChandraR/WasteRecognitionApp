@@ -43,7 +43,7 @@ fun ImportDatasetView(
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
-        Text("Jumlah gambar dipilih 20/100",
+        Text("Jumlah gambar dipilih ${importDatasetViewModel?.getTrainingDatasetCount()?:0} /100",
             fontSize = Typography.titleLarge.fontSize,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
@@ -58,10 +58,10 @@ fun ImportDatasetView(
             (importDatasetViewModel?.datasetClassList?: datasetClassList).forEach {
                 LabelListCard(
                     it.className,
-                    "(${it.currentCount}/${it.maximumCount} min)",
+                    "(${it.currentCount}/${it.minimunCount} min)",
                     leadingIcon = it.icon,
                     modifier = Modifier.height(65.dp).clickable{
-                        importDatasetViewModel?.selectedIndex?.value = importDatasetViewModel?.datasetClassList?.indexOf(it)?:-1
+                        importDatasetViewModel?.selectedIndex?.value = importDatasetViewModel.datasetClassList.indexOf(it)
                         importDatasetViewModel?.navHostController?.navigate(Destination.Import)
                         Toast.makeText(importDatasetViewModel?.context, "Selected index ${importDatasetViewModel?.selectedIndex?.value}", Toast.LENGTH_LONG).show()
                     }
