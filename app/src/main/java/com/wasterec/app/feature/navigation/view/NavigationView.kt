@@ -4,12 +4,15 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -46,7 +49,7 @@ fun NavigationView(
     anotateViewModel: AnotateViewModel,
     importImageViewModel: ImportImageViewModel,
     trainingViewModel: TrainingViewModel,
-    modelLoadViewModel: ModelLoadViewModel
+    modelLoadViewModel: ModelLoadViewModel,
 ) {
     val startDestination = Destination.Splash
     var selectedDestination by rememberSaveable { mutableIntStateOf(0) }
