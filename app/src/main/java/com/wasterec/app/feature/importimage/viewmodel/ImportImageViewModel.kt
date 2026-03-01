@@ -1,16 +1,18 @@
 package com.wasterec.app.feature.importimage.viewmodel
 
+import android.app.Application
 import android.graphics.Bitmap
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import com.wasterec.app.model.TrainingModel
 
 
-class ImportImageViewModel : ViewModel() {
-    var imageDatasetList  = mutableStateListOf<TrainingModel>()
+class ImportImageViewModel( application: Application , var imageDatasetList : MutableList<TrainingModel>) : AndroidViewModel(application = application) {
+
     var showConfirmImageDeletionDialog : MutableState<Boolean> = mutableStateOf(false)
     val selectedImageIndex : MutableState<Int> = mutableIntStateOf(0)
 

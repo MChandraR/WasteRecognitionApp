@@ -71,7 +71,7 @@ class ModelLoadViewModel(
 
     fun navigateToDatasetImport(){
         if(backboneModelDownloadProgress.value >= 1f){
-            navHostController.navigate(Destination.Import)
+            navHostController.navigate(Destination.ImportDataset)
         }
     }
 }

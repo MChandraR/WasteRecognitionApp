@@ -4,12 +4,15 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -46,12 +49,13 @@ fun NavigationView(
     anotateViewModel: AnotateViewModel,
     importImageViewModel: ImportImageViewModel,
     trainingViewModel: TrainingViewModel,
-    modelLoadViewModel: ModelLoadViewModel
+    modelLoadViewModel: ModelLoadViewModel,
 ) {
     val startDestination = Destination.Splash
     var selectedDestination by rememberSaveable { mutableIntStateOf(0) }
     var efficientNetB0: EfficientNetB0 = EfficientNetB0( context )
     val trainData = remember { mutableStateListOf<TrainingModel>() }
+    val selectedLabelIndex : MutableState<Int> = remember {mutableStateOf(0)}
 
     NavHost(
         navController = navController,
@@ -61,8 +65,8 @@ fun NavigationView(
         composable<Destination.Info>{  }
         composable<Destination.Login>{ LoginView(loginViewModel) }
         composable<Destination.Splash>{ SplashView() }
-        composable<Destination.Import>{ ImportImageView(navController, importImageViewModel) }
-        composable<Destination.ImportDataset>{ ImportDatasetView(importDatasetViewModel) }
+        composable<Destination.Import>{ ImportImageView(navController, importImageViewModel, selectedLabelIndex) }
+        composable<Destination.ImportDataset>{ ImportDatasetView(importDatasetViewModel, selectedLabelIndex) }
         composable<Destination.Training>{ TrainingView(trainingViewModel) }
         composable<Destination.Annotate>{ AnnotateView(anotateViewModel, importImageViewModel) }
         composable<Destination.FinishTraining>{ FinishTrainingView(navController) }

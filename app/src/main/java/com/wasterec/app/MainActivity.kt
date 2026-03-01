@@ -10,6 +10,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
@@ -20,6 +25,7 @@ import com.wasterec.app.feature.home.viewmodel.HomeViewModel
 import com.wasterec.app.feature.importdataset.viewmodel.ImportDatasetViewModel
 import com.wasterec.app.feature.importdataset.viewmodel_factory.ImportDatasetViewModelFactory
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
+import com.wasterec.app.feature.importimage.viewmodel_factory.ImportImageViewModelFactory
 import com.wasterec.app.feature.login.factory.LoginViewModelFactory
 import com.wasterec.app.feature.login.viewmodel.LoginViewModel
 import com.wasterec.app.feature.modelload.factory.ModelLoadViewModelFactory
@@ -28,6 +34,7 @@ import com.wasterec.app.feature.navigation.view.NavigationView
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
 import com.wasterec.app.feature.training.viewmodelfactory.TrainingViewModelFactory
 import com.wasterec.app.model.Destination
+import com.wasterec.app.model.TrainingModel
 
 class MainActivity : ComponentActivity() {
 
@@ -41,8 +48,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val application: Application = this.applicationContext as Application
+            val trainingData : SnapshotStateList<TrainingModel> = remember {mutableStateListOf()}
 
-            val importImageViewModel : ImportImageViewModel = viewModel()
+            val importImageViewModel : ImportImageViewModel = viewModel(
+                factory = ImportImageViewModelFactory(
+                    application = application,
+                    trainingData
+                )
+            )
             val anotateViewModel : AnotateViewModel = viewModel(
                 factory = AnotateViewModelFactory(
                     application = application,
@@ -88,6 +101,7 @@ class MainActivity : ComponentActivity() {
             val importDatasetViewModel: ImportDatasetViewModel = viewModel(
                 factory = ImportDatasetViewModelFactory(
                     application = application,
+                    context = this,
                     navHostController = navController
                 )
             )
@@ -106,7 +120,7 @@ class MainActivity : ComponentActivity() {
             )
 
             handler.postDelayed({
-                navController.navigate(Destination.Login) {
+                navController.navigate(Destination.Home) {
                     popUpTo(navController.graph.startDestinationId) {
                         inclusive = true
                     }
