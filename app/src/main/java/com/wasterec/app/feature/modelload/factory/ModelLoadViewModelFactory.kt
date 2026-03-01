@@ -11,12 +11,11 @@ import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
 class ModelLoadViewModelFactory(
     val application: Application,
     val context: Context,
-    val navHostController : NavHostController,
-    val trainingViewModel: TrainingViewModel
+    val navHostController : NavHostController
 ): ViewModelProvider.Factory{
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(ModelLoadViewModel::class.java)){
-            return ModelLoadViewModel(application,context, navHostController, trainingViewModel) as T
+            return ModelLoadViewModel(application,context, navHostController) as T
         }
         throw IllegalArgumentException("Invalid ViewModel Type")
     }

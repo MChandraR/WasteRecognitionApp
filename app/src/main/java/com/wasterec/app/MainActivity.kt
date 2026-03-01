@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.wasterec.app.feature.anotate.factory.AnotateViewModelFactory
-import com.wasterec.app.feature.anotate.viewmodel.AnotateViewModel
+import com.wasterec.app.feature.anotate.viewmodel.AnnotateViewModel
 import com.wasterec.app.feature.home.view_model_factory.HomeViewModelFactory
 import com.wasterec.app.feature.home.viewmodel.HomeViewModel
 import com.wasterec.app.feature.importdataset.data.DatasetClass
@@ -111,7 +111,7 @@ class MainActivity : ComponentActivity() {
                     selectedLabel
                 )
             )
-            val anotateViewModel : AnotateViewModel = viewModel(
+            val annotateViewModel : AnnotateViewModel = viewModel(
                 factory = AnotateViewModelFactory(
                     application = application,
                     context = this,
@@ -132,8 +132,7 @@ class MainActivity : ComponentActivity() {
                 factory = ModelLoadViewModelFactory(
                     application = application,
                     context = this,
-                    navHostController = navController,
-                    trainingViewModel = trainingViewModel
+                    navHostController = navController
                 )
             )
 
@@ -172,7 +171,7 @@ class MainActivity : ComponentActivity() {
                 loginViewModel,
                 homeViewModel,
                 importDatasetViewModel,
-                anotateViewModel,
+                annotateViewModel,
                 importImageViewModel,
                 trainingViewModel,
                 modelLoadViewModel,

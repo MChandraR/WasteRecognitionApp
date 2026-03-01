@@ -6,7 +6,6 @@ import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.wasterec.app.helper.GlobalModelError
 import com.wasterec.app.model.Destination

@@ -12,7 +12,7 @@ import java.io.InputStream
 class FileManager(val context : Context) {
     suspend fun saveDownloadFileToDisk(fileName : String, responseBody: ResponseBody, onProgress : (progress : Float)->Unit){
         return withContext(Dispatchers.IO){
-            val destinationFile : File = File(context.filesDir, fileName)
+            val destinationFile = File(context.filesDir, fileName)
 
             var inputStream : InputStream? = null
             var fileOutputStream : FileOutputStream? = null

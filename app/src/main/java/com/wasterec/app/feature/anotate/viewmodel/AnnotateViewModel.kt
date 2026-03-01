@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableFloatStateOf
@@ -19,8 +18,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class AnotateViewModel(application : Application,val context: Context, val navHostController: NavHostController): AndroidViewModel(application = application) {
-    var currentAnotateIndex : MutableState<Int> = mutableIntStateOf(0)
+class AnnotateViewModel(application : Application, val context: Context, val navHostController: NavHostController): AndroidViewModel(application = application) {
+    var currentAnnotateIndex : MutableState<Int> = mutableIntStateOf(0)
     var showLabelSelectionMenu : MutableState<Boolean> = mutableStateOf(false)
     var predictResult : MutableState<String> = mutableStateOf("")
     var confidentLevel : MutableState<Float> = mutableFloatStateOf(0f)
@@ -35,7 +34,7 @@ class AnotateViewModel(application : Application,val context: Context, val navHo
     fun reInit(){
         isModelLoading.value = true
         currentBitmap.value = null
-        currentAnotateIndex.value = 0
+        currentAnnotateIndex.value = 0
         showLabelSelectionMenu.value = false
         predictResult.value = ""
         confidentLevel.value = 0f

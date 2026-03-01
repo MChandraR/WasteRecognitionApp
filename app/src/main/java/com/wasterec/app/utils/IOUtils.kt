@@ -4,7 +4,7 @@ import android.content.Context
 import java.io.File
 
 object IOUtils {
-    public fun assetFilePath(context: Context, assetName: String): String {
+    fun assetFilePath(context: Context, assetName: String): String {
         val file = File(context.filesDir, assetName)
         System.out.println("Ada file!")
 
