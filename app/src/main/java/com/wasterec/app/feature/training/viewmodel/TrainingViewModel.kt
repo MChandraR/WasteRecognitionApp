@@ -42,8 +42,7 @@ class TrainingViewModel(
     val classifierWeightFileManager : ClassifierWeightFileManager = ClassifierWeightFileManager(context)
     var modelConfig = ModelConiguration(
         learningRate = 0.001f,
-        epoch = 15,
-        batchSize = 2
+        epoch = 15
     )
 
     //Fungsi untuk reinit nilai atau reset variabel
@@ -91,7 +90,7 @@ class TrainingViewModel(
                 config = modelConfig,
                 dataset = importImageViewModel.imageDatasetList,
                 onProgressUpdate = { epoch, loss ->
-                    println("Progress pelatihan ${epoch}")
+                    println("Progress pelatihan $epoch")
                     currentEpoch.value = epoch+1
                     currentLoss.value = loss
                     if (!loss.isNaN() && !loss.isInfinite()) {

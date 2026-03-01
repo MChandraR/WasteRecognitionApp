@@ -1,7 +1,5 @@
 package com.wasterec.app.feature.importdataset.data
 
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
 import com.wasterec.app.R
 
 data class DatasetClass(

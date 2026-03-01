@@ -3,7 +3,6 @@ package com.wasterec.app.manager
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import com.wasterec.app.model.ClassifierWeightModel
 import com.wasterec.app.model.ModelConiguration
@@ -60,7 +59,7 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
         val safeBitmap = forceSoftwareBitmap(bitmap)
         var classifierParam  = ClassifierWeightModel(arrayOf(floatArrayOf()), floatArrayOf())
 
-        loadClassifierParams(context){
+        loadClassifierParams{
             classifierParam =  ClassifierWeightModel(it.first, it.second)
         }
 
@@ -84,7 +83,7 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
         }
 
         val maxLogits = logits.maxOrNull() ?: 0f
-        println("Max : ${maxLogits}")
+        println("Max : $maxLogits")
         val expLogits = logits.map{ kotlin.math.exp(it - maxLogits) }
         expLogits.forEach {
             println(it)

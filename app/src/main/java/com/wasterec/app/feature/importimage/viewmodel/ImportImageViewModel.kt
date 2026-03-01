@@ -7,7 +7,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import com.wasterec.app.feature.importdataset.data.DatasetClass
 import com.wasterec.app.feature.importdataset.data.datasetClassList
 import com.wasterec.app.model.TrainingModel
@@ -39,7 +38,7 @@ class ImportImageViewModel(
     }
 
     fun getEachLabelCount(): IntArray{
-        val labelOfLabelCount : IntArray = IntArray(6)
+        val labelOfLabelCount = IntArray(6)
 
         imageDatasetList.forEach {
             labelOfLabelCount.set(it.Label, labelOfLabelCount.get(it.Label)+1)

@@ -1,12 +1,10 @@
 package com.wasterec.app.manager
 
 import android.content.Context
-import android.util.Log
 import com.wasterec.app.utils.IOUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import org.pytorch.LiteModuleLoader
 import org.pytorch.Module
 import kotlin.math.exp
@@ -33,7 +31,7 @@ open class ModelManager(private val context : Context, private val modelPath : S
         if (model == null) {
             model = LiteModuleLoader.load(modelPath)
 
-            loadClassifierParams(context){
+            loadClassifierParams(){
                 classifierWeights = it.first
                 classifierBias = it.second
             }
@@ -52,7 +50,7 @@ open class ModelManager(private val context : Context, private val modelPath : S
         return expValues.map { it / sumExp }.toFloatArray()
     }
 
-    fun loadClassifierParams(context: Context, result : (Pair<Array<FloatArray>, FloatArray>) -> Unit ) {
+    fun loadClassifierParams( result : (Pair<Array<FloatArray>, FloatArray>) -> Unit ) {
         CoroutineScope(Dispatchers.IO).launch{
             val classifierParam = classifierWeightFileManager.loadClassifierParamFromFile()
             if(classifierParam != null){

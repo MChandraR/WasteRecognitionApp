@@ -1,7 +1,5 @@
 package com.wasterec.app.services
 
-import android.content.Context
-import androidx.compose.ui.geometry.Rect
 import com.wasterec.app.utils.AuthInterceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

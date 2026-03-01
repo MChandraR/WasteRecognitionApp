@@ -12,5 +12,4 @@ object ColorAsset {
     val secondaryBlue = Color(0x80004AAD)
 
     val alpha5 = Color(0x0D000000)
-    val alpha10 = Color(0x1A000000)
 }

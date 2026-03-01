@@ -6,7 +6,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
 import androidx.navigation.NavHostController
-import com.wasterec.app.R
 import com.wasterec.app.feature.importdataset.data.DatasetClass
 import com.wasterec.app.model.TrainingModel
 

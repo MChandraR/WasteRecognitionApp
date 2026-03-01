@@ -5,7 +5,6 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.navigation.NavHostController
 import com.wasterec.app.model.Destination
@@ -13,14 +12,15 @@ import com.wasterec.app.model.api_request.LoginModelRequestAPI
 import com.wasterec.app.repositories.UserRepository
 import com.wasterec.app.services.SharedPreferenceService
 
-class LoginViewModel(application : Application, val context: Context, navController : NavHostController) : AndroidViewModel(application) {
+class LoginViewModel(application : Application, val context: Context,
+                     val navController: NavHostController
+) : AndroidViewModel(application) {
     var username : MutableState<String> = mutableStateOf("")
     var password : MutableState<String> = mutableStateOf("")
     var showAlert : MutableState<Boolean> = mutableStateOf(false)
     val alertMessage : MutableState<String> = mutableStateOf("")
     var loginAPIService = UserRepository()
     var sharedPreferenceService : SharedPreferenceService = SharedPreferenceService(context)
-    val navController : NavHostController = navController
     var isSuccess : MutableState<Boolean> = mutableStateOf(false)
     var showPassword : MutableState<Boolean> = mutableStateOf(false)
 
@@ -29,7 +29,7 @@ class LoginViewModel(application : Application, val context: Context, navControl
     fun login(){
         if(username.value.isNotEmpty() && password.value.isNotEmpty()){
             try{
-                val response = loginAPIService.login(LoginModelRequestAPI(username = username.value, password = password.value),
+                loginAPIService.login(LoginModelRequestAPI(username = username.value, password = password.value),
                     onSuccess = {
                         sharedPreferenceService.storeStringValue("authToken", it.data.authToken)
                         alertMessage.value = it.message

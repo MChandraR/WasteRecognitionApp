@@ -23,9 +23,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,7 +39,6 @@ import androidx.navigation.NavHostController
 import com.wasterec.app.R
 import com.wasterec.app.feature.importimage.components.ConfirmationDialog
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
-import com.wasterec.app.model.Destination
 import com.wasterec.app.model.TrainingModel
 import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
