@@ -8,13 +8,21 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
+import com.wasterec.app.feature.importdataset.data.DatasetClass
 import com.wasterec.app.model.TrainingModel
 
 
-class ImportImageViewModel( application: Application , var imageDatasetList : MutableList<TrainingModel>) : AndroidViewModel(application = application) {
+class ImportImageViewModel(
+    application: Application ,
+    var imageDatasetList : MutableList<TrainingModel>,
+    val selectedLabelIndex : MutableState<Int>,
+    val selectedLabel : MutableState<DatasetClass>
+) : AndroidViewModel(application = application) {
 
     var showConfirmImageDeletionDialog : MutableState<Boolean> = mutableStateOf(false)
     val selectedImageIndex : MutableState<Int> = mutableIntStateOf(0)
+    val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
+
 
     fun reInit(){
         imageDatasetList = mutableStateListOf()
@@ -48,5 +56,17 @@ class ImportImageViewModel( application: Application , var imageDatasetList : Mu
         if(dataIndex >= 0 && dataIndex < imageDatasetList.size){
             imageDatasetList[dataIndex].Label = labelIndex
         }
+    }
+
+    fun getDatasetForSelectedLabel():List<TrainingModel>{
+        return imageDatasetList.filter { it.Label == selectedLabelIndex.value }
+    }
+
+    fun getTotalOfDatasetForSelectedLabel():Int{
+        return imageDatasetList.filter { it.Label == selectedLabelIndex.value }.size
+    }
+
+    fun getSelectedLabel():String{
+        return label.get(selectedLabelIndex.value)
     }
 }

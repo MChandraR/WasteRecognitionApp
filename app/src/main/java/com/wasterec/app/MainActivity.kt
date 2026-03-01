@@ -22,6 +22,8 @@ import com.wasterec.app.feature.anotate.factory.AnotateViewModelFactory
 import com.wasterec.app.feature.anotate.viewmodel.AnotateViewModel
 import com.wasterec.app.feature.home.view_model_factory.HomeViewModelFactory
 import com.wasterec.app.feature.home.viewmodel.HomeViewModel
+import com.wasterec.app.feature.importdataset.data.DatasetClass
+import com.wasterec.app.feature.importdataset.data.datasetClassList
 import com.wasterec.app.feature.importdataset.viewmodel.ImportDatasetViewModel
 import com.wasterec.app.feature.importdataset.viewmodel_factory.ImportDatasetViewModelFactory
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
@@ -49,11 +51,17 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val application: Application = this.applicationContext as Application
             val trainingData : SnapshotStateList<TrainingModel> = remember {mutableStateListOf()}
+            val selectedLabelIndex : MutableState<Int> = remember {mutableStateOf(0)}
+            val selectedLabel : MutableState<DatasetClass> = remember {mutableStateOf(
+                datasetClassList[0]
+            )}
 
             val importImageViewModel : ImportImageViewModel = viewModel(
                 factory = ImportImageViewModelFactory(
                     application = application,
-                    trainingData
+                    trainingData,
+                    selectedLabelIndex,
+                    selectedLabel
                 )
             )
             val anotateViewModel : AnotateViewModel = viewModel(
@@ -102,7 +110,9 @@ class MainActivity : ComponentActivity() {
                 factory = ImportDatasetViewModelFactory(
                     application = application,
                     context = this,
-                    navHostController = navController
+                    navHostController = navController,
+                    selectedLabelIndex,
+                    selectedLabel
                 )
             )
 

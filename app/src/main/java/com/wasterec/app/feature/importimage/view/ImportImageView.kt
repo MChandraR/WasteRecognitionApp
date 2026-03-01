@@ -44,6 +44,7 @@ import com.wasterec.app.feature.importimage.components.ConfirmationDialog
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.model.Destination
 import com.wasterec.app.model.TrainingModel
+import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
 import com.wasterec.app.utils.resizeAndCropCenter
 import com.wasterec.app.utils.uriToBitmap
@@ -52,7 +53,6 @@ import com.wasterec.app.utils.uriToBitmap
 fun ImportImageView(
     navHostControlelr : NavHostController? = null,
     importImageViewModel: ImportImageViewModel? = null,
-    selectedLabelIndex : MutableState<Int>
 ) {
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(
@@ -64,7 +64,7 @@ fun ImportImageView(
                 importImageViewModel?.imageDatasetList?.add(
                     TrainingModel(
                         resizeAndCropCenter(it),
-                        (0..5).random()
+                        importImageViewModel.selectedLabelIndex.value
                     )
                 )
             }
@@ -79,14 +79,15 @@ fun ImportImageView(
             Spacer(modifier = Modifier.weight(.25f))
 
             Text(
-                "Pilih 100 Gambar sebagai dataset pelatihan",
+                "Import Dataset untuk label ${importImageViewModel?.getSelectedLabel()}",
                 modifier = Modifier.fillMaxWidth().padding(20.dp),
                 textAlign = TextAlign.Center,
                 fontSize = Typography.titleLarge.fontSize,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Bold,
+                color = ColorAsset.primaryBlue,
             )
             Text(
-                "Jumlah gambar yang dipilih ${importImageViewModel?.imageDatasetList?.size}/100",
+                "Jumlah gambar yang dipilih ${importImageViewModel?.getTotalOfDatasetForSelectedLabel()}/${importImageViewModel?.selectedLabel?.value?.minimunCount}",
                 modifier = Modifier.fillMaxWidth().padding(20.dp),
                 textAlign = TextAlign.Center,
                 fontSize = Typography.bodyLarge.fontSize,
@@ -94,13 +95,13 @@ fun ImportImageView(
             )
 
 
-            if ((importImageViewModel?.imageDatasetList?.size ?: 0) > 0) {
+            if ((importImageViewModel?.getDatasetForSelectedLabel()?.size ?: 0) > 0) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
                     modifier = Modifier.weight(.5f)
                 ) {
-                    items(importImageViewModel?.imageDatasetList?.size ?: 0) { index ->
-                        importImageViewModel?.getImageDataBitmap(index)?.let { bitmap ->
+                    items(importImageViewModel?.getDatasetForSelectedLabel()?.size ?: 0) { index ->
+                        importImageViewModel?.getDatasetForSelectedLabel()[index]?.Input?.let { bitmap ->
                             Box {
                                 Image(
                                     bitmap = bitmap.asImageBitmap(),
@@ -166,16 +167,18 @@ fun ImportImageView(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
-                    border = BorderStroke(1.dp, Color.Black),
+                    border = BorderStroke(3.dp, ColorAsset.primaryBlue),
                     colors = ButtonColors(
                         containerColor = Color.Transparent,
-                        contentColor = Color.Black,
+                        contentColor = ColorAsset.primaryBlue,
                         disabledContentColor = Color.LightGray,
                         disabledContainerColor = Color.LightGray
                     )
                 ) {
                     Text(
                         "Import gambar",
+                        fontSize = Typography.bodyLarge.fontSize,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(10.dp)
                     )
                 }
@@ -184,20 +187,22 @@ fun ImportImageView(
 
                 Button(
                     onClick = {
-                        navHostControlelr?.navigate(Destination.Annotate)
+                        navHostControlelr?.popBackStack()
                     },
                     enabled = (importImageViewModel?.imageDatasetList?.size ?: 0) >= 1,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonColors(
-                        containerColor = Color.LightGray,
-                        contentColor = Color.Black,
+                        containerColor = ColorAsset.primaryBlue,
+                        contentColor = Color.White,
                         disabledContentColor = Color.Black,
                         disabledContainerColor = Color.LightGray
                     )
                 ) {
                     Text(
                         "Simpan",
+                        fontSize = Typography.bodyLarge.fontSize,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(10.dp)
                     )
                 }
@@ -223,6 +228,6 @@ fun ImportImageView(
 @Composable
 fun ImportImageViewPreview(){
     Column(modifier = Modifier.background(Color.White)) {
-        ImportImageView(null, null, remember { mutableStateOf(0) })
+        ImportImageView(null, null)
     }
 }

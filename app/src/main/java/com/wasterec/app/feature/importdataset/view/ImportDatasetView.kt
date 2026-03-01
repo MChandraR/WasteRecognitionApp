@@ -32,7 +32,6 @@ import com.wasterec.app.ui.theme.Typography
 @Composable
 fun ImportDatasetView(
     importDatasetViewModel: ImportDatasetViewModel? = null,
-    selectedIndex : MutableState<Int>
 ){
     Column(
         modifier = Modifier.fillMaxSize()
@@ -62,9 +61,9 @@ fun ImportDatasetView(
                     "(${it.currentCount}/${it.maximumCount} min)",
                     leadingIcon = it.icon,
                     modifier = Modifier.height(65.dp).clickable{
-                        selectedIndex.value = importDatasetViewModel?.datasetClassList?.indexOf(it)?:-1
+                        importDatasetViewModel?.selectedIndex?.value = importDatasetViewModel?.datasetClassList?.indexOf(it)?:-1
                         importDatasetViewModel?.navHostController?.navigate(Destination.Import)
-                        Toast.makeText(importDatasetViewModel?.context, "Selected index ${selectedIndex.value}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(importDatasetViewModel?.context, "Selected index ${importDatasetViewModel?.selectedIndex?.value}", Toast.LENGTH_LONG).show()
                     }
                 )
             }
@@ -92,5 +91,5 @@ fun ImportDatasetView(
 @Composable
 fun ImportDatasetViewPreview(){
     val selectedLabel : MutableState<Int> = remember { mutableStateOf(0) }
-    ImportDatasetView(null, selectedLabel)
+    ImportDatasetView(null)
 }
