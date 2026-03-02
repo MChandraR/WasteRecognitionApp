@@ -4,10 +4,8 @@ import android.app.Application
 import android.content.Context
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.navigation.NavHostController
-import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
 import com.wasterec.app.manager.ClassifierWeightFileManager
 import com.wasterec.app.manager.FileManager
 import com.wasterec.app.model.Destination
@@ -20,7 +18,6 @@ class ModelLoadViewModel(
     application : Application,
     val context: Context,
     val navHostController: NavHostController,
-    val trainingViewModel: TrainingViewModel
     ) : AndroidViewModel(application) {
 
     val backboneModelDownloadProgress : MutableState<Float> = mutableFloatStateOf(0f)
@@ -71,7 +68,7 @@ class ModelLoadViewModel(
 
     fun navigateToDatasetImport(){
         if(backboneModelDownloadProgress.value >= 1f){
-            navHostController.navigate(Destination.Import)
+            navHostController.navigate(Destination.ImportDataset)
         }
     }
 }

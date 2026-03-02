@@ -1,7 +1,5 @@
 package com.wasterec.app.services
 
-import android.content.Context
-import androidx.compose.ui.geometry.Rect
 import com.wasterec.app.utils.AuthInterceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -9,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 open class ApiService(
-    val baseUrl : String = "http://192.168.1.11:8000/",
+    val baseUrl : String = "http://10.132.251.202:8000/",
     var retrofit: Retrofit? = null,
     val authToken : String? = null,
 ){

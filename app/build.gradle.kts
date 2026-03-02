@@ -49,19 +49,19 @@ android {
 
 
 dependencies {
-    val nav_version = "2.9.5"
+    val navVersion = "2.9.5"
     // Jetpack Compose integration
     implementation(libs.androidx.navigation.compose)
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
     // Views/Fragments integration
-    implementation("androidx.navigation:navigation-fragment:$nav_version")
-    implementation("androidx.navigation:navigation-ui:$nav_version")
+    implementation("androidx.navigation:navigation-fragment:$navVersion")
+    implementation("androidx.navigation:navigation-ui:$navVersion")
 
     // Feature module support for Fragments
-    implementation("androidx.navigation:navigation-dynamic-features-fragment:$nav_version")
+    implementation("androidx.navigation:navigation-dynamic-features-fragment:$navVersion")
 
     // Testing Navigation
-    androidTestImplementation("androidx.navigation:navigation-testing:$nav_version")
+    androidTestImplementation("androidx.navigation:navigation-testing:$navVersion")
 
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("io.coil-kt:coil-gif:2.7.0") // ✨ penting untuk GIF

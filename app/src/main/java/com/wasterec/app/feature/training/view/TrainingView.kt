@@ -216,7 +216,7 @@ fun TrainingView(
         )
 
         LinearProgressIndicator(
-            progress = { ((trainingViewModel?.currentEpoch?.value?: 0).toFloat() / ((trainingViewModel?.modelConfig?.epoch?:1).toFloat())).toFloat() },
+            progress = { ((trainingViewModel?.currentEpoch?.value?: 0).toFloat() / ((trainingViewModel?.modelConfig?.epoch?:1).toFloat())) },
             modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp).height(10.dp)
         )
 

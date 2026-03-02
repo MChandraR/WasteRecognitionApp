@@ -1,4 +1,4 @@
-package com.wasterec.app.utils;
+package com.wasterec.app.utils
 
 import okhttp3.Interceptor
 import okhttp3.Response

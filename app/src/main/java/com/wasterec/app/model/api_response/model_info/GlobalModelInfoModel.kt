@@ -1,6 +1,5 @@
 package com.wasterec.app.model.api_response.model_info
 
-import com.wasterec.app.model.api_response.ResponseBody
 import kotlinx.serialization.Serializable
 
 @Serializable

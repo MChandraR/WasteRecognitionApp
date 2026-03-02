@@ -10,14 +10,24 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.wasterec.app.feature.anotate.factory.AnotateViewModelFactory
-import com.wasterec.app.feature.anotate.viewmodel.AnotateViewModel
+import com.wasterec.app.feature.anotate.viewmodel.AnnotateViewModel
 import com.wasterec.app.feature.home.view_model_factory.HomeViewModelFactory
 import com.wasterec.app.feature.home.viewmodel.HomeViewModel
+import com.wasterec.app.feature.importdataset.data.DatasetClass
+import com.wasterec.app.feature.importdataset.data.datasetClassList
+import com.wasterec.app.feature.importdataset.viewmodel.ImportDatasetViewModel
+import com.wasterec.app.feature.importdataset.viewmodel_factory.ImportDatasetViewModelFactory
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
+import com.wasterec.app.feature.importimage.viewmodel_factory.ImportImageViewModelFactory
 import com.wasterec.app.feature.login.factory.LoginViewModelFactory
 import com.wasterec.app.feature.login.viewmodel.LoginViewModel
 import com.wasterec.app.feature.modelload.factory.ModelLoadViewModelFactory
@@ -26,6 +36,7 @@ import com.wasterec.app.feature.navigation.view.NavigationView
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
 import com.wasterec.app.feature.training.viewmodelfactory.TrainingViewModelFactory
 import com.wasterec.app.model.Destination
+import com.wasterec.app.model.TrainingModel
 
 class MainActivity : ComponentActivity() {
 
@@ -39,9 +50,68 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val application: Application = this.applicationContext as Application
+            val trainingData : SnapshotStateList<TrainingModel> = remember {mutableStateListOf()}
+            val selectedLabelIndex : MutableState<Int> = remember {mutableStateOf(0)}
+            val selectedLabel : MutableState<DatasetClass> = remember {mutableStateOf(
+                datasetClassList[0]
+            )}
 
-            val importImageViewModel : ImportImageViewModel = viewModel()
-            val anotateViewModel : AnotateViewModel = viewModel(
+            var datasetClassList : SnapshotStateList<DatasetClass> = remember {
+                mutableStateListOf(
+                    DatasetClass(
+                        R.drawable.plastic_waste,
+                        "Plastik",
+                        12,
+                        currentCount = 0,
+                        maximumCount = 22
+                    ),
+                    DatasetClass(
+                        R.drawable.paper_waste,
+                        "Kertas",
+                        12,
+                        currentCount = 0,
+                        maximumCount = 22
+                    ),
+                    DatasetClass(
+                        R.drawable.glass_waste,
+                        "Kaca",
+                        12,
+                        currentCount = 0,
+                        maximumCount = 22
+                    ),
+                    DatasetClass(
+                        R.drawable.metal_waste,
+                        "Logam",
+                        12,
+                        currentCount = 0,
+                        maximumCount = 22
+                    ),
+                    DatasetClass(
+                        R.drawable.cardboard_waste,
+                        "Kardus",
+                        12,
+                        currentCount = 0,
+                        maximumCount = 22
+                    ),
+                    DatasetClass(
+                        R.drawable.trash_waste,
+                        "Sampah",
+                        12,
+                        currentCount = 0,
+                        maximumCount = 22
+                    ),
+                )
+            }
+
+            val importImageViewModel : ImportImageViewModel = viewModel(
+                factory = ImportImageViewModelFactory(
+                    application = application,
+                    trainingData,
+                    selectedLabelIndex,
+                    selectedLabel
+                )
+            )
+            val annotateViewModel : AnnotateViewModel = viewModel(
                 factory = AnotateViewModelFactory(
                     application = application,
                     context = this,
@@ -62,8 +132,7 @@ class MainActivity : ComponentActivity() {
                 factory = ModelLoadViewModelFactory(
                     application = application,
                     context = this,
-                    navHostController = navController,
-                    trainingViewModel = trainingViewModel
+                    navHostController = navController
                 )
             )
 
@@ -83,13 +152,26 @@ class MainActivity : ComponentActivity() {
                 )
             )
 
+            val importDatasetViewModel: ImportDatasetViewModel = viewModel(
+                factory = ImportDatasetViewModelFactory(
+                    application = application,
+                    context = this,
+                    navHostController = navController,
+                    trainingData,
+                    selectedLabelIndex,
+                    selectedLabel,
+                    datasetClassList
+                )
+            )
+
             //DebugView(this)
             NavigationView(
                 this,
                 navController,
                 loginViewModel,
                 homeViewModel,
-                anotateViewModel,
+                importDatasetViewModel,
+                annotateViewModel,
                 importImageViewModel,
                 trainingViewModel,
                 modelLoadViewModel,
