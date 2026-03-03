@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.wasterec.app.ui.color.ColorAsset
 
 @Composable
 fun MyButton(
@@ -19,7 +20,7 @@ fun MyButton(
             onClick()
         },
         shape = RoundedCornerShape(10.dp),
-        colors = ButtonColors(containerColor = Color.LightGray, contentColor = Color.Black, disabledContainerColor = Color.LightGray, disabledContentColor = Color.Black),
+        colors = ButtonColors(containerColor = ColorAsset.primaryBlue, contentColor = Color.White, disabledContainerColor = Color.LightGray, disabledContentColor = Color.Black),
         modifier = modifier
     ) {
         content()

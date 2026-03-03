@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.navigation.NavHostController
+import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.manager.EfficientNetB0
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class AnnotateViewModel(application : Application, val context: Context, val navHostController: NavHostController): AndroidViewModel(application = application) {
+class AnnotateViewModel(application : Application, val context: Context, val navHostController: NavHostController, val datasetManager: DatasetManager): AndroidViewModel(application = application) {
     var currentAnnotateIndex : MutableState<Int> = mutableIntStateOf(0)
     var showLabelSelectionMenu : MutableState<Boolean> = mutableStateOf(false)
     var predictResult : MutableState<String> = mutableStateOf("")
