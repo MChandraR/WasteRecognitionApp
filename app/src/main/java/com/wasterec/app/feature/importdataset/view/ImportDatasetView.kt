@@ -75,7 +75,7 @@ fun ImportDatasetView(
             colors = ButtonDefaults.buttonColors(containerColor = ColorAsset.primaryBlue),
             modifier = Modifier.padding(10.dp).fillMaxWidth(),
             onClick = {
-
+                    importDatasetViewModel?.navHostController?.navigate(Destination.Annotate)
             }
         ) {
             Text("Selanjutnya",
