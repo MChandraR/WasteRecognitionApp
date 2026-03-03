@@ -228,12 +228,12 @@ fun AnnotateView(
             ) {
                 LabelSelectionComponent(modifier = Modifier.background(Color.White, shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))) { selectedIndex ->
                     println("Label yang benar sudah paperbacking $selectedIndex")
-                    annotateViewModel.datasetManager?.setLabelForImage(
+                    annotateViewModel.datasetManager.setLabelForImage(
                         annotateViewModel.currentAnnotateIndex.value,
                         selectedIndex
                     )
                    val nextIndex = min(
-                        (annotateViewModel.datasetManager?.getDataSize() ?: 0) - 1,
+                        (annotateViewModel.datasetManager.getDataSize() ?: 0) - 1,
                         annotateViewModel.currentAnnotateIndex.value + 1
                     )
                     annotateViewModel.showLabelSelectionMenu.value = false

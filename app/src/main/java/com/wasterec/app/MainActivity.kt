@@ -35,7 +35,9 @@ import com.wasterec.app.feature.login.viewmodel.LoginViewModel
 import com.wasterec.app.feature.modelload.factory.ModelLoadViewModelFactory
 import com.wasterec.app.feature.modelload.viewmodel.ModelLoadViewModel
 import com.wasterec.app.feature.navigation.view.NavigationView
+import com.wasterec.app.feature.training.viewmodel.FinishTrainingViewModel
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
+import com.wasterec.app.feature.training.viewmodelfactory.FinishTrainingViewModelFactory
 import com.wasterec.app.feature.training.viewmodelfactory.TrainingViewModelFactory
 import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.model.Destination
@@ -58,7 +60,7 @@ class MainActivity : ComponentActivity() {
             val selectedLabel : MutableState<DatasetClass> = remember {mutableStateOf(
                 datasetClassList[0]
             )}
-            val datasetManager = DatasetManager(trainingData)
+            val datasetManager = remember {DatasetManager(listOf())}
 
             var datasetClassList : SnapshotStateList<DatasetClass> = remember {
                 mutableStateListOf(
@@ -120,7 +122,7 @@ class MainActivity : ComponentActivity() {
                     application = application,
                     context = this,
                     navHostController = navController,
-                    datasetManager
+                    trainingData
                 )
             )
 
@@ -129,7 +131,8 @@ class MainActivity : ComponentActivity() {
                     application = application,
                     context = this,
                     navHostController = navController,
-                    importImageViewModel = importImageViewModel
+                    importImageViewModel = importImageViewModel,
+                    datasetManager = datasetManager
                 )
             )
 
@@ -178,6 +181,15 @@ class MainActivity : ComponentActivity() {
                 )
             )
 
+            val finishTrainingViewModel : FinishTrainingViewModel = viewModel(
+                factory = FinishTrainingViewModelFactory(
+                    application,
+                    navController,
+                    trainingData,
+                    datasetManager
+                )
+            )
+
             //DebugView(this)
             NavigationView(
                 this,
@@ -190,6 +202,7 @@ class MainActivity : ComponentActivity() {
                 importImageViewModel,
                 trainingViewModel,
                 modelLoadViewModel,
+                finishTrainingViewModel
             )
 
             handler.postDelayed({

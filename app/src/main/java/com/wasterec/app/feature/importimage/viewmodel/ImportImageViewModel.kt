@@ -6,6 +6,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
 import com.wasterec.app.feature.importdataset.data.DatasetClass
 import com.wasterec.app.feature.importdataset.data.datasetClassList
@@ -14,7 +15,7 @@ import com.wasterec.app.model.TrainingModel
 
 class ImportImageViewModel(
     application: Application ,
-    var imageDatasetList : MutableList<TrainingModel>,
+    var imageDatasetList : SnapshotStateList<TrainingModel>,
     val selectedLabelIndex : MutableState<Int>,
     val selectedLabel : MutableState<DatasetClass>
 ) : AndroidViewModel(application = application) {
