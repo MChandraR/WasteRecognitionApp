@@ -38,9 +38,7 @@ import kotlin.math.min
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AnnotateView(
-    annotateViewModel: AnnotateViewModel? = null,
-    importImageViewModel: ImportImageViewModel? = null,
-) {
+    annotateViewModel: AnnotateViewModel? = null) {
 
     LaunchedEffect(Dispatchers.IO) {
         //anotateViewModel?.getLatestGlobalWeight()
@@ -59,7 +57,7 @@ fun AnnotateView(
                 Spacer(Modifier.weight(1f))
 
                 Text(
-                    "Proses anotasi :  ${(annotateViewModel?.currentAnnotateIndex?.value ?: 0) + 1} dari ${importImageViewModel?.imageDatasetList?.size}",
+                    "Proses anotasi :  ${(annotateViewModel?.currentAnnotateIndex?.value ?: 0) + 1} dari ${annotateViewModel?.datasetManager?.getDataSize()}",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 20.dp)
@@ -74,12 +72,12 @@ fun AnnotateView(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                if (importImageViewModel?.getImageDataBitmap(
-                        annotateViewModel?.currentAnnotateIndex?.value ?: 0
+                if (annotateViewModel?.datasetManager?.getImageDataBitmap(
+                        annotateViewModel.currentAnnotateIndex?.value ?: 0
                     ) != null
                 ) {
-                    importImageViewModel.getImageDataBitmap(
-                        annotateViewModel?.currentAnnotateIndex?.value ?: 0
+                    annotateViewModel?.datasetManager?.getImageDataBitmap(
+                        annotateViewModel.currentAnnotateIndex?.value ?: 0
                     )
                         ?.let { bmp ->
                             // Jalankan inference di background saat URI berubah
@@ -166,24 +164,24 @@ fun AnnotateView(
                     Row {
                         SecondaryButton(
                             onClick = {
-                                importImageViewModel?.setLabelForImage(
-                                    annotateViewModel?.currentAnnotateIndex?.value ?: 0,
-                                    annotateViewModel?.predictedLabel?.value ?: 0
+                                annotateViewModel?.datasetManager?.setLabelForImage(
+                                    annotateViewModel.currentAnnotateIndex?.value ?: 0,
+                                    annotateViewModel.predictedLabel?.value ?: 0
                                 )
                                 println("Ditandai sebagai benar dengan label ${annotateViewModel?.predictResult?.value} index : ${annotateViewModel?.predictedLabel?.value}")
                                 val nextIndex = min(
-                                    (importImageViewModel?.imageDatasetList?.size ?: 0) - 1,
+                                    (annotateViewModel?.datasetManager?.getDataSize() ?: 0) - 1,
                                     (annotateViewModel?.currentAnnotateIndex?.value ?: 0) + 1
                                 )
                                 if (annotateViewModel != null) {
 
-                                    importImageViewModel?.imageDatasetList?.get(nextIndex)?.Input?.let { bitmap ->
+                                    annotateViewModel?.datasetManager?.trainingData?.get(nextIndex)?.Input?.let { bitmap ->
                                         annotateViewModel.classifyImage(bitmap)
                                     }
                                 }
                                 //Validasi jika index terakhir / gambar terakhir maka lanjut ke halaman selanjutnya
                                 if ((annotateViewModel?.currentAnnotateIndex?.value
-                                        ?: 0) >= (importImageViewModel?.imageDatasetList?.size
+                                        ?: 0) >= (annotateViewModel?.datasetManager?.getDataSize()
                                         ?: 0) - 1
                                 ) {
                                     annotateViewModel?.navHostController?.navigate(Destination.Training)
@@ -230,22 +228,22 @@ fun AnnotateView(
             ) {
                 LabelSelectionComponent(modifier = Modifier.background(Color.White, shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))) { selectedIndex ->
                     println("Label yang benar sudah paperbacking $selectedIndex")
-                    importImageViewModel?.setLabelForImage(
+                    annotateViewModel.datasetManager?.setLabelForImage(
                         annotateViewModel.currentAnnotateIndex.value,
                         selectedIndex
                     )
                    val nextIndex = min(
-                        (importImageViewModel?.imageDatasetList?.size ?: 0) - 1,
+                        (annotateViewModel.datasetManager?.getDataSize() ?: 0) - 1,
                         annotateViewModel.currentAnnotateIndex.value + 1
                     )
                     annotateViewModel.showLabelSelectionMenu.value = false
-                    importImageViewModel?.imageDatasetList?.get(nextIndex)?.Input?.let { bitmap ->
+                    annotateViewModel.datasetManager?.trainingData?.get(nextIndex)?.Input?.let { bitmap ->
                         annotateViewModel.classifyImage(bitmap)
                     }
 
                     //Validasi , jika sudah di akhir index / gambar , lanjut ke training
                     if ((annotateViewModel.currentAnnotateIndex.value
-                                ) >= (importImageViewModel?.imageDatasetList?.size ?: 0) - 1
+                                ) >= (annotateViewModel.datasetManager.getDataSize() ?: 0) - 1
                     ) {
                         annotateViewModel.navHostController.navigate(Destination.Training)
                     }

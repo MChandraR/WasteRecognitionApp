@@ -15,8 +15,28 @@ import com.wasterec.app.utils.rotateBitmap
 class DatasetManager (
     var trainingData : List<TrainingModel>
 ){
-    fun getTrainingData() : List<TrainingModel>{
-        return trainingData
+    fun loadData(trainignData : List<TrainingModel>){
+        this.trainingData = trainingData
+    }
+
+    fun getData() : List<TrainingModel>{
+        return this.trainingData
+    }
+
+    fun setLabelForImage(dataIndex : Int, labelIndex : Int){
+        if(dataIndex >= 0 && dataIndex < trainingData.size){
+            trainingData[dataIndex].Label = labelIndex
+        }
+    }
+    fun getDataSize():Int{
+        return this.trainingData.size
+    }
+
+    fun getImageDataBitmap(index : Int) : Bitmap?{
+        if(index >= 0 && index < trainingData.size){
+            return trainingData[index].Input
+        }
+        return null
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -61,7 +81,7 @@ class DatasetManager (
             TrainingModel(imageData, item.Label, currentTypes)
         }
 
-        this.trainingData = trainingData
+        this.trainingData = processedTrainingData
 
         println("Resized Image : $resizedCount")
         println("Rotated Image : $rotatedCount")

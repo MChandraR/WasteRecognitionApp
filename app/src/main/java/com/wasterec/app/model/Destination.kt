@@ -32,6 +32,9 @@ object Destination {
     data object Import : Route
 
     @Serializable
+    data object Preprocess : Route
+
+    @Serializable
     data object ImportDataset : Route
 
 

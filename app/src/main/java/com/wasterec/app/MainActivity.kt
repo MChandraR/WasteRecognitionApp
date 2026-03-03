@@ -20,6 +20,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.wasterec.app.feature.anotate.factory.AnotateViewModelFactory
 import com.wasterec.app.feature.anotate.viewmodel.AnnotateViewModel
+import com.wasterec.app.feature.data_preprocessing.viewmodel.DataProcessingViewModel
+import com.wasterec.app.feature.data_preprocessing.viewmodel_factory.DataProcessingViewModelFactory
 import com.wasterec.app.feature.home.view_model_factory.HomeViewModelFactory
 import com.wasterec.app.feature.home.viewmodel.HomeViewModel
 import com.wasterec.app.feature.importdataset.data.DatasetClass
@@ -35,6 +37,7 @@ import com.wasterec.app.feature.modelload.viewmodel.ModelLoadViewModel
 import com.wasterec.app.feature.navigation.view.NavigationView
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
 import com.wasterec.app.feature.training.viewmodelfactory.TrainingViewModelFactory
+import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.model.Destination
 import com.wasterec.app.model.TrainingModel
 
@@ -55,6 +58,7 @@ class MainActivity : ComponentActivity() {
             val selectedLabel : MutableState<DatasetClass> = remember {mutableStateOf(
                 datasetClassList[0]
             )}
+            val datasetManager = DatasetManager(trainingData)
 
             var datasetClassList : SnapshotStateList<DatasetClass> = remember {
                 mutableStateListOf(
@@ -115,7 +119,8 @@ class MainActivity : ComponentActivity() {
                 factory = AnotateViewModelFactory(
                     application = application,
                     context = this,
-                    navHostController = navController
+                    navHostController = navController,
+                    datasetManager
                 )
             )
 
@@ -164,6 +169,15 @@ class MainActivity : ComponentActivity() {
                 )
             )
 
+            val datasetProcessingViewModel : DataProcessingViewModel = viewModel(
+                factory = DataProcessingViewModelFactory(
+                    application,
+                    navController,
+                    trainingData,
+                    datasetManager
+                )
+            )
+
             //DebugView(this)
             NavigationView(
                 this,
@@ -171,6 +185,7 @@ class MainActivity : ComponentActivity() {
                 loginViewModel,
                 homeViewModel,
                 importDatasetViewModel,
+                datasetProcessingViewModel,
                 annotateViewModel,
                 importImageViewModel,
                 trainingViewModel,
@@ -178,7 +193,7 @@ class MainActivity : ComponentActivity() {
             )
 
             handler.postDelayed({
-                navController.navigate(Destination.Login) {
+                navController.navigate(Destination.Home) {
                     popUpTo(navController.graph.startDestinationId) {
                         inclusive = true
                     }
