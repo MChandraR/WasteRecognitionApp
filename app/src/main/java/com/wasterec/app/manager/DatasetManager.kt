@@ -15,7 +15,7 @@ import com.wasterec.app.utils.rotateBitmap
 class DatasetManager (
     var trainingData : List<TrainingModel>
 ){
-    fun loadData(trainignData : List<TrainingModel>){
+    fun loadData(trainingData : List<TrainingModel>){
         this.trainingData = trainingData
     }
 

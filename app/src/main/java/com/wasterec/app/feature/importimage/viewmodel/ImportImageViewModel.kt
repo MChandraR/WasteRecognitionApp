@@ -26,7 +26,7 @@ class ImportImageViewModel(
 
 
     fun reInit(){
-        imageDatasetList = mutableStateListOf()
+        imageDatasetList.clear()
         showConfirmImageDeletionDialog.value = false
         selectedImageIndex.value = 0
     }
