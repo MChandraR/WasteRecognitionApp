@@ -13,10 +13,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.navigation.NavHostController
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import com.wasterec.app.feature.anotate.viewmodel.AnnotateViewModel
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.manager.ClassifierWeightFileManager
+import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.manager.EfficientNetB0
 import com.wasterec.app.model.ClassifierWeightModel
+import com.wasterec.app.model.Destination
 import com.wasterec.app.model.ModelConiguration
 import com.wasterec.app.model.globalmodel.GlobalWeightModel
 import com.wasterec.app.repositories.GlobalModelRepository
@@ -31,7 +34,7 @@ class TrainingViewModel(
     application : Application,
     val context : Context,
     val navHostController: NavHostController,
-    val importImageViewModel: ImportImageViewModel
+    val annotateViewModel: AnnotateViewModel
 ) : AndroidViewModel(application) {
     var efficientNetB0 : EfficientNetB0 = EfficientNetB0(context)
     val modelProducer : MutableState<CartesianChartModelProducer> = mutableStateOf(
@@ -82,13 +85,34 @@ class TrainingViewModel(
         }
     }
 
+    fun clearTrainingData(){
+        annotateViewModel.datasetManager.clearAlLData()
+        annotateViewModel.trainingData.clear()
+    }
+
+    fun navigateToFinishTrainingView(){
+        navHostController.navigate(Destination.FinishTraining)
+    }
+
+    fun clearNavigationPathToHome(){
+        CoroutineScope(Dispatchers.Main).launch {
+            navHostController.navigate(Destination.Home) {
+                popUpTo(navHostController.graph.startDestinationId) {
+                    inclusive = false
+                }
+                launchSingleTop = true
+            }
+        }
+
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     //Fungsi buat memanggil model dan mulai training local
     fun startLocalTraining(){
         CoroutineScope(Dispatchers.IO).launch {
             val data = efficientNetB0.train(
                 config = modelConfig,
-                dataset = importImageViewModel.imageDatasetList,
+                dataset = annotateViewModel.datasetManager.getData(),
                 onProgressUpdate = { epoch, loss ->
                     println("Progress pelatihan $epoch")
                     currentEpoch.value = epoch+1
@@ -103,12 +127,13 @@ class TrainingViewModel(
 
             print("SENDING CLASSIFIER WEIGHT")
             GlobalModelRepository().uploadModelWeight(globalWeightModel = GlobalWeightModel(
-                num_sample = importImageViewModel.imageDatasetList.size,
-                label_count = importImageViewModel.getEachLabelCount(),
+                num_sample = annotateViewModel.datasetManager.getDataSize(),
+                label_count = annotateViewModel.datasetManager.getEachLabelCount(),
                 weights = encodeWeightsToBase64(data.get("weights") as Array<FloatArray>),
                 bias = floatArrayToBase64(data.getValue("bias") as FloatArray),
             )
             )
+            clearTrainingData()
         }
     }
 
