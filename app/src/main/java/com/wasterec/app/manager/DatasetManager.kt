@@ -15,8 +15,12 @@ import com.wasterec.app.utils.rotateBitmap
 class DatasetManager (
     var trainingData : List<TrainingModel>
 ){
-    fun loadData(trainignData : List<TrainingModel>){
+    fun loadData(trainingData : List<TrainingModel>){
         this.trainingData = trainingData
+    }
+
+    fun clearAlLData(){
+        this.trainingData = listOf<TrainingModel>()
     }
 
     fun getData() : List<TrainingModel>{
@@ -92,6 +96,7 @@ class DatasetManager (
 
         this.trainingData = processedTrainingData
 
+        println("Image count : ${trainingData.size}")
         println("Resized Image : $resizedCount")
         println("Rotated Image : $rotatedCount")
         println("Horizontally Flipped Image : $horizontallyFlippedCount")
@@ -100,7 +105,7 @@ class DatasetManager (
         return this
     }
 
-    fun applyRandomRotation(bitmap : Bitmap, chance : Double = .1): Pair<Bitmap, Boolean> {
+    fun applyRandomRotation(bitmap : Bitmap, chance : Double = .9): Pair<Bitmap, Boolean> {
         val angles = listOf(30f,45f,50f )
         if(generateBooleanWithChance(chance)){
             return Pair(rotateBitmap(bitmap, angles.random()), true)
@@ -108,14 +113,14 @@ class DatasetManager (
         return Pair(bitmap,false)
     }
 
-    fun applyRandomHorizontalFlip(bitmap: Bitmap, chance:Double = 0.1): Pair<Bitmap, Boolean>{
+    fun applyRandomHorizontalFlip(bitmap: Bitmap, chance:Double = 0.9): Pair<Bitmap, Boolean>{
         if(generateBooleanWithChance(chance)){
             return Pair(flipHorizontal(bitmap), true)
         }
         return Pair(bitmap, false)
     }
 
-    fun applyRandomVerticallyFlip(bitmap: Bitmap, chance:Double = 0.1): Pair<Bitmap, Boolean>{
+    fun applyRandomVerticallyFlip(bitmap: Bitmap, chance:Double = 0.9): Pair<Bitmap, Boolean>{
         if(generateBooleanWithChance(chance)){
             return Pair(flipVertical(bitmap), true)
         }

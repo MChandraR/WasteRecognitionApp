@@ -9,17 +9,19 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
 import androidx.navigation.NavHostController
 import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.manager.EfficientNetB0
+import com.wasterec.app.model.TrainingModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class AnnotateViewModel(application : Application, val context: Context, val navHostController: NavHostController, val datasetManager: DatasetManager): AndroidViewModel(application = application) {
+class AnnotateViewModel(application : Application, val context: Context, val navHostController: NavHostController, val trainingData : SnapshotStateList<TrainingModel>): AndroidViewModel(application = application) {
     var currentAnnotateIndex : MutableState<Int> = mutableIntStateOf(0)
     var showLabelSelectionMenu : MutableState<Boolean> = mutableStateOf(false)
     var predictResult : MutableState<String> = mutableStateOf("")
@@ -29,10 +31,12 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
     var efficientNetB0 : EfficientNetB0? = EfficientNetB0(context, "Backbone.ptl" )
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
     var isModelLoading : MutableState<Boolean> = mutableStateOf(true)
+    var datasetManager = DatasetManager(trainingData)
 
     //Deklarasikan ulang semua nilai variabel
     @RequiresApi(Build.VERSION_CODES.O)
     fun reInit(){
+        datasetManager = DatasetManager(trainingData)
         isModelLoading.value = true
         currentBitmap.value = null
         currentAnnotateIndex.value = 0

@@ -1,5 +1,6 @@
 package com.wasterec.app.feature.training.view
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,14 +19,20 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.wasterec.app.R
+import com.wasterec.app.feature.training.viewmodel.FinishTrainingViewModel
 import com.wasterec.app.model.Destination
 import com.wasterec.app.shared.components.MyButton
 import com.wasterec.app.ui.theme.Typography
 
 @Composable
 fun FinishTrainingView(
-    navController: NavHostController
+    finishTrainingViewModel: FinishTrainingViewModel? = null
 ){
+
+    BackHandler() {
+        finishTrainingViewModel?.navigateBackToHome()
+    }
+
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -53,12 +60,7 @@ fun FinishTrainingView(
 
         MyButton(
             onClick = {
-                navController.navigate(Destination.Home) {
-                    popUpTo(navController.graph.startDestinationId) {
-                        inclusive = true
-                    }
-                    launchSingleTop = true
-                }
+               finishTrainingViewModel?.navigateBackToHome()
 
             },
             modifier = Modifier
@@ -74,5 +76,5 @@ fun FinishTrainingView(
 @Preview(showBackground = true)
 @Composable
 fun Finish(){
-    FinishTrainingView(rememberNavController())
+    FinishTrainingView()
 }

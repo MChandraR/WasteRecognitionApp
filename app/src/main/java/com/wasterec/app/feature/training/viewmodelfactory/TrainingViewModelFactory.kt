@@ -8,6 +8,7 @@ import androidx.navigation.NavHostController
 import com.wasterec.app.feature.anotate.viewmodel.AnnotateViewModel
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
+import com.wasterec.app.manager.DatasetManager
 
 class TrainingViewModelFactory(
     val application: Application,

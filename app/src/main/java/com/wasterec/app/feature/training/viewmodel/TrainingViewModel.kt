@@ -16,8 +16,10 @@ import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import com.wasterec.app.feature.anotate.viewmodel.AnnotateViewModel
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.manager.ClassifierWeightFileManager
+import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.manager.EfficientNetB0
 import com.wasterec.app.model.ClassifierWeightModel
+import com.wasterec.app.model.Destination
 import com.wasterec.app.model.ModelConiguration
 import com.wasterec.app.model.globalmodel.GlobalWeightModel
 import com.wasterec.app.repositories.GlobalModelRepository
@@ -83,6 +85,27 @@ class TrainingViewModel(
         }
     }
 
+    fun clearTrainingData(){
+        annotateViewModel.datasetManager.clearAlLData()
+        annotateViewModel.trainingData.clear()
+    }
+
+    fun navigateToFinishTrainingView(){
+        navHostController.navigate(Destination.FinishTraining)
+    }
+
+    fun clearNavigationPathToHome(){
+        CoroutineScope(Dispatchers.Main).launch {
+            navHostController.navigate(Destination.Home) {
+                popUpTo(navHostController.graph.startDestinationId) {
+                    inclusive = false
+                }
+                launchSingleTop = true
+            }
+        }
+
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     //Fungsi buat memanggil model dan mulai training local
     fun startLocalTraining(){
@@ -110,6 +133,7 @@ class TrainingViewModel(
                 bias = floatArrayToBase64(data.getValue("bias") as FloatArray),
             )
             )
+            clearTrainingData()
         }
     }
 

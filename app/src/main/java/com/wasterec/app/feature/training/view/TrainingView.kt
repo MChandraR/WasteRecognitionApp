@@ -2,6 +2,7 @@ package com.wasterec.app.feature.training.view
 
 import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -54,19 +55,16 @@ fun TrainingView(
     var loadIdx by remember{ mutableIntStateOf(1) }
 
     LaunchedEffect(Unit) {
-
-
         while (true) {
             loadIdx++
             loadIdx = max(1, loadIdx % 4)
             delay(1000)
         }
-
-
     }
 
-
-
+    BackHandler() {
+        trainingViewModel?.clearNavigationPathToHome()
+    }
 
     Column(
         modifier = Modifier
@@ -223,7 +221,7 @@ fun TrainingView(
         MyButton(
             onClick = {
                 //trainingViewModel?.reInit() //THIS CAUSE DOUBLE LOCAL TRAINING
-                trainingViewModel?.navHostController?.navigate(route = Destination.FinishTraining)
+                trainingViewModel?.navigateToFinishTrainingView()
             },
             modifier = Modifier
                 .fillMaxWidth()
