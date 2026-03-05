@@ -147,7 +147,7 @@ fun TrainingView(
                         }
                 ) {
                     Text(
-                        "${trainingViewModel?.importImageViewModel?.imageDatasetList?.size}",
+                        "${trainingViewModel?.annotateViewModel?.datasetManager?.getDataSize()}",
                         fontSize = Typography.displayLarge.fontSize * 1.2,
                         fontWeight = FontWeight.Bold,
                     )
@@ -234,7 +234,7 @@ fun TrainingView(
 
         LaunchedEffect(Unit){
             trainingViewModel?.reInit()
-            Toast.makeText(trainingViewModel?.context, "Training dengan total : ${trainingViewModel?.importImageViewModel?.imageDatasetList?.count()}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(trainingViewModel?.context, "Training dengan total : ${trainingViewModel?.annotateViewModel?.datasetManager?.getDataSize()}", Toast.LENGTH_SHORT).show()
         }
     }
 }
