@@ -131,8 +131,7 @@ class MainActivity : ComponentActivity() {
                     application = application,
                     context = this,
                     navHostController = navController,
-                    importImageViewModel = importImageViewModel,
-                    datasetManager = datasetManager
+                    annotateViewModel = annotateViewModel
                 )
             )
 

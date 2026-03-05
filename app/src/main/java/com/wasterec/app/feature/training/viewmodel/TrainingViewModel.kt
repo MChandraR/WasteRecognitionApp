@@ -13,6 +13,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.navigation.NavHostController
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import com.wasterec.app.feature.anotate.viewmodel.AnnotateViewModel
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.manager.ClassifierWeightFileManager
 import com.wasterec.app.manager.DatasetManager
@@ -32,8 +33,7 @@ class TrainingViewModel(
     application : Application,
     val context : Context,
     val navHostController: NavHostController,
-    val importImageViewModel: ImportImageViewModel,
-    val datasetManager: DatasetManager
+    val annotateViewModel: AnnotateViewModel
 ) : AndroidViewModel(application) {
     var efficientNetB0 : EfficientNetB0 = EfficientNetB0(context)
     val modelProducer : MutableState<CartesianChartModelProducer> = mutableStateOf(
@@ -90,7 +90,7 @@ class TrainingViewModel(
         CoroutineScope(Dispatchers.IO).launch {
             val data = efficientNetB0.train(
                 config = modelConfig,
-                dataset = datasetManager.getData(),
+                dataset = annotateViewModel.datasetManager.getData(),
                 onProgressUpdate = { epoch, loss ->
                     println("Progress pelatihan $epoch")
                     currentEpoch.value = epoch+1
@@ -105,8 +105,8 @@ class TrainingViewModel(
 
             print("SENDING CLASSIFIER WEIGHT")
             GlobalModelRepository().uploadModelWeight(globalWeightModel = GlobalWeightModel(
-                num_sample = importImageViewModel.imageDatasetList.size,
-                label_count = importImageViewModel.getEachLabelCount(),
+                num_sample = annotateViewModel.datasetManager.getDataSize(),
+                label_count = annotateViewModel.datasetManager.getEachLabelCount(),
                 weights = encodeWeightsToBase64(data.get("weights") as Array<FloatArray>),
                 bias = floatArrayToBase64(data.getValue("bias") as FloatArray),
             )

@@ -24,8 +24,6 @@ class DataProcessingViewModel(
     }
 
     fun navigateToAnnotatePage(){
-        trainingData.clear()
-        trainingData.addAll(datasetManager.getData())
         navHostController.navigate(Destination.Annotate)
     }
 }

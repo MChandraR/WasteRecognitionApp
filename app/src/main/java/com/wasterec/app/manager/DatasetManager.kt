@@ -36,6 +36,15 @@ class DatasetManager (
         return this.trainingData.size
     }
 
+    fun getEachLabelCount(): IntArray{
+        val labelOfLabelCount = IntArray(6)
+
+        trainingData.forEach {
+            labelOfLabelCount.set(it.Label, labelOfLabelCount.get(it.Label)+1)
+        }
+        return labelOfLabelCount
+    }
+
     fun getImageDataBitmap(index : Int) : Bitmap?{
         if(index >= 0 && index < trainingData.size){
             return trainingData[index].Input
@@ -87,6 +96,7 @@ class DatasetManager (
 
         this.trainingData = processedTrainingData
 
+        println("Image count : ${trainingData.size}")
         println("Resized Image : $resizedCount")
         println("Rotated Image : $rotatedCount")
         println("Horizontally Flipped Image : $horizontallyFlippedCount")
