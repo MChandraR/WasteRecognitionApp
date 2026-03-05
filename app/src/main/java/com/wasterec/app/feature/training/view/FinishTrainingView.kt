@@ -1,5 +1,6 @@
 package com.wasterec.app.feature.training.view
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,11 @@ import com.wasterec.app.ui.theme.Typography
 fun FinishTrainingView(
     finishTrainingViewModel: FinishTrainingViewModel? = null
 ){
+
+    BackHandler() {
+        finishTrainingViewModel?.navigateBackToHome()
+    }
+
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
