@@ -5,3 +5,10 @@
 <a href="https://www.flaticon.com/free-icons/corrugated" title="corrugated icons">Corrugated icons created by Nadiinko - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/garbage-bag" title="garbage bag icons">Garbage bag icons created by Freepik - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/modify" title="modify icons">Modify icons created by meaicon - Flaticon</a>
+<a href="https://www.flaticon.com/free-animated-icons/automation" title="automation animated icons">Automation animated icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-animated-icons/data-collection" title="data collection animated icons">Data collection animated icons created by Freepik - Flaticon</a>
+
+
+
+
+

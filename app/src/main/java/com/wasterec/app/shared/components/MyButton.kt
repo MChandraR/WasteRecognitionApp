@@ -13,9 +13,11 @@ import com.wasterec.app.ui.color.ColorAsset
 fun MyButton(
     onClick : () -> Unit,
     modifier:Modifier = Modifier,
+    enabled : Boolean = true,
     content : @Composable () -> Unit,
     ){
     Button(
+        enabled = enabled,
         onClick = {
             onClick()
         },

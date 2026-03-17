@@ -15,6 +15,12 @@ import com.wasterec.app.utils.rotateBitmap
 class DatasetManager (
     var trainingData : List<TrainingModel>
 ){
+
+    val resizedCount = 0
+    val rotatedCount = 0
+    val horizontallyFlippedCount = 0
+    val verticallyFlippedCount = 0
+
     fun loadData(trainingData : List<TrainingModel>){
         this.trainingData = trainingData
     }
@@ -53,13 +59,16 @@ class DatasetManager (
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun preProcessTrainingData(resizeImage: Boolean = false): DatasetManager {
+    fun preProcessTrainingData(resizeImage: Boolean = false, onProgress : (progress:Float)->Unit, onResult : ((dataType : List<Int> )->Unit)? = null): DatasetManager {
         var resizedCount = 0
         var rotatedCount = 0
         var horizontallyFlippedCount = 0
         var verticallyFlippedCount = 0
+        var totalDataCount = 0
 
         val processedTrainingData = trainingData.map { item ->
+            totalDataCount+=1
+            onProgress(((totalDataCount/trainingData.size).toFloat()))
             var imageData = forceSoftwareBitmap(item.Input)
             var currentTypes = item.Type
 
@@ -95,12 +104,18 @@ class DatasetManager (
         }
 
         this.trainingData = processedTrainingData
+        onResult?.invoke(listOf(resizedCount, rotatedCount, horizontallyFlippedCount, verticallyFlippedCount))
 
         println("Image count : ${trainingData.size}")
         println("Resized Image : $resizedCount")
         println("Rotated Image : $rotatedCount")
         println("Horizontally Flipped Image : $horizontallyFlippedCount")
         println("Vertically Flipped Image : $verticallyFlippedCount")
+
+        rotatedCount = 0
+        resizedCount = 0
+        horizontallyFlippedCount = 0
+        verticallyFlippedCount = 0
 
         return this
     }

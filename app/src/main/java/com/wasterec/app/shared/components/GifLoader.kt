@@ -12,7 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 
 
 @Composable
-fun GifLoader(data : Int) {
+fun GifLoader(data : Int, modifier: Modifier = Modifier) {
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
             .data(data = data) // nama file gif
@@ -25,6 +25,6 @@ fun GifLoader(data : Int) {
             )
             .build(),
         contentDescription = "Animasi GIF",
-        modifier = Modifier.size(200.dp)
+        modifier = modifier.size(200.dp)
     )
 }
