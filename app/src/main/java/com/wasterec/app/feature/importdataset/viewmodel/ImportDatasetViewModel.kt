@@ -3,10 +3,12 @@ package com.wasterec.app.feature.importdataset.viewmodel
 import android.app.Application
 import android.content.Context
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
 import androidx.navigation.NavHostController
 import com.wasterec.app.feature.importdataset.data.DatasetClass
+import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.model.TrainingModel
 
 class ImportDatasetViewModel(
@@ -19,10 +21,17 @@ class ImportDatasetViewModel(
     val datasetClassList : SnapshotStateList<DatasetClass>
 ) : AndroidViewModel(application = application) {
 
+    val datasetManager = DatasetManager(trainignDataset)
+    var classCount : MutableList<Int> = mutableStateListOf(0,0,0,0,0,0)
 
     fun getTrainingDatasetCount():Int{
         return trainignDataset.size
     }
 
+    fun getClassCount(){
+        datasetManager.getEachLabelCount().forEachIndexed { idx, value ->
+            classCount[idx] = value
+        }
+    }
 
 }
