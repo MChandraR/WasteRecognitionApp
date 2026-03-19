@@ -1,6 +1,7 @@
 package com.wasterec.app.feature.training.viewmodel
 
 import android.app.Application
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
 import androidx.navigation.NavHostController
@@ -12,7 +13,7 @@ class FinishTrainingViewModel(
     application: Application,
     val navHostController: NavHostController,
     val trainingData : SnapshotStateList<TrainingModel>,
-    val datasetManager: DatasetManager
+    val datasetManager: MutableState<DatasetManager>
 ): AndroidViewModel(application = application){
 
     fun navigateBackToHome(){
@@ -27,6 +28,6 @@ class FinishTrainingViewModel(
 
     fun clearAllData(){
         trainingData.clear()
-        datasetManager.clearAlLData()
+        datasetManager.value.clearAlLData()
     }
 }

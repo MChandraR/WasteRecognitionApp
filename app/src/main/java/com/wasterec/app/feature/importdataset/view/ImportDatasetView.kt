@@ -79,7 +79,7 @@ fun ImportDatasetView(
 
         MyButton(
             modifier = Modifier.padding(10.dp).fillMaxWidth(),
-            enabled = (importDatasetViewModel?.trainignDataset?.size?:0) > 10,
+            enabled = (importDatasetViewModel?.trainignDataset?.size?:0) > 0,
             onClick = {
                     importDatasetViewModel?.navHostController?.navigate(Destination.Preprocess)
             }

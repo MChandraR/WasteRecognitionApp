@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -23,6 +24,7 @@ import com.wasterec.app.model.Destination
 import com.wasterec.app.model.ModelConiguration
 import com.wasterec.app.model.globalmodel.GlobalWeightModel
 import com.wasterec.app.repositories.GlobalModelRepository
+import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.utils.encodeWeightsToBase64
 import com.wasterec.app.utils.floatArrayToBase64
 import kotlinx.coroutines.CoroutineScope
@@ -34,7 +36,8 @@ class TrainingViewModel(
     application : Application,
     val context : Context,
     val navHostController: NavHostController,
-    val annotateViewModel: AnnotateViewModel
+    val annotateViewModel: AnnotateViewModel,
+    val datasetManager: MutableState<DatasetManager>
 ) : AndroidViewModel(application) {
     var efficientNetB0 : EfficientNetB0 = EfficientNetB0(context)
     val modelProducer : MutableState<CartesianChartModelProducer> = mutableStateOf(
@@ -43,14 +46,25 @@ class TrainingViewModel(
     var currentLoss : MutableState<Float> = mutableFloatStateOf(0f)
     val lossList = mutableStateListOf<Float>()
     val classifierWeightFileManager : ClassifierWeightFileManager = ClassifierWeightFileManager(context)
+    val totalDatasetCount: MutableIntState = mutableIntStateOf(0)
+    val totalLabelCount : MutableList<Int> = mutableListOf(0,0,0,0,0,0)
+    val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
+
     var modelConfig = ModelConiguration(
         learningRate = 0.001f,
         epoch = 15
     )
 
+
+
     //Fungsi untuk reinit nilai atau reset variabel
     @RequiresApi(Build.VERSION_CODES.O)
     fun reInit(){
+        totalDatasetCount.intValue = datasetManager.value.getDataSize()
+        datasetManager.value.getEachLabelCount().forEachIndexed { idx, value ->
+            totalLabelCount[idx] = value
+        }
+
         val backboneModelFile = File(context.filesDir, "Backbone.ptl")
         if(backboneModelFile.exists()){
             efficientNetB0 = EfficientNetB0(context, "Backbone.ptl")
@@ -91,6 +105,7 @@ class TrainingViewModel(
     }
 
     fun navigateToFinishTrainingView(){
+        clearTrainingData()
         navHostController.navigate(Destination.FinishTraining)
     }
 
