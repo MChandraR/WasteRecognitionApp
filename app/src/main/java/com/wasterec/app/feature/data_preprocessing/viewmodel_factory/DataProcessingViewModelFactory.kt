@@ -1,6 +1,7 @@
 package com.wasterec.app.feature.data_preprocessing.viewmodel_factory
 
 import android.app.Application
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -13,7 +14,7 @@ class DataProcessingViewModelFactory(
     val application: Application,
     val navHostController: NavHostController,
     val trainingData : SnapshotStateList<TrainingModel>,
-    val datasetManager: DatasetManager
+    val datasetManager: MutableState<DatasetManager>
 ): ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(DataProcessingViewModel::class.java)){

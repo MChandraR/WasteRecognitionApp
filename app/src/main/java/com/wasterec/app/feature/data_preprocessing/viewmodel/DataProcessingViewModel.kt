@@ -19,7 +19,7 @@ class DataProcessingViewModel(
     application: Application,
     val navHostController: NavHostController,
     val trainingData : SnapshotStateList<TrainingModel>,
-    val datasetManager: DatasetManager
+    val datasetManager: MutableState<DatasetManager>
     ) : AndroidViewModel(application=application) {
 
     val dataTypeCount : MutableList<Int> = mutableListOf(0,0,0,0)
@@ -36,8 +36,8 @@ class DataProcessingViewModel(
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun proProcessData(){
-        datasetManager.loadData(trainingData)
-        datasetManager.preProcessTrainingData(resizeImage = false, onProgress = {dataProcessingProgress.floatValue = it}){
+        datasetManager.value.loadData(trainingData)
+        datasetManager.value.preProcessTrainingData(resizeImage = false, onProgress = {dataProcessingProgress.floatValue = it}){
             resizedCount.intValue = it[0]
             rotatedCount.intValue  = it[1]
             horizontallyFlippedCount.intValue = it[2]
@@ -49,7 +49,7 @@ class DataProcessingViewModel(
 
     fun navigateToAnnotatePage(){
         trainingData.clear()
-        trainingData.addAll(datasetManager.getData())
+        trainingData.addAll(datasetManager.value.getData())
         navHostController.navigate(Destination.Annotate)
     }
 }

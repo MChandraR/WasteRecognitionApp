@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
             val selectedLabel : MutableState<DatasetClass> = remember {mutableStateOf(
                 datasetClassList[0]
             )}
-            val datasetManager = remember {DatasetManager(listOf())}
+            val datasetManager: MutableState<DatasetManager> = remember { mutableStateOf(DatasetManager(listOf()))}
 
             var datasetClassList : SnapshotStateList<DatasetClass> = remember {
                 mutableStateListOf(
@@ -131,7 +131,8 @@ class MainActivity : ComponentActivity() {
                     application = application,
                     context = this,
                     navHostController = navController,
-                    annotateViewModel = annotateViewModel
+                    annotateViewModel = annotateViewModel,
+                    datasetManager = datasetManager
                 )
             )
 
