@@ -2,12 +2,14 @@ package com.wasterec.app.feature.importimage.viewmodel
 
 import android.app.Application
 import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
 import com.wasterec.app.feature.importdataset.data.DatasetClass
 import com.wasterec.app.feature.importdataset.data.datasetClassList
 import com.wasterec.app.model.TrainingModel
@@ -45,6 +47,15 @@ class ImportImageViewModel(
             labelOfLabelCount.set(it.Label, labelOfLabelCount.get(it.Label)+1)
         }
         return labelOfLabelCount
+    }
+
+    fun validateDataForCurrentLabelBeforeInput(action : ()->Unit){
+        var index : Int = label.indexOf(selectedLabel.value.className)
+        if(getEachLabelCount().get(index) <= datasetClassList.get(index).maximumCount){
+            action()
+        }else{
+            Toast.makeText(application.baseContext, "Maxsimum data tercapai", Toast.LENGTH_LONG).show()
+        }
     }
 
     fun deleteDataFromDataset(index : Int){

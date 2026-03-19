@@ -18,6 +18,7 @@ object ColorAsset {
     val primaryAqua = Color(0xFF1B8199)
     val primaryGreen = Color(0xFF008600)
     val primaryPurple = Color(0xFF7C3DD4)
+    val primaryRed = Color(0xFFE52B07)
     val primaryOrange = Color(0xFFCF450A)
     val primaryYellow = Color(0xFFFFAA00)
 
