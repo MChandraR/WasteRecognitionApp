@@ -1,16 +1,13 @@
-package com.wasterec.app.feature.data_preprocessing.components
+package com.wasterec.app.shared.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,7 +17,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import coil.size.Size
 import com.wasterec.app.ui.theme.Typography
 
 @Composable
@@ -29,7 +28,9 @@ fun RoundedColoredBox(
     trailingText : String,
     color : Color = Color.Blue,
     cornerSize : Int = 10,
-    modifier : Modifier = Modifier
+    leadingFontSize : TextUnit = Typography.displayLarge.fontSize,
+    trailingFontSize : TextUnit = Typography.bodyLarge.fontSize,
+    modifier : Modifier = Modifier,
     )
     {
     Row(
@@ -42,12 +43,12 @@ fun RoundedColoredBox(
     ) {
         Text(leadingText,
             color = color,
-            fontSize = Typography.displayLarge.fontSize,
+            fontSize = leadingFontSize,
             fontWeight = FontWeight.Bold
         )
         Text(trailingText,
             color = color,
-            fontSize = Typography.bodyLarge.fontSize,
+            fontSize = trailingFontSize,
             fontWeight = FontWeight.Bold
         )
     }
@@ -68,7 +69,6 @@ fun RoundedBoxPreview(){
             RoundedColoredBox("20", "Rotated", modifier = Modifier.weight(.5f))
             RoundedColoredBox("20", "Flipped Vertically", modifier = Modifier.weight(.5f))
         }
-
         Spacer(modifier = Modifier.height(10.dp))
 
         Row(
