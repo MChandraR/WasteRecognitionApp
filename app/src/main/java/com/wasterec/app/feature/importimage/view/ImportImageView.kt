@@ -56,9 +56,10 @@ fun ImportImageView(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
     ) { uris ->
+        val datasetCount = (importImageViewModel?.imageDatasetList?.size)?:0
         uris.forEachIndexed { idx,uri ->
-            if(((importImageViewModel?.imageDatasetList?.size?.plus(idx))
-                    ?: 0) < (importImageViewModel?.selectedLabel?.value?.maximumCount
+
+            if( datasetCount.plus(idx) < (importImageViewModel?.selectedLabel?.value?.maximumCount
                     ?: 0)
             ){
                 val bitmap = uriToBitmap(context, uri)
@@ -116,7 +117,7 @@ fun ImportImageView(
 
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     RoundedColoredBox(
-                        "Min:", "12",
+                        "Min:", "${importImageViewModel?.selectedLabel?.value?.minimunCount}",
                         color = ColorAsset.primaryYellow, 5,
                         modifier = Modifier.height(40.dp),
                         leadingFontSize = Typography.titleSmall.fontSize,
@@ -125,7 +126,7 @@ fun ImportImageView(
 
 
                     RoundedColoredBox(
-                        "Max:", "21",
+                        "Max:", "${importImageViewModel?.selectedLabel?.value?.maximumCount}",
                         color = ColorAsset.primaryRed, 5,
                         modifier = Modifier.height(40.dp),
                         leadingFontSize = Typography.titleSmall.fontSize,
