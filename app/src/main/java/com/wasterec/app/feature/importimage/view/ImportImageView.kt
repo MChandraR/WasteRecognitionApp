@@ -124,7 +124,6 @@ fun ImportImageView(
                         trailingFontSize = Typography.titleSmall.fontSize,
                     )
 
-
                     RoundedColoredBox(
                         "Max:", "${importImageViewModel?.selectedLabel?.value?.maximumCount}",
                         color = ColorAsset.primaryRed, 5,
