@@ -2,6 +2,7 @@ package com.wasterec.app.feature.training.viewmodel
 
 import android.app.Application
 import android.content.Context
+import android.graphics.Bitmap
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableIntState
@@ -19,10 +20,12 @@ import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.manager.ClassifierWeightFileManager
 import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.manager.EfficientNetB0
+import com.wasterec.app.manager.FileManager
 import com.wasterec.app.model.ClassifierWeightModel
 import com.wasterec.app.model.Destination
 import com.wasterec.app.model.ModelConiguration
 import com.wasterec.app.model.globalmodel.GlobalWeightModel
+import com.wasterec.app.repositories.DatasetUploadRepository
 import com.wasterec.app.repositories.GlobalModelRepository
 import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.utils.encodeWeightsToBase64
@@ -33,20 +36,21 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 class TrainingViewModel(
-    application : Application,
-    val context : Context,
+    val app : Application,
     val navHostController: NavHostController,
     val annotateViewModel: AnnotateViewModel,
     val datasetManager: MutableState<DatasetManager>
-) : AndroidViewModel(application) {
-    var efficientNetB0 : EfficientNetB0 = EfficientNetB0(context)
+) : AndroidViewModel(app) {
+    var efficientNetB0 : EfficientNetB0 = EfficientNetB0(app.baseContext)
     val modelProducer : MutableState<CartesianChartModelProducer> = mutableStateOf(
         CartesianChartModelProducer())
     var currentEpoch : MutableState<Int>  = mutableIntStateOf(0)
     var currentLoss : MutableState<Float> = mutableFloatStateOf(0f)
     val lossList = mutableStateListOf<Float>()
-    val classifierWeightFileManager : ClassifierWeightFileManager = ClassifierWeightFileManager(context)
+    val classifierWeightFileManager : ClassifierWeightFileManager = ClassifierWeightFileManager(app.baseContext)
     val totalDatasetCount: MutableIntState = mutableIntStateOf(0)
+    val datasetRepository : DatasetUploadRepository = DatasetUploadRepository(app.baseContext)
+    val fileManager : FileManager = FileManager(app.baseContext)
     val totalLabelCount : MutableList<Int> = mutableListOf(0,0,0,0,0,0)
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
 
@@ -65,9 +69,9 @@ class TrainingViewModel(
             totalLabelCount[idx] = value
         }
 
-        val backboneModelFile = File(context.filesDir, "Backbone.ptl")
+        val backboneModelFile = File(app.baseContext.filesDir, "Backbone.ptl")
         if(backboneModelFile.exists()){
-            efficientNetB0 = EfficientNetB0(context, "Backbone.ptl")
+            efficientNetB0 = EfficientNetB0(app.baseContext, "Backbone.ptl")
             println("Berhasil mengupdate backbone terbaru ")
         }
         CoroutineScope(Dispatchers.IO).launch {
@@ -81,6 +85,17 @@ class TrainingViewModel(
 
             }
         }
+
+        //UPload dataset ke server
+        CoroutineScope(Dispatchers.IO).launch{
+            val dataset : List<Bitmap> = annotateViewModel.datasetManager.getData().map { it.Input }
+            val datasetToUpload = fileManager.convertBitmapToZipFile(dataset, File(app.baseContext.cacheDir, "Dataset.zip") )
+            datasetToUpload?.let {
+                datasetRepository.uploadDatasetToServer(it)
+                println("Berhasil upload dataset ke server")
+            }
+        }
+
         lossList.clear()
 
     }

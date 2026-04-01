@@ -1,6 +1,7 @@
 package com.wasterec.app.manager
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -8,6 +9,8 @@ import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 class FileManager(val context : Context) {
     suspend fun saveDownloadFileToDisk(fileName : String, responseBody: ResponseBody, onProgress : (progress : Float)->Unit){
@@ -45,6 +48,24 @@ class FileManager(val context : Context) {
                 inputStream?.close()
                 fileOutputStream?.close()
             }
+        }
+    }
+
+    fun convertBitmapToZipFile(bitmap : List<Bitmap>, destinationFile : File):File?{
+        try{
+            ZipOutputStream(FileOutputStream(destinationFile)).use { zipOut ->
+                bitmap.forEachIndexed { index, bitmap ->
+                    val imageFile = ZipEntry("image_$index.png")
+                    zipOut.putNextEntry(imageFile)
+
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, zipOut)
+                    zipOut.closeEntry()
+                }
+            }
+            return destinationFile
+        }catch (e: Exception){
+            println("Error converting bitmap to zip file : ${e.message}")
+            return null
         }
     }
 }

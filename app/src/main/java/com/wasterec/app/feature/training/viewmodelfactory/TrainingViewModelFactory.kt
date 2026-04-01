@@ -19,7 +19,7 @@ class TrainingViewModelFactory(
 ) : ViewModelProvider.Factory{
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(TrainingViewModel::class.java)){
-            return TrainingViewModel(application, context, navHostController, annotateViewModel, datasetManager) as T
+            return TrainingViewModel(application,  navHostController, annotateViewModel, datasetManager) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")    }
 }
