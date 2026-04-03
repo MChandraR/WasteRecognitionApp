@@ -53,6 +53,7 @@ class TrainingViewModel(
     val fileManager : FileManager = FileManager(app.baseContext)
     val totalLabelCount : MutableList<Int> = mutableListOf(0,0,0,0,0,0)
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
+    val modelAccuracy = mutableIntStateOf(0)
 
     var modelConfig = ModelConiguration(
         learningRate = 0.001f,
@@ -60,10 +61,15 @@ class TrainingViewModel(
     )
 
 
+    fun getModelAccuracy():Int{
+        val accuracy = (annotateViewModel?.rightLabelCount?.intValue?:0).toFloat() / (annotateViewModel?.datasetManager?.getDataSize()?:1).toFloat()
+        return (accuracy * 100).toInt()
+    }
 
     //Fungsi untuk reinit nilai atau reset variabel
     @RequiresApi(Build.VERSION_CODES.O)
     fun reInit(){
+        modelAccuracy.intValue = getModelAccuracy()
         totalDatasetCount.intValue = datasetManager.value.getDataSize()
         datasetManager.value.getEachLabelCount().forEachIndexed { idx, value ->
             totalLabelCount[idx] = value

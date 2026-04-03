@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -32,10 +33,13 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
     var isModelLoading : MutableState<Boolean> = mutableStateOf(true)
     var datasetManager = DatasetManager(trainingData)
+    var rightLabelCount : MutableIntState = mutableIntStateOf(0)
+
 
     //Deklarasikan ulang semua nilai variabel
     @RequiresApi(Build.VERSION_CODES.O)
     fun reInit(){
+        rightLabelCount.intValue = 0
         datasetManager = DatasetManager(trainingData)
         isModelLoading.value = true
         currentBitmap.value = null

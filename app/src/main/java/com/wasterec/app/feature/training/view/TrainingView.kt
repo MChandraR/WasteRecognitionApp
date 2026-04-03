@@ -106,7 +106,7 @@ fun TrainingView(
                 )
             ){
                 Text(
-                    "20%",
+                    "${trainingViewModel?.modelAccuracy?.intValue?:0}%",
                     fontSize = Typography.displayLarge.fontSize * 1.5,
                     fontWeight = FontWeight.Bold,
                     color = ColorAsset.primaryBlue,

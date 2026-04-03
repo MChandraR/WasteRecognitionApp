@@ -164,6 +164,7 @@ fun AnnotateView(
                     Row {
                         SecondaryButton(
                             onClick = {
+                                annotateViewModel?.rightLabelCount?.intValue += 1
                                 annotateViewModel?.datasetManager?.setLabelForImage(
                                     annotateViewModel.currentAnnotateIndex?.value ?: 0,
                                     annotateViewModel.predictedLabel?.value ?: 0
