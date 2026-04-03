@@ -29,7 +29,7 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
     var confidentLevel : MutableState<Float> = mutableFloatStateOf(0f)
     var predictedLabel : MutableState<Int> = mutableIntStateOf(0)
     var currentBitmap : MutableState<Bitmap?> = mutableStateOf(null)
-    var efficientNetB0 : EfficientNetB0? = EfficientNetB0(context, "Backbone.ptl" )
+    var efficientNetB0 : EfficientNetB0? = null
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
     var isModelLoading : MutableState<Boolean> = mutableStateOf(true)
     var datasetManager = DatasetManager(trainingData)

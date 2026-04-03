@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,6 +39,7 @@ fun HomeView(
 
     LaunchedEffect(Unit) {
         homeViewModel?.getGlobalModelInfo()
+        homeViewModel?.getTrainingStatusForClient()
     }
 
     Column(
@@ -152,6 +154,7 @@ fun HomeView(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
+                enabled = homeViewModel?.isTrainingOpenForClient?.value ?: false,
                 colors = ButtonDefaults.buttonColors(ColorAsset.primaryBlue),
                 shape = RoundedCornerShape(10.dp),
                 onClick = {
@@ -163,9 +166,19 @@ fun HomeView(
             ) {
                 Text(
                     "Start Training",
+                    fontSize = Typography.titleSmall.fontSize,
                     modifier = Modifier.padding(10.dp)
                 )
             }
+
+            if((homeViewModel?.isTrainingOpenForClient?.value ?: false) == false){
+                Text("Anda sudah melakukan training sebelumnya, harap tunggu hingga ronde selanjutnya",
+                    textAlign = TextAlign.Center,
+                    fontSize = Typography.bodySmall.fontSize,
+                    color = ColorAsset.primaryYellow,
+                    modifier = Modifier.padding(vertical = 10.dp))
+            }
+
 
             Spacer(modifier = Modifier.weight(1f))
         }

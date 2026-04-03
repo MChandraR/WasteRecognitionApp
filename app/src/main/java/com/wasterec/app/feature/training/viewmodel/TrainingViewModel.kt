@@ -54,6 +54,7 @@ class TrainingViewModel(
     val totalLabelCount : MutableList<Int> = mutableListOf(0,0,0,0,0,0)
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
     val modelAccuracy = mutableIntStateOf(0)
+    val globalModelRepository = GlobalModelRepository(app.baseContext)
 
     var modelConfig = ModelConiguration(
         learningRate = 0.001f,
@@ -80,6 +81,7 @@ class TrainingViewModel(
             efficientNetB0 = EfficientNetB0(app.baseContext, "Backbone.ptl")
             println("Berhasil mengupdate backbone terbaru ")
         }
+
         CoroutineScope(Dispatchers.IO).launch {
             val newClassifierParam : ClassifierWeightModel? = classifierWeightFileManager.loadClassifierParamFromFile()
             newClassifierParam?.let{ newParam ->
@@ -162,7 +164,7 @@ class TrainingViewModel(
             )
 
             print("SENDING CLASSIFIER WEIGHT")
-            GlobalModelRepository().uploadModelWeight(globalWeightModel = GlobalWeightModel(
+            globalModelRepository.uploadModelWeight(globalWeightModel = GlobalWeightModel(
                 num_sample = annotateViewModel.datasetManager.getDataSize(),
                 label_count = annotateViewModel.datasetManager.getEachLabelCount(),
                 weights = encodeWeightsToBase64(data.get("weights") as Array<FloatArray>),
