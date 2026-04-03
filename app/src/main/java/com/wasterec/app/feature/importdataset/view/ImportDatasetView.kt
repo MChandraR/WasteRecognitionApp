@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,13 +26,19 @@ import com.wasterec.app.feature.importdataset.components.LabelListCard
 import com.wasterec.app.feature.importdataset.data.datasetClassList
 import com.wasterec.app.feature.importdataset.viewmodel.ImportDatasetViewModel
 import com.wasterec.app.model.Destination
+import com.wasterec.app.shared.components.MyButton
 import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
+import kotlinx.coroutines.Dispatchers
 
 @Composable
 fun ImportDatasetView(
     importDatasetViewModel: ImportDatasetViewModel? = null,
 ){
+    LaunchedEffect(Dispatchers.IO) {
+        importDatasetViewModel?.getClassCount()
+    }
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -54,13 +61,13 @@ fun ImportDatasetView(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.padding(10.dp)
         ) {
-            (importDatasetViewModel?.datasetClassList?: datasetClassList).forEach {
+            (importDatasetViewModel?.datasetClassList?: datasetClassList).forEachIndexed { idx,value ->
                 LabelListCard(
-                    it.className,
-                    "(${it.currentCount}/${it.minimunCount} min)",
-                    leadingIcon = it.icon,
+                    value.className,
+                    "(${ (importDatasetViewModel?.classCount?.get(idx))?:0 }/${value.minimunCount} min)",
+                    leadingIcon = value.icon,
                     modifier = Modifier.height(65.dp).clickable{
-                        importDatasetViewModel?.selectedIndex?.value = importDatasetViewModel.datasetClassList.indexOf(it)
+                        importDatasetViewModel?.selectedIndex?.value = importDatasetViewModel.datasetClassList.indexOf(value)
                         importDatasetViewModel?.navHostController?.navigate(Destination.Import)
                         Toast.makeText(importDatasetViewModel?.context, "Selected index ${importDatasetViewModel?.selectedIndex?.value}", Toast.LENGTH_LONG).show()
                     }
@@ -70,12 +77,11 @@ fun ImportDatasetView(
         
         Spacer(modifier = Modifier.weight(1f))
 
-        Button(
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = ColorAsset.primaryBlue),
+        MyButton(
             modifier = Modifier.padding(10.dp).fillMaxWidth(),
+            enabled = (importDatasetViewModel?.trainignDataset?.size?:0) > 0,
             onClick = {
-                    importDatasetViewModel?.navHostController?.navigate(Destination.Annotate)
+                    importDatasetViewModel?.navHostController?.navigate(Destination.Preprocess)
             }
         ) {
             Text("Selanjutnya",

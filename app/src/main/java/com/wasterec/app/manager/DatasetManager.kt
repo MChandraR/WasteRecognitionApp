@@ -15,18 +15,60 @@ import com.wasterec.app.utils.rotateBitmap
 class DatasetManager (
     var trainingData : List<TrainingModel>
 ){
-    fun getTrainingData() : List<TrainingModel>{
-        return trainingData
+
+    val resizedCount = 0
+    val rotatedCount = 0
+    val horizontallyFlippedCount = 0
+    val verticallyFlippedCount = 0
+
+    fun loadData(trainingData : List<TrainingModel>){
+        this.trainingData = trainingData
+    }
+
+    fun clearAlLData(){
+        this.trainingData = listOf<TrainingModel>()
+    }
+
+    fun getData() : List<TrainingModel>{
+        return this.trainingData
+    }
+
+    fun setLabelForImage(dataIndex : Int, labelIndex : Int){
+        if(dataIndex >= 0 && dataIndex < trainingData.size){
+            trainingData[dataIndex].Label = labelIndex
+        }
+    }
+    fun getDataSize():Int{
+        return this.trainingData.size
+    }
+
+    fun getEachLabelCount(): IntArray{
+        val labelOfLabelCount = IntArray(6)
+
+        trainingData.forEach {
+            labelOfLabelCount.set(it.Label, labelOfLabelCount.get(it.Label)+1)
+        }
+        return labelOfLabelCount
+    }
+
+    fun getImageDataBitmap(index : Int) : Bitmap?{
+        if(index >= 0 && index < trainingData.size){
+            return trainingData[index].Input
+        }
+        return null
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun preProcessTrainingData(resizeImage: Boolean = false): DatasetManager {
+    fun preProcessTrainingData(resizeImage: Boolean = false, onProgress : (progress:Float)->Unit, onResult : ((dataType : List<Int> )->Unit)? = null): DatasetManager {
         var resizedCount = 0
         var rotatedCount = 0
         var horizontallyFlippedCount = 0
         var verticallyFlippedCount = 0
+        var totalDataCount = 0
 
         val processedTrainingData = trainingData.map { item ->
+            totalDataCount+=1
+            onProgress(((totalDataCount/trainingData.size).toFloat()))
             var imageData = forceSoftwareBitmap(item.Input)
             var currentTypes = item.Type
 
@@ -61,17 +103,24 @@ class DatasetManager (
             TrainingModel(imageData, item.Label, currentTypes)
         }
 
-        this.trainingData = trainingData
+        this.trainingData = processedTrainingData
+        onResult?.invoke(listOf(resizedCount, rotatedCount, horizontallyFlippedCount, verticallyFlippedCount))
 
+        println("Image count : ${trainingData.size}")
         println("Resized Image : $resizedCount")
         println("Rotated Image : $rotatedCount")
         println("Horizontally Flipped Image : $horizontallyFlippedCount")
         println("Vertically Flipped Image : $verticallyFlippedCount")
 
+        rotatedCount = 0
+        resizedCount = 0
+        horizontallyFlippedCount = 0
+        verticallyFlippedCount = 0
+
         return this
     }
 
-    fun applyRandomRotation(bitmap : Bitmap, chance : Double = .1): Pair<Bitmap, Boolean> {
+    fun applyRandomRotation(bitmap : Bitmap, chance : Double = .2): Pair<Bitmap, Boolean> {
         val angles = listOf(30f,45f,50f )
         if(generateBooleanWithChance(chance)){
             return Pair(rotateBitmap(bitmap, angles.random()), true)
@@ -79,14 +128,14 @@ class DatasetManager (
         return Pair(bitmap,false)
     }
 
-    fun applyRandomHorizontalFlip(bitmap: Bitmap, chance:Double = 0.1): Pair<Bitmap, Boolean>{
+    fun applyRandomHorizontalFlip(bitmap: Bitmap, chance:Double = 0.2): Pair<Bitmap, Boolean>{
         if(generateBooleanWithChance(chance)){
             return Pair(flipHorizontal(bitmap), true)
         }
         return Pair(bitmap, false)
     }
 
-    fun applyRandomVerticallyFlip(bitmap: Bitmap, chance:Double = 0.1): Pair<Bitmap, Boolean>{
+    fun applyRandomVerticallyFlip(bitmap: Bitmap, chance:Double = 0.2): Pair<Bitmap, Boolean>{
         if(generateBooleanWithChance(chance)){
             return Pair(flipVertical(bitmap), true)
         }

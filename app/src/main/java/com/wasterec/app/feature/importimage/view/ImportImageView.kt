@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,6 +41,7 @@ import com.wasterec.app.R
 import com.wasterec.app.feature.importimage.components.ConfirmationDialog
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.model.TrainingModel
+import com.wasterec.app.shared.components.RoundedColoredBox
 import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
 import com.wasterec.app.utils.resizeAndCropCenter
@@ -54,17 +56,24 @@ fun ImportImageView(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
     ) { uris ->
-        uris.forEach { uri ->
-            val bitmap = uriToBitmap(context, uri)
-            bitmap?.let {
-                importImageViewModel?.increaseItemCountForSelectedLabelinDataset()
-                importImageViewModel?.imageDatasetList?.add(
-                    TrainingModel(
-                        resizeAndCropCenter(it),
-                        importImageViewModel.selectedLabelIndex.value
+        val datasetCount = (importImageViewModel?.imageDatasetList?.size)?:0
+        uris.forEachIndexed { idx,uri ->
+
+            if( datasetCount.plus(idx) < (importImageViewModel?.selectedLabel?.value?.maximumCount
+                    ?: 0)
+            ){
+                val bitmap = uriToBitmap(context, uri)
+                bitmap?.let {
+                    importImageViewModel?.increaseItemCountForSelectedLabelinDataset()
+                    importImageViewModel?.imageDatasetList?.add(
+                        TrainingModel(
+                            resizeAndCropCenter(it),
+                            importImageViewModel.selectedLabelIndex.value
+                        )
                     )
-                )
+                }
             }
+
 
         }
         println("Jumlah data dari picker : " + importImageViewModel?.imageDatasetList?.size.toString())
@@ -77,19 +86,54 @@ fun ImportImageView(
 
             Text(
                 "Import Dataset untuk label ${importImageViewModel?.getSelectedLabel()}",
-                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp),
                 textAlign = TextAlign.Center,
                 fontSize = Typography.titleLarge.fontSize,
                 fontWeight = FontWeight.Bold,
                 color = ColorAsset.primaryBlue,
             )
-            Text(
-                "Jumlah gambar yang dipilih ${importImageViewModel?.getTotalOfDatasetForSelectedLabel()}/${importImageViewModel?.selectedLabel?.value?.minimunCount}",
-                modifier = Modifier.fillMaxWidth().padding(20.dp),
-                textAlign = TextAlign.Center,
-                fontSize = Typography.bodyLarge.fontSize,
-                fontWeight = FontWeight.Medium
-            )
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "Jumlah gambar :",
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center,
+                        fontSize = Typography.bodyLarge.fontSize,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Text(
+                        " ${(importImageViewModel?.getTotalOfDatasetForSelectedLabel()) ?: 0}",
+                        modifier = Modifier,
+                        textAlign = TextAlign.Center,
+                        fontSize = Typography.titleLarge.fontSize,
+                        fontWeight = FontWeight.Bold,
+                        color = ColorAsset.primaryBlue
+                    )
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    RoundedColoredBox(
+                        "Min:", "${importImageViewModel?.selectedLabel?.value?.minimunCount}",
+                        color = ColorAsset.primaryYellow, 5,
+                        modifier = Modifier.height(40.dp),
+                        leadingFontSize = Typography.titleSmall.fontSize,
+                        trailingFontSize = Typography.titleSmall.fontSize,
+                    )
+
+                    RoundedColoredBox(
+                        "Max:", "${importImageViewModel?.selectedLabel?.value?.maximumCount}",
+                        color = ColorAsset.primaryRed, 5,
+                        modifier = Modifier.height(40.dp),
+                        leadingFontSize = Typography.titleSmall.fontSize,
+                        trailingFontSize = Typography.titleSmall.fontSize,
+                    )
+                }
+            }
+
 
 
             if ((importImageViewModel?.getDatasetForSelectedLabel()?.size ?: 0) > 0) {
@@ -160,7 +204,9 @@ fun ImportImageView(
             Column {
                 Button(
                     onClick = {
-                        launcher.launch("image/*")
+                        importImageViewModel?.validateDataForCurrentLabelBeforeInput {
+                            launcher.launch("image/*")
+                        }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),

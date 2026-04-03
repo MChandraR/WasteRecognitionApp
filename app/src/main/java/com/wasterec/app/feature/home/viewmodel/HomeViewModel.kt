@@ -10,18 +10,21 @@ import androidx.navigation.NavHostController
 import com.wasterec.app.helper.GlobalModelError
 import com.wasterec.app.model.Destination
 import com.wasterec.app.model.api_response.model_info.GlobalModelInfoModel
+import com.wasterec.app.repositories.DatasetUploadRepository
 import com.wasterec.app.repositories.GlobalModelRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    val context: Context,
     val navHostController: NavHostController,
     application: Application
 ) : AndroidViewModel(application = application) {
     val globalModelInfoModel : MutableState<GlobalModelInfoModel?> = mutableStateOf(null)
-    val globalModelRepository: GlobalModelRepository = GlobalModelRepository(context)
+    val globalModelRepository: GlobalModelRepository = GlobalModelRepository(application.baseContext)
+
+    val datasetUploadRepository = DatasetUploadRepository(application.baseContext)
+
     fun getGlobalModelInfo(){
         globalModelRepository.fetchGlobalModel({ error, result ->
             println("Berhasil mendapatkan data global model")
@@ -38,11 +41,13 @@ class HomeViewModel(
                             launchSingleTop = true
                         }
                     }
-                    Toast.makeText(context, error.message,  Toast.LENGTH_LONG).show()
+                    Toast.makeText(globalModelRepository.context, error.message,  Toast.LENGTH_LONG).show()
                 }
                 println(error.message)
             }
         })
+
+        //datasetUploadRepository.uploadDatasetToServer()
     }
 
 

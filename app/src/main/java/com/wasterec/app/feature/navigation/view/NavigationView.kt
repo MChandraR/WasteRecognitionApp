@@ -13,6 +13,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.wasterec.app.feature.anotate.view.AnnotateView
 import com.wasterec.app.feature.anotate.viewmodel.AnnotateViewModel
+import com.wasterec.app.feature.data_preprocessing.view.DataProcessingView
+import com.wasterec.app.feature.data_preprocessing.viewmodel.DataProcessingViewModel
 import com.wasterec.app.feature.home.viewmodel.HomeViewModel
 import com.wasterec.app.feature.importdataset.view.ImportDatasetView
 import com.wasterec.app.feature.importdataset.viewmodel.ImportDatasetViewModel
@@ -26,6 +28,7 @@ import com.wasterec.app.feature.modelload.viewmodel.ModelLoadViewModel
 import com.wasterec.app.feature.splash.view.SplashView
 import com.wasterec.app.feature.training.view.FinishTrainingView
 import com.wasterec.app.feature.training.view.TrainingView
+import com.wasterec.app.feature.training.viewmodel.FinishTrainingViewModel
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
 import com.wasterec.app.model.Destination
 
@@ -37,10 +40,12 @@ fun NavigationView(
     loginViewModel : LoginViewModel,
     homeViewModel : HomeViewModel,
     importDatasetViewModel: ImportDatasetViewModel,
+    dataestProcessingViewModel: DataProcessingViewModel,
     annotateViewModel: AnnotateViewModel,
     importImageViewModel: ImportImageViewModel,
     trainingViewModel: TrainingViewModel,
     modelLoadViewModel: ModelLoadViewModel,
+    finishTrainingViewModel: FinishTrainingViewModel
 ) {
     val startDestination = Destination.Splash
     var selectedDestination by rememberSaveable { mutableIntStateOf(0) }
@@ -51,13 +56,14 @@ fun NavigationView(
     ) {
         composable<Destination.Home> { MainView(homeViewModel) }
         composable<Destination.Info>{  }
+        composable<Destination.Preprocess>{ DataProcessingView(dataestProcessingViewModel) }
         composable<Destination.Login>{ LoginView(loginViewModel) }
         composable<Destination.Splash>{ SplashView() }
         composable<Destination.Import>{ ImportImageView(navController, importImageViewModel) }
         composable<Destination.ImportDataset>{ ImportDatasetView(importDatasetViewModel) }
         composable<Destination.Training>{ TrainingView(trainingViewModel) }
-        composable<Destination.Annotate>{ AnnotateView(annotateViewModel, importImageViewModel) }
-        composable<Destination.FinishTraining>{ FinishTrainingView(navController) }
+        composable<Destination.Annotate>{ AnnotateView(annotateViewModel) }
+        composable<Destination.FinishTraining>{ FinishTrainingView(finishTrainingViewModel) }
         composable<Destination.WeightLoading>{ ModelLoadView(modelLoadViewModel) }
 
     }

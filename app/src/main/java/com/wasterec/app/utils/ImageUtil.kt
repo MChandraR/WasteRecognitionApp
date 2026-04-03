@@ -57,11 +57,22 @@ fun uriToBitmap(context: Context, uri: Uri): Bitmap? {
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun forceSoftwareBitmap(bitmap: Bitmap): Bitmap {
-    if (bitmap.config != Bitmap.Config.HARDWARE) return bitmap
+    // 1. If it's already software-backed or already recycled, just return it
+    if (bitmap.isRecycled || bitmap.config != Bitmap.Config.HARDWARE) {
+        return bitmap
+    }
 
+    // 2. Attempt to copy. Note: copy() can return null if out of memory
     val softwareBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, false)
-    bitmap.recycle()
-    return softwareBitmap
+
+    // 3. Only recycle the old one if the copy was successful
+    // AND you are sure no other part of your app needs the hardware version.
+    if (softwareBitmap != null) {
+        // bitmap.recycle() // Optional: Only use if you're sure you're done with 'bitmap'
+        return softwareBitmap
+    }
+
+    return bitmap
 }
 
 /**

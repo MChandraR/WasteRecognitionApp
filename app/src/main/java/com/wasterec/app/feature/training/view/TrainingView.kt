@@ -2,6 +2,7 @@ package com.wasterec.app.feature.training.view
 
 import android.os.Build
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.SliderDefaults.drawStopIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +41,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLa
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
+import com.wasterec.app.feature.training.ui.trainingColorList
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
 import com.wasterec.app.model.Destination
 import com.wasterec.app.shared.components.MyButton
@@ -54,19 +58,16 @@ fun TrainingView(
     var loadIdx by remember{ mutableIntStateOf(1) }
 
     LaunchedEffect(Unit) {
-
-
         while (true) {
             loadIdx++
             loadIdx = max(1, loadIdx % 4)
             delay(1000)
         }
-
-
     }
 
-
-
+    BackHandler() {
+        trainingViewModel?.clearNavigationPathToHome()
+    }
 
     Column(
         modifier = Modifier
@@ -80,17 +81,18 @@ fun TrainingView(
         Text(
             "Training",
             fontSize = Typography.displayLarge.fontSize,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = ColorAsset.primaryBlue
         )
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
-                .padding(30.dp)
+                .padding(20.dp)
         ) {
             Text("Performa model lokal",
-                fontSize = Typography.titleMedium.fontSize,
+                fontSize = Typography.titleSmall.fontSize,
                 fontWeight = FontWeight.Bold
             )
             Column (
@@ -99,37 +101,40 @@ fun TrainingView(
                 modifier = Modifier
                     .padding(10.dp)
                     .background(
-                    color = ColorAsset.lightGray,
+                    color = ColorAsset.primaryBlue05,
                     shape =  RoundedCornerShape(10.dp)
                 )
             ){
                 Text(
-                    "20%",
-                    fontSize = Typography.displayLarge.fontSize * 1.2,
+                    "${trainingViewModel?.modelAccuracy?.intValue?:0}%",
+                    fontSize = Typography.displayLarge.fontSize * 1.5,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 50.dp, end = 50.dp, top = 20.dp)
+                    color = ColorAsset.primaryBlue,
+                    modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = 20.dp)
                 )
-                Text("Total Image",
+                Text("Akurasi",
+                    color = ColorAsset.primaryBlue,
                     modifier = Modifier.padding(bottom = 20.dp))
             }
 
         }
 
-        Spacer(Modifier.weight(.3f))
+        Spacer(Modifier.weight(.1f))
 
-        Column {
+        Column (verticalArrangement = Arrangement.spacedBy(10.dp)){
             Text(
                 "Detail Dataset",
-                fontSize = Typography.titleMedium.fontSize,
-                fontWeight = FontWeight.Bold
+                fontSize = Typography.titleSmall.fontSize,
+                fontWeight = FontWeight.Bold,
             )
 
             ConstraintLayout(
                 modifier = Modifier
                     .background(
-                        color = ColorAsset.lightGray,
+                        color = Color.Transparent,
                         shape = RoundedCornerShape(10)
                     )
+                    .border(1.dp,ColorAsset.primaryBlue25, RoundedCornerShape(10))
                     .fillMaxWidth()
             ) {
                 val (count, label ) = createRefs()
@@ -147,11 +152,13 @@ fun TrainingView(
                         }
                 ) {
                     Text(
-                        "${trainingViewModel?.importImageViewModel?.imageDatasetList?.size}",
+                        "${trainingViewModel?.totalDatasetCount?.intValue}",
                         fontSize = Typography.displayLarge.fontSize * 1.2,
                         fontWeight = FontWeight.Bold,
+                        color = ColorAsset.primaryBlue
                     )
-                    Text("Total Image")
+                    Text("Total Image",
+                        color = ColorAsset.primaryBlue)
                 }
 
 
@@ -159,23 +166,23 @@ fun TrainingView(
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
                     modifier = Modifier
                         .constrainAs(label){
-                            top.linkTo(parent.top)
-                            bottom.linkTo(parent.bottom)
+                            top.linkTo(parent.top,15.dp)
+                            bottom.linkTo(parent.bottom, 15.dp)
                             end.linkTo(parent.end, 10.dp)
                         }
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         for(i in 0 ..< 3){
-                            Box(modifier = Modifier.border(1.dp, Color.Black, RoundedCornerShape(5.dp))){
-                                Text("Plastik : 20", modifier = Modifier.padding(10.dp,5.dp))
+                            Box(modifier = Modifier.border(1.dp, trainingColorList.get(i), RoundedCornerShape(5.dp))){
+                                Text("${trainingViewModel?.label?.get(i)?.padEnd(8)} : ${trainingViewModel?.totalLabelCount?.get(i)}", modifier = Modifier.padding(10.dp,8.dp), fontWeight = FontWeight.Bold, color = trainingColorList.get(i))
                             }
                         }
                     }
 
                     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        for(i in 0 ..< 3){
-                            Box(modifier = Modifier.border(1.dp, Color.Black, RoundedCornerShape(5.dp))){
-                                Text("Plastik : 20", modifier = Modifier.padding(10.dp,5.dp))
+                        for(i in 3 ..< 6){
+                            Box(modifier = Modifier.border(1.dp, trainingColorList.get(i), RoundedCornerShape(5.dp))){
+                                Text("${trainingViewModel?.label?.get(i)?.padEnd(8)} : ${trainingViewModel?.totalLabelCount?.get(i)}", modifier = Modifier.padding(10.dp,8.dp), fontWeight = FontWeight.Bold, color = trainingColorList.get(i))
                             }
                         }
                     }
@@ -217,24 +224,29 @@ fun TrainingView(
 
         LinearProgressIndicator(
             progress = { ((trainingViewModel?.currentEpoch?.value?: 0).toFloat() / ((trainingViewModel?.modelConfig?.epoch?:1).toFloat())) },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp).height(10.dp)
+            modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp).height(10.dp),
+            color = ColorAsset.primaryBlue,
+            trackColor = ColorAsset.primaryBlue25,
+            drawStopIndicator = {
+                drawStopIndicator(Offset.Zero, 0.dp, Color.Transparent)
+            }
         )
 
         MyButton(
             onClick = {
                 //trainingViewModel?.reInit() //THIS CAUSE DOUBLE LOCAL TRAINING
-                trainingViewModel?.navHostController?.navigate(route = Destination.FinishTraining)
+                trainingViewModel?.navigateToFinishTrainingView()
             },
             modifier = Modifier
                 .fillMaxWidth()
         ) { 
-            Text("Selesai",
+            Text("Selanjutnya",
                 modifier = Modifier.padding(10.dp))
         }
 
         LaunchedEffect(Unit){
             trainingViewModel?.reInit()
-            Toast.makeText(trainingViewModel?.context, "Training dengan total : ${trainingViewModel?.importImageViewModel?.imageDatasetList?.count()}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(trainingViewModel?.app?.baseContext, "Training dengan total : ${trainingViewModel?.annotateViewModel?.datasetManager?.getDataSize()}", Toast.LENGTH_SHORT).show()
         }
     }
 }
