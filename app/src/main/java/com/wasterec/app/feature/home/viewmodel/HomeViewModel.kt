@@ -12,6 +12,7 @@ import com.wasterec.app.model.Destination
 import com.wasterec.app.model.api_response.model_info.GlobalModelInfoModel
 import com.wasterec.app.repositories.DatasetUploadRepository
 import com.wasterec.app.repositories.GlobalModelRepository
+import com.wasterec.app.repositories.TrainingRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,7 +24,8 @@ class HomeViewModel(
     val globalModelInfoModel : MutableState<GlobalModelInfoModel?> = mutableStateOf(null)
     val globalModelRepository: GlobalModelRepository = GlobalModelRepository(application.baseContext)
 
-    val datasetUploadRepository = DatasetUploadRepository(application.baseContext)
+    val trainingRepository = TrainingRepository(application.baseContext)
+    val isTrainingOpenForClient = mutableStateOf(false)
 
     fun getGlobalModelInfo(){
         globalModelRepository.fetchGlobalModel({ error, result ->
@@ -46,8 +48,20 @@ class HomeViewModel(
                 println(error.message)
             }
         })
+    }
 
-        //datasetUploadRepository.uploadDatasetToServer()
+    fun getTrainingStatusForClient(){
+        trainingRepository.getTrainingStatusForClient(
+            onSuccess = { trainingStatus ->
+                trainingStatus?.let {
+                    isTrainingOpenForClient.value = it.isopen
+                    println("APakah dibuka ? ${it.isopen}")
+                }
+            },
+            onFailed = {
+
+            }
+        )
     }
 
 

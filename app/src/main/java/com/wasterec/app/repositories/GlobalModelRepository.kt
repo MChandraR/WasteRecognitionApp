@@ -15,84 +15,80 @@ import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 
 class GlobalModelRepository(val context: Context? = null) : ApiService() {
-    fun getGlobamModelService() : GlobalModelService?{
+    fun getGlobamModelService(request : suspend (globalModelService : GlobalModelService)->Unit) {
         //If there's context get stored AuthToken from SP and inject to Request Header
         context?.let{
             val authToken = SharedPreferenceService(context).getStringValue("authToken")
             authToken?.let{addAuthorizationBerer(authToken)}
         }
-       return this.retrofit?.create(GlobalModelService::class.java)
+       this.retrofit?.create(GlobalModelService::class.java)?.let {
+           CoroutineScope(Dispatchers.IO).launch {
+               try{
+                   request(it)
+               }catch (e : Exception){
+
+               }
+           }
+       }
     }
 
     //Function to fetch data related to Global Model Info from server
     fun fetchGlobalModel(callback : (exception : AppError?, result : GlobalModelInfoModel?) -> Unit) {
-        this.getGlobamModelService()?.let{ fetchGlobalModelService ->
-            CoroutineScope(Dispatchers.IO).launch {
-                val response = fetchGlobalModelService.getModelInfo()
-                if(response.isSuccessful){
-                    if(response.body()?.status == 401)  callback(GlobalModelError.Unauthorized(), null)
-                    else callback(null, response.body()?.data)
-                }else{
-                    if(response.code() == 401)  callback(GlobalModelError.Unauthorized(), null)
-                }
+        this.getGlobamModelService{
+            val response = it.getModelInfo()
+            if(response.isSuccessful){
+                if(response.body()?.status == 401)  callback(GlobalModelError.Unauthorized(), null)
+                else callback(null, response.body()?.data)
+            }else{
+                if(response.code() == 401)  callback(GlobalModelError.Unauthorized(), null)
             }
+
         }
     }
 
     //Fungsi to fetch model weight from server
     fun fetchGlobalModelClassifierWeight(callback : (exception : AppError?, result : ClassifierWeightModel?)->Unit){
-        val globalModelService = this.getGlobamModelService()
-        if (globalModelService != null) {
-            CoroutineScope(Dispatchers.IO).launch{
-                val response = globalModelService.getClassifierModelWeight()
-                if(response.isSuccessful){
-                    callback(null, response.body())
-                }else{
-                    callback(GlobalModelError.NoInternet(), null)
-                }
+        this.getGlobamModelService{
+            val response = it.getClassifierModelWeight()
+            if(response.isSuccessful){
+                callback(null, response.body())
+            }else{
+                callback(GlobalModelError.NoInternet(), null)
             }
         }
     }
 
-
     fun uploadModelWeight(globalWeightModel: GlobalWeightModel){
-        if(this.getGlobamModelService() != null){
-            val globalModelService = this.getGlobamModelService()
-
-            CoroutineScope(Dispatchers.IO).launch {
-                val response = globalModelService?.updateModelWeight(globalWeight = globalWeightModel)
-                if (response != null) {
-                    if(response.isSuccessful){
-                        println("response ${response.body().toString()}")
-                    }else{
-                        println("Gagal ${response.errorBody().toString()} ${response.body().toString()}")
-                    }
-                }
+        this.getGlobamModelService{
+            val response = it.updateModelWeight(globalWeight = globalWeightModel)
+            if(response.isSuccessful){
+                println("response ${response.body().toString()}")
+            }else{
+                println("Gagal ${response.errorBody().toString()} ${response.body().toString()}")
             }
         }
     }
 
     fun donwloadGlobalModelFile(onResponse : (response : ResponseBody)->Unit, onFailure : (message:String)->Unit){
-        val globalModelService: GlobalModelService? = this.getGlobamModelService()
-        CoroutineScope(Dispatchers.IO).launch {
-            val downloadResponse = globalModelService?.downloadGlobalModelStream()
-            if(downloadResponse?.body() != null){
+        this.getGlobamModelService {
+            val downloadResponse = it.downloadGlobalModelStream()
+            if (downloadResponse.body() != null) {
                 onResponse(downloadResponse.body()!!)
-            }else{
-                onFailure(downloadResponse?.message().toString())
+            } else {
+                onFailure(downloadResponse.message().toString())
             }
         }
     }
 
     fun donwloadBackboneModelFile(onResponse : (response : ResponseBody)->Unit, onFailure : (message:String)->Unit){
-        val globalModelService: GlobalModelService? = this.getGlobamModelService()
-        CoroutineScope(Dispatchers.IO).launch {
-            val downloadResponse = globalModelService?.downloadBackboneModelStream()
-            if(downloadResponse?.body() != null){
+        this.getGlobamModelService {
+            val downloadResponse = it.downloadBackboneModelStream()
+            if (downloadResponse.body() != null) {
                 onResponse(downloadResponse.body()!!)
-            }else{
-                onFailure(downloadResponse?.message().toString())
+            } else {
+                onFailure(downloadResponse.message().toString())
             }
+
         }
     }
 }

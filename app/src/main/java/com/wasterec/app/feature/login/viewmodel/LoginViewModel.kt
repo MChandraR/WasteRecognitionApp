@@ -20,7 +20,7 @@ class LoginViewModel(application : Application, val context: Context,
     var showAlert : MutableState<Boolean> = mutableStateOf(false)
     val alertMessage : MutableState<String> = mutableStateOf("")
     var loginAPIService = UserRepository()
-    var sharedPreferenceService : SharedPreferenceService = SharedPreferenceService(context)
+    var sharedPreferenceService : SharedPreferenceService = SharedPreferenceService(application.baseContext)
     var isSuccess : MutableState<Boolean> = mutableStateOf(false)
     var showPassword : MutableState<Boolean> = mutableStateOf(false)
 
