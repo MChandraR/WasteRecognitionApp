@@ -106,7 +106,7 @@ fun TrainingView(
                 )
             ){
                 Text(
-                    "20%",
+                    "${trainingViewModel?.modelAccuracy?.intValue?:0}%",
                     fontSize = Typography.displayLarge.fontSize * 1.5,
                     fontWeight = FontWeight.Bold,
                     color = ColorAsset.primaryBlue,
@@ -246,7 +246,7 @@ fun TrainingView(
 
         LaunchedEffect(Unit){
             trainingViewModel?.reInit()
-            Toast.makeText(trainingViewModel?.context, "Training dengan total : ${trainingViewModel?.annotateViewModel?.datasetManager?.getDataSize()}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(trainingViewModel?.app?.baseContext, "Training dengan total : ${trainingViewModel?.annotateViewModel?.datasetManager?.getDataSize()}", Toast.LENGTH_SHORT).show()
         }
     }
 }
