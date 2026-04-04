@@ -143,7 +143,7 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
             Pair(feat, data.Label)
         }
 
-        repeat(config.epoch) { epoch ->
+        for( epoch in 0 ..< config.epoch) {
             var totalLoss = 0f
 
             for ((features, label) in featureList) {
@@ -163,8 +163,33 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
                 val probs = expScore.map { (it / sumExp) }
 
                 // 4. Cross Entropy Loss (Natural Log)
-                totalLoss += -ln(probs[label].coerceAtLeast(1e-10f))
+                var sampleLoss = 0f
 
+                for (i in 0 until numClasses) {
+                    // Label Smoothing target
+                    val target = if (i == label) {
+                        (1f - smoothingValue + (smoothingValue / numClasses))
+                    } else {
+                        (smoothingValue / numClasses)
+                    }
+
+                    // Kalkulasi Cross Entropy yang benar dengan Label Smoothing
+                    sampleLoss += -target * ln(probs[i].coerceAtLeast(1e-10f))
+
+                    val gradOut = probs[i] - target
+
+                    // Update Bias
+                    bias[i] -= learningRate * gradOut
+
+                    // Update Weights
+                    for (j in 0 until numFeatures) {
+                        // PENTING: Normalisasi weight decay berdasarkan ukuran dataset
+                        // agar tidak terlalu agresif saat menggunakan batch-size 1
+                        val l2Reg = (weightDecay / dataset.size) * weights[i][j]
+                        weights[i][j] -= learningRate * (gradOut * features[j] + l2Reg)
+                    }
+                }
+                totalLoss += sampleLoss
                 // 5. Backpropagation
                 for (i in 0 until numClasses) {
                     // Label Smoothing target
@@ -183,6 +208,9 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
             }
             val avgLoss = totalLoss / dataset.size
             onProgressUpdate(epoch, avgLoss)
+            if(avgLoss < .2f){
+                break;
+            }
             //Log.i("TRAIN", "Epoch ${epoch + 1} Done. Avg Loss: $avgLoss")
         }
 

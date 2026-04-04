@@ -59,7 +59,7 @@ fun ImportImageView(
         val datasetCount = (importImageViewModel?.imageDatasetList?.size)?:0
         uris.forEachIndexed { idx,uri ->
 
-            if( datasetCount.plus(idx) < (importImageViewModel?.selectedLabel?.value?.maximumCount
+            if( ((importImageViewModel?.getTotalOfDatasetForSelectedLabel()) ?: 0).plus(idx) < (importImageViewModel?.selectedLabel?.value?.maximumCount
                     ?: 0)
             ){
                 val bitmap = uriToBitmap(context, uri)

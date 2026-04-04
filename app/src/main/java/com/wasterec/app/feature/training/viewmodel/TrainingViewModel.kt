@@ -58,7 +58,7 @@ class TrainingViewModel(
 
     var modelConfig = ModelConiguration(
         learningRate = 0.001f,
-        epoch = 15
+        epoch = 300
     )
 
 
@@ -171,7 +171,7 @@ class TrainingViewModel(
                 bias = floatArrayToBase64(data.getValue("bias") as FloatArray),
             )
             )
-            clearTrainingData()
+            //clearTrainingData()
         }
     }
 
