@@ -37,6 +37,7 @@ fun ImportDatasetView(
 ){
     LaunchedEffect(Dispatchers.IO) {
         importDatasetViewModel?.getClassCount()
+        importDatasetViewModel?.validateClassCount()
     }
 
     Column(
@@ -67,6 +68,7 @@ fun ImportDatasetView(
                     "(${ (importDatasetViewModel?.classCount?.get(idx))?:0 }/${value.minimunCount} min)",
                     leadingIcon = value.icon,
                     modifier = Modifier.height(65.dp).clickable{
+                        importDatasetViewModel?.resetState()
                         importDatasetViewModel?.selectedIndex?.value = importDatasetViewModel.datasetClassList.indexOf(value)
                         importDatasetViewModel?.navHostController?.navigate(Destination.Import)
                         Toast.makeText(importDatasetViewModel?.context, "Selected index ${importDatasetViewModel?.selectedIndex?.value}", Toast.LENGTH_LONG).show()
@@ -79,7 +81,7 @@ fun ImportDatasetView(
 
         MyButton(
             modifier = Modifier.padding(10.dp).fillMaxWidth(),
-            enabled = (importDatasetViewModel?.trainignDataset?.size?:0) > 0,
+            enabled = ((importDatasetViewModel?.trainignDataset?.size?:0) >= 100 && (importDatasetViewModel?.isClassCountMeetRequirement?.value?: true) ) ,
             onClick = {
                     importDatasetViewModel?.navHostController?.navigate(Destination.Preprocess)
             }
