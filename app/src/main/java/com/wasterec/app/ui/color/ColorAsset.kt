@@ -16,6 +16,7 @@ object ColorAsset {
     val primaryBlue50 = Color(0x80004AAD)
     val primaryBlue05 = Color(0x0D004AAD)
     val secondaryBlue = Color(0x80004AAD)
+    val darkerBlue = Color(0xFF002F6E)
 
     val alpha5 = Color(0x0D000000)
 

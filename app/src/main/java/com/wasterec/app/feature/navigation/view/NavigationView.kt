@@ -31,6 +31,8 @@ import com.wasterec.app.feature.training.view.TrainingView
 import com.wasterec.app.feature.training.viewmodel.FinishTrainingViewModel
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
 import com.wasterec.app.feature.training_history.viewmodel.TrainingHistoryViewModel
+import com.wasterec.app.feature.training_history_detail.view.TrainingHistoryDetailView
+import com.wasterec.app.feature.training_history_detail.viewmodel.TrainingHistoryDetailViewModel
 import com.wasterec.app.model.Destination
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -47,7 +49,8 @@ fun NavigationView(
     trainingViewModel: TrainingViewModel,
     modelLoadViewModel: ModelLoadViewModel,
     finishTrainingViewModel: FinishTrainingViewModel,
-    trainingHistoryViewModel: TrainingHistoryViewModel
+    trainingHistoryViewModel: TrainingHistoryViewModel,
+    trainingHistoryDetailViewModel: TrainingHistoryDetailViewModel
 ) {
     val startDestination = Destination.Splash
     var selectedDestination by rememberSaveable { mutableIntStateOf(0) }
@@ -67,6 +70,7 @@ fun NavigationView(
         composable<Destination.Annotate>{ AnnotateView(annotateViewModel) }
         composable<Destination.FinishTraining>{ FinishTrainingView(finishTrainingViewModel) }
         composable<Destination.WeightLoading>{ ModelLoadView(modelLoadViewModel) }
+        composable<Destination.TrainingHistoryDetail>{ TrainingHistoryDetailView(trainingHistoryDetailViewModel) }
 
     }
 
