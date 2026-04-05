@@ -1,5 +1,7 @@
 package com.wasterec.app.feature.home.view
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
@@ -19,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,7 +31,11 @@ import com.wasterec.app.model.Destination
 import com.wasterec.app.shared.components.GifLoader
 import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
+import com.wasterec.app.utils.getDateTimeFromTimestamp
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeView(
     homeViewModel: HomeViewModel? = null,
@@ -96,18 +101,7 @@ fun HomeView(
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    Text(
-                        "Akurasi :",
-                    )
-                    Text(
-                        "80%",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = Typography.titleLarge.fontSize,
-                        modifier = Modifier
-                            .padding(top=2.dp)
-                            .padding(bottom = 20.dp),
-                        color = ColorAsset.primaryBlue
-                    )
+
                     Text(
                         "Model :",
                     )
@@ -115,6 +109,18 @@ fun HomeView(
                         (homeViewModel?.globalModelInfoModel?.value)?.model_name ?: "EfficientNet-B0" ,
                         fontWeight = FontWeight.Bold,
                         fontSize = Typography.titleSmall.fontSize,
+                        modifier = Modifier
+                            .padding(top=2.dp)
+                            .padding(bottom = 20.dp),
+                        color = ColorAsset.primaryBlue
+                    )
+                    Text(
+                        "Akurasi :",
+                    )
+                    Text(
+                        "%.2f".format(Locale.ROOT, (homeViewModel?.globalModelInfoModel?.value)?.accuracy?.toFloat()?.times(100f)) + "%",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = Typography.titleLarge.fontSize,
                         modifier = Modifier
                             .padding(top=2.dp),
                         color = ColorAsset.primaryBlue
@@ -126,10 +132,10 @@ fun HomeView(
                         .weight(1f)
                 ) {
                     Text(
-                        "Round :",
+                        "Version :",
                     )
                     Text(
-                        "1 (On Queue)",
+                        homeViewModel?.globalModelInfoModel?.value?.model_version ?: "",
                         fontWeight = FontWeight.Bold,
                         fontSize = Typography.titleSmall.fontSize,
                         modifier = Modifier
@@ -141,7 +147,8 @@ fun HomeView(
                         "Terakhir Diperbarui :",
                     )
                     Text(
-                        (homeViewModel?.globalModelInfoModel?.value)?.last_updated ?: "-" ,
+                        "${getDateTimeFromTimestamp(homeViewModel?.globalModelInfoModel?.value?.last_updated?.toLong() ?: 0L)?.format(
+                            DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"))}" ,
                         fontWeight = FontWeight.Bold,
                         fontSize = Typography.titleSmall.fontSize,
                         modifier = Modifier
@@ -187,6 +194,7 @@ fun HomeView(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun homeViewPreview(){
