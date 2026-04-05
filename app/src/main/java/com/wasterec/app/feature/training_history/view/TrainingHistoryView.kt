@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -17,11 +18,16 @@ import com.wasterec.app.feature.training_history.components.TrainingHistoryCard
 import com.wasterec.app.feature.training_history.viewmodel.TrainingHistoryViewModel
 import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
+import kotlinx.coroutines.Dispatchers
 
 @Composable
 fun TrainingHistoryView(
     trainingHistoryViewModel : TrainingHistoryViewModel? = null
 ){
+    LaunchedEffect(Dispatchers.IO) {
+        trainingHistoryViewModel?.fetchTrainingData()
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize().padding(20.dp)
@@ -40,8 +46,10 @@ fun TrainingHistoryView(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.weight(1f)
         ) {
-            items(5){
-                TrainingHistoryCard(1, "s890df", "0.1232", "2023-01-01 at 09:00")
+            items(trainingHistoryViewModel?.trainingHistoryData?.size ?: 0){
+                trainingHistoryViewModel?.trainingHistoryData?.forEachIndexed { idx, trainingData ->
+                    TrainingHistoryCard(idx + 1, trainingData.session_id, "${trainingData.average_loss}", trainingData.created_at)
+                }
             }
         }
     }

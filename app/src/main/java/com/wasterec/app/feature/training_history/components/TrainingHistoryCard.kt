@@ -3,6 +3,7 @@ package com.wasterec.app.feature.training_history.components
 import android.media.Image
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,22 +31,23 @@ fun TrainingHistoryCard(number: Int, id : String, loss : String, date : String){
             modifier = Modifier
                 .fillMaxWidth()
                 .border(2.dp, ColorAsset.shadeBlue, RoundedCornerShape(10.dp))
-                .padding(start = 20.dp, 10.dp, 20.dp, 10.dp)
+                .padding(15.dp)
         ) {
             Text("${number}",
                 fontWeight = FontWeight.Bold,
-                fontSize = Typography.displayMedium.fontSize,
+                fontSize = Typography.displayMedium.fontSize * 1,
                 color = ColorAsset.primaryBlue,
-                modifier = Modifier.padding(start = 10.dp, end= 30.dp)
+                modifier = Modifier.padding(start = 10.dp, end= 25.dp)
                 )
 
-            Column(modifier = Modifier.weight(1f)) {
+            Column(verticalArrangement = Arrangement.spacedBy(0.dp),modifier = Modifier.weight(1f)) {
                 Text("ID : ${id}",
                     fontSize = Typography.bodyMedium.fontSize,
-                    color= ColorAsset.tertiaryBlue
+                    color= ColorAsset.tertiaryBlue,
+                    modifier = Modifier.padding(bottom = 2.dp)
                 )
                 Text("Loss : ${loss}",
-                    fontSize = Typography.titleMedium.fontSize,
+                    fontSize = Typography.titleLarge.fontSize,
                     fontWeight = FontWeight.Bold,
                     color= ColorAsset.primaryBlue
                 )
@@ -66,9 +68,9 @@ fun TrainingHistoryCard(number: Int, id : String, loss : String, date : String){
 @Preview(showBackground = true)
 @Composable
 fun TrainingHistoryCardPreview(){
-//    Column(modifier = Modifier.fillMaxSize()) {
-//        TrainingHistoryCard(1, "s890df", "0.1232", "2023-01-01 at 09:00")
-//
-//    }
-    TrainingHistoryView()
+    Column(modifier = Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.Center) {
+        TrainingHistoryCard(1, "s890df", "0.1232", "2023-01-01 at 09:00")
+
+    }
+    //TrainingHistoryView()
 }

@@ -1,5 +1,7 @@
 package com.wasterec.app.feature.main
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -44,7 +46,7 @@ fun MainView(
 
     Scaffold(
         bottomBar = {
-            NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+            NavigationBar(windowInsets = NavigationBarDefaults.windowInsets, containerColor = ColorAsset.darkerWhite)  {
                 entries.forEachIndexed { index, destination ->
                     NavigationBarItem(
                         selected = selectedTab == index,
@@ -69,16 +71,19 @@ fun MainView(
             }
         }
     ) { contentPadding ->
-        if (selectedTab == 0){
-            HomeView(
-                homeViewModel,
-                modifier = Modifier.padding(contentPadding)
-            )
-        }else if (selectedTab == 1){
-            TrainingHistoryView(
-                trainingHistoryViewModel
-            )
+        Column(modifier = Modifier.background(Color.White)) {
+            if (selectedTab == 0){
+                HomeView(
+                    homeViewModel,
+                    modifier = Modifier.padding(contentPadding)
+                )
+            }else if (selectedTab == 1){
+                TrainingHistoryView(
+                    trainingHistoryViewModel
+                )
+            }
         }
+
     }
 
 
