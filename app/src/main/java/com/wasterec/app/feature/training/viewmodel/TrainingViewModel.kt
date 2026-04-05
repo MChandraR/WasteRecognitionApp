@@ -41,7 +41,7 @@ class TrainingViewModel(
     val annotateViewModel: AnnotateViewModel,
     val datasetManager: MutableState<DatasetManager>
 ) : AndroidViewModel(app) {
-    var efficientNetB0 : EfficientNetB0 = EfficientNetB0(app.baseContext)
+    var efficientNetB0 : EfficientNetB0? = null
     val modelProducer : MutableState<CartesianChartModelProducer> = mutableStateOf(
         CartesianChartModelProducer())
     var currentEpoch : MutableState<Int>  = mutableIntStateOf(0)
@@ -85,7 +85,7 @@ class TrainingViewModel(
         CoroutineScope(Dispatchers.IO).launch {
             val newClassifierParam : ClassifierWeightModel? = classifierWeightFileManager.loadClassifierParamFromFile()
             newClassifierParam?.let{ newParam ->
-                efficientNetB0.setClassifierWeightAndBias(newParam.weights, newParam.bias)
+                efficientNetB0?.setClassifierWeightAndBias(newParam.weights, newParam.bias)
                 println("Berhasil memuat classifier param tebaru")
             }
             startLocalTraining()
@@ -148,7 +148,7 @@ class TrainingViewModel(
     //Fungsi buat memanggil model dan mulai training local
     fun startLocalTraining(){
         CoroutineScope(Dispatchers.IO).launch {
-            val data = efficientNetB0.train(
+            val data = efficientNetB0?.train(
                 config = modelConfig,
                 dataset = annotateViewModel.datasetManager.getData(),
                 onProgressUpdate = { epoch, loss ->
@@ -167,8 +167,10 @@ class TrainingViewModel(
             globalModelRepository.uploadModelWeight(globalWeightModel = GlobalWeightModel(
                 num_sample = annotateViewModel.datasetManager.getDataSize(),
                 label_count = annotateViewModel.datasetManager.getEachLabelCount(),
-                weights = encodeWeightsToBase64(data.get("weights") as Array<FloatArray>),
+                weights = encodeWeightsToBase64(data?.get("weights") as Array<FloatArray>),
                 bias = floatArrayToBase64(data.getValue("bias") as FloatArray),
+                loss = lossList,
+                average_loss = lossList.average().toFloat()
             )
             )
             //clearTrainingData()

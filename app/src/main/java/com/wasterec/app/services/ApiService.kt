@@ -5,8 +5,9 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+
 open class ApiService(
-    val baseUrl : String = "http://10.99.136.11:8000/api/",
+    val baseUrl : String = "http://192.168.1.14:8000/api/",
     var retrofit: Retrofit? = null,
     val authToken : String? = null,
 ){

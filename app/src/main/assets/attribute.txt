@@ -10,5 +10,4 @@
 <a href="https://www.flaticon.com/free-animated-icons/uploading" title="uploading animated icons">Uploading animated icons created by Freepik - Flaticon</a>
 <a href="https://www.flaticon.com/free-animated-icons/security" title="security animated icons">Security animated icons created by Freepik - Flaticon</a>
 <a href="https://www.flaticon.com/free-icons/close" title="close icons">Close icons created by Fathema Khanom - Flaticon</a>
-
-
+<a href="https://www.flaticon.com/free-icons/no-data" title="no data icons">No data icons created by yaicon - Flaticon</a>

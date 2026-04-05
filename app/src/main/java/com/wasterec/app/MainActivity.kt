@@ -119,6 +119,7 @@ class MainActivity : ComponentActivity() {
                     selectedLabel
                 )
             )
+
             val annotateViewModel : AnnotateViewModel = viewModel(
                 factory = AnotateViewModelFactory(
                     application = application,
@@ -215,7 +216,7 @@ class MainActivity : ComponentActivity() {
             )
 
             handler.postDelayed({
-                navController.navigate(Destination.Login) {
+                navController.navigate(Destination.Home) {
                     popUpTo(navController.graph.startDestinationId) {
                         inclusive = true
                     }
