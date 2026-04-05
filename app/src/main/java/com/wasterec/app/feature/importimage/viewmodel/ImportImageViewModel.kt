@@ -13,6 +13,7 @@ import androidx.lifecycle.application
 import com.wasterec.app.feature.importdataset.data.DatasetClass
 import com.wasterec.app.feature.importdataset.data.datasetClassList
 import com.wasterec.app.model.TrainingModel
+import com.wasterec.app.utils.resizeAndCropCenter
 
 
 class ImportImageViewModel(
@@ -25,12 +26,38 @@ class ImportImageViewModel(
     var showConfirmImageDeletionDialog : MutableState<Boolean> = mutableStateOf(false)
     val selectedImageIndex : MutableState<Int> = mutableIntStateOf(0)
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
-
+    val importedImageList : SnapshotStateList<Bitmap> = SnapshotStateList()
 
     fun reInit(){
-        imageDatasetList.clear()
-        showConfirmImageDeletionDialog.value = false
-        selectedImageIndex.value = 0
+        importedImageList.clear()
+        getDatasetForSelectedLabel().forEach {
+            importedImageList.add(it.Input)
+        }
+//        imageDatasetList.clear()
+//        showConfirmImageDeletionDialog.value = false
+//        selectedImageIndex.value = 0
+    }
+
+    fun addDataToImportedImageList(bitmap: Bitmap){
+        println("Menambahkan data")
+        importedImageList.add(bitmap)
+    }
+
+    fun saveImportedImageListToDataset(){
+        imageDatasetList.removeAll({it.Label == selectedLabelIndex.value})
+        importedImageList.forEach {
+            increaseItemCountForSelectedLabelinDataset()
+            imageDatasetList.add(
+                TrainingModel(
+                    resizeAndCropCenter(it),
+                    selectedLabelIndex.value
+                )
+            )
+        }
+    }
+
+    fun removeDataFromImportedImageList(index : Int){
+        importedImageList.removeAt(index)
     }
 
     fun getImageDataBitmap(index : Int) : Bitmap?{

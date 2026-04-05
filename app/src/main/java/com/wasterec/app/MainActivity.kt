@@ -39,6 +39,8 @@ import com.wasterec.app.feature.training.viewmodel.FinishTrainingViewModel
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
 import com.wasterec.app.feature.training.viewmodelfactory.FinishTrainingViewModelFactory
 import com.wasterec.app.feature.training.viewmodelfactory.TrainingViewModelFactory
+import com.wasterec.app.feature.training_history.viewmodel.TrainingHistoryViewModel
+import com.wasterec.app.feature.training_history.viewmodel.TrainingHistoryViewModelFactory
 import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.model.Destination
 import com.wasterec.app.model.TrainingModel
@@ -190,6 +192,12 @@ class MainActivity : ComponentActivity() {
                 )
             )
 
+            val trainingHistoryViewModel : TrainingHistoryViewModel = viewModel(
+                factory = TrainingHistoryViewModelFactory(
+                    application
+                )
+            )
+
             //DebugView(this)
             NavigationView(
                 this,
@@ -202,7 +210,8 @@ class MainActivity : ComponentActivity() {
                 importImageViewModel,
                 trainingViewModel,
                 modelLoadViewModel,
-                finishTrainingViewModel
+                finishTrainingViewModel,
+                trainingHistoryViewModel
             )
 
             handler.postDelayed({

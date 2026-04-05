@@ -60,6 +60,7 @@ fun LabelSelectionComponent(modifier : Modifier, onSelect : (selectedIndex : Int
                         unselectedColor = ColorAsset.primaryBlue
                     ),
                     onClick = {
+                        onSelect(radioOptions.indexOf(text))
                     } // null recommended for accessibility with screen readers
                 )
                 Text(
