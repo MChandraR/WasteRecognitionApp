@@ -89,6 +89,7 @@ fun CustomTextInputField(
                 focusedTrailingIconColor = trailingColor,
                 unfocusedTrailingIconColor = trailingColor,
                 focusedLeadingIconColor = leadingColor,
+                disabledLeadingIconColor = leadingColor,
                 unfocusedLeadingIconColor = leadingColor,
                 unfocusedContainerColor = Color.Transparent,
                 focusedContainerColor = Color.Transparent,

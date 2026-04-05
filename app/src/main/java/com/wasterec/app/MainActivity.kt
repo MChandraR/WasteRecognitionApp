@@ -215,7 +215,7 @@ class MainActivity : ComponentActivity() {
             )
 
             handler.postDelayed({
-                navController.navigate(Destination.Home) {
+                navController.navigate(Destination.Login) {
                     popUpTo(navController.graph.startDestinationId) {
                         inclusive = true
                     }

@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -59,7 +60,8 @@ fun LoginView(loginViewModel: LoginViewModel){
             CustomTextInputField(
                 text =  loginViewModel.username.value,
                 onChange = {  loginViewModel.username.value = it},
-                leadingResId = R.drawable.outline_contacts_product_24,
+                leadingResId = R.drawable.outline_person_24,
+                leadingColor = ColorAsset.primaryBlue,
                 backgroundColor = ColorAsset.alpha5,
                 placeholder = {
                     Text("Masukkan username")
@@ -72,8 +74,8 @@ fun LoginView(loginViewModel: LoginViewModel){
             CustomTextInputField(
                 text = loginViewModel.password.value,
                 onChange = {  loginViewModel.password.value = it},
-                leadingResId = R.drawable.outline_contacts_product_24,
-                trailingResId = R.drawable.baseline_add_location_24,
+                leadingResId = R.drawable.outline_key_vertical_24,
+                trailingResId = R.drawable.outline_eye_tracking_24,
                 trailingColor = ColorAsset.primaryBlue,
                 leadingColor = ColorAsset.primaryBlue,
                 visualTransformation = if(loginViewModel.showPassword.value) VisualTransformation.None else PasswordVisualTransformation() ,
@@ -99,7 +101,9 @@ fun LoginView(loginViewModel: LoginViewModel){
                 colors = ButtonColors(contentColor = Color.White, disabledContentColor = ColorAsset.lightGray, containerColor = ColorAsset.primaryBlue, disabledContainerColor = ColorAsset.lightGray)
             ){
                 Text("Login",
-                    modifier = Modifier.padding(5.dp, 10.dp)
+                    modifier = Modifier.padding(5.dp, 10.dp),
+                    fontSize = Typography.titleLarge.fontSize,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -107,7 +111,8 @@ fun LoginView(loginViewModel: LoginViewModel){
         //Alert to show information about login status
         Alert(
             title = if (loginViewModel.isSuccess.value) "Login Sukses" else "Login Gagal",
-            message = loginViewModel.alertMessage.value,
+            message = if (loginViewModel.isSuccess.value) "Silahkan masuk ke aplikasi" else "Username atau password yang dimasukkan tidak sesuai !",
+            icon = if (loginViewModel.isSuccess.value) R.drawable.shield else R.drawable.close ,
             showAlert = loginViewModel.showAlert.value,
         ) {
             loginViewModel.dismissAlert()
@@ -150,6 +155,7 @@ fun LoginViewPreview(){
                 leadingResId = R.drawable.outline_contacts_product_24,
                 leadingColor = ColorAsset.primaryBlue,
                 backgroundColor = ColorAsset.alpha5,
+                maxLines = 1,
                 placeholder = {
                     Text("Masukkan username")
                 }
@@ -161,11 +167,12 @@ fun LoginViewPreview(){
             CustomTextInputField(
                 text = password.value,
                 onChange = { password.value = it},
-                leadingResId = R.drawable.outline_contacts_product_24,
-                trailingResId = R.drawable.baseline_add_location_24,
+                leadingResId = R.drawable.outline_key_vertical_24,
+                trailingResId = R.drawable.outline_eye_tracking_24,
                 trailingColor = ColorAsset.primaryBlue,
                 leadingColor = ColorAsset.primaryBlue,
                 backgroundColor = ColorAsset.alpha5,
+                maxLines = 1,
                 placeholder = {
                     Text("Masukkan password")
                 }
@@ -194,7 +201,7 @@ fun LoginViewPreview(){
         Alert(
             title = "Login Sukses",
             message = "Ini contoh message",
-            showAlert = false,
+            showAlert = true,
         ) {
         }
     }
