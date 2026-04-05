@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.wasterec.app.feature.importdataset.components.LabelListCard
 import com.wasterec.app.feature.importdataset.data.datasetClassList
 import com.wasterec.app.feature.importdataset.viewmodel.ImportDatasetViewModel
+import com.wasterec.app.feature.training.ui.trainingColorList
 import com.wasterec.app.model.Destination
 import com.wasterec.app.shared.components.MyButton
 import com.wasterec.app.ui.color.ColorAsset
@@ -54,7 +55,7 @@ fun ImportDatasetView(
 
         Text(buildAnnotatedString {
             append("Pilih")
-            withStyle(style = SpanStyle(color = ColorAsset.primaryBlue, fontWeight = FontWeight.Bold)) {
+            withStyle(style = SpanStyle(fontSize = Typography.titleMedium.fontSize,color = ColorAsset.primaryBlue, fontWeight = FontWeight.Bold)) {
                 append(" 100 ")
             }
             append("gambar sebagai dataset pelatihan")
@@ -65,14 +66,13 @@ fun ImportDatasetView(
         )
         Text(buildAnnotatedString {
             append("Jumlah gambar dipilih ")
-            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = ColorAsset.primaryYellow)){
+            withStyle(style = SpanStyle(fontSize = Typography.titleLarge.fontSize, fontWeight = FontWeight.Bold, color = ColorAsset.primaryYellow)){
                 append("${importDatasetViewModel?.getTrainingDatasetCount() ?: 0}")
             }
-            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = ColorAsset.primaryBlue)){
+            withStyle(style = SpanStyle(fontSize = Typography.titleMedium.fontSize,fontWeight = FontWeight.Bold, color = ColorAsset.primaryBlue)){
                 append("/100")
             }
-        }
-            ,
+        },
             fontSize = Typography.titleMedium.fontSize,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
@@ -89,11 +89,10 @@ fun ImportDatasetView(
                     value.className,
                     "(${ (importDatasetViewModel?.classCount?.get(idx))?:0 } gambar)",
                     leadingIcon = value.icon,
-                    modifier = Modifier.height(65.dp).clickable{
+                    modifier = Modifier.height(75.dp).clickable{
                         importDatasetViewModel?.resetState()
                         importDatasetViewModel?.selectedIndex?.value = importDatasetViewModel.datasetClassList.indexOf(value)
                         importDatasetViewModel?.navHostController?.navigate(Destination.Import)
-                        Toast.makeText(importDatasetViewModel?.context, "Selected index ${importDatasetViewModel?.selectedIndex?.value}", Toast.LENGTH_LONG).show()
                     }
                 )
             }
