@@ -24,8 +24,7 @@ fun ModelLoadView(modelLoadViewModel: ModelLoadViewModel?){
 
     //Init fungsi dan variabel dari viewModel
     LaunchedEffect(Dispatchers.IO) {
-        modelLoadViewModel?.downloadBackboneModel()
-        modelLoadViewModel?.loadClassifierParam()
+        modelLoadViewModel?.getGlobalModel()
     }
 
     Column(

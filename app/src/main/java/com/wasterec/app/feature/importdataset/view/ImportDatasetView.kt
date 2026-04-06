@@ -1,6 +1,7 @@
 package com.wasterec.app.feature.importdataset.view
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,6 +44,10 @@ import kotlinx.coroutines.Dispatchers
 fun ImportDatasetView(
     importDatasetViewModel: ImportDatasetViewModel? = null,
 ){
+    BackHandler() {
+        
+    }
+
     LaunchedEffect(Dispatchers.IO) {
         importDatasetViewModel?.getClassCount()
         importDatasetViewModel?.validateClassCount()
