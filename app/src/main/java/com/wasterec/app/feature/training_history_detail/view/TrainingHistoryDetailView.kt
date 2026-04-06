@@ -78,13 +78,13 @@ fun TrainingHistoryDetailView(
                 color = ColorAsset.tertiaryBlue
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(.5f))
 
             Column (
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .padding(10.dp)
+                    .padding(bottom = 10.dp)
                     .border(2.dp, ColorAsset.shadeBlue, RoundedCornerShape(10.dp))
                     .fillMaxWidth()
             ){

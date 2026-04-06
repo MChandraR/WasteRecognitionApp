@@ -13,6 +13,7 @@ import com.wasterec.app.model.api_response.model_info.GlobalModelInfoModel
 import com.wasterec.app.repositories.DatasetUploadRepository
 import com.wasterec.app.repositories.GlobalModelRepository
 import com.wasterec.app.repositories.TrainingRepository
+import com.wasterec.app.services.SharedPreferenceService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,9 +24,12 @@ class HomeViewModel(
 ) : AndroidViewModel(application = application) {
     val globalModelInfoModel : MutableState<GlobalModelInfoModel?> = mutableStateOf(null)
     val globalModelRepository: GlobalModelRepository = GlobalModelRepository(application.baseContext)
+    val sharedPreferenceService = SharedPreferenceService(application.baseContext)
 
     val trainingRepository = TrainingRepository(application.baseContext)
     val isTrainingOpenForClient = mutableStateOf(false)
+    val isUserAlreadyLoggedIn = mutableStateOf(false)
+
 
     fun getGlobalModelInfo(){
         globalModelRepository.fetchGlobalModel({ error, result ->
@@ -64,5 +68,13 @@ class HomeViewModel(
         )
     }
 
+    fun logout(){
+        sharedPreferenceService.removeStringValue("authToken")
+    }
+
+    fun checkIfUserLoggedIn(){
+        val authToken = sharedPreferenceService.getStringValue("authToken")
+        isUserAlreadyLoggedIn.value = ( (authToken!="") && (authToken != null) )
+    }
 
 }

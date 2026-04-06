@@ -63,6 +63,7 @@ fun LoginView(loginViewModel: LoginViewModel){
                 leadingResId = R.drawable.outline_person_24,
                 leadingColor = ColorAsset.primaryBlue,
                 backgroundColor = ColorAsset.alpha5,
+                maxLines = 1,
                 placeholder = {
                     Text("Masukkan username")
                 }
@@ -82,6 +83,7 @@ fun LoginView(loginViewModel: LoginViewModel){
                 onTrailingClick = {
                     loginViewModel.showPassword.value = !loginViewModel.showPassword.value
                 },
+                maxLines = 1,
                 backgroundColor = ColorAsset.alpha5,
                 placeholder = {
                     Text("Masukkan password")

@@ -2,7 +2,9 @@ package com.wasterec.app.feature.home.view
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,6 +49,7 @@ fun HomeView(
     LaunchedEffect(Unit) {
         homeViewModel?.getGlobalModelInfo()
         homeViewModel?.getTrainingStatusForClient()
+        homeViewModel?.checkIfUserLoggedIn()
     }
 
     Column(
@@ -63,6 +68,17 @@ fun HomeView(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            if(homeViewModel?.isUserAlreadyLoggedIn?.value == true) {
+                Column(horizontalAlignment = Alignment.End, modifier = Modifier.fillMaxWidth()) {
+                    Image(
+                        painter = painterResource(R.drawable.outline_exit_to_app_24), "",
+                        colorFilter = ColorFilter.tint(ColorAsset.primaryBlue),
+                        modifier = Modifier.clickable {
+                            homeViewModel?.logout()
+                        }
+                    )
+                }
+            }
             Spacer(modifier = Modifier.weight(1f))
             GifLoader(R.drawable.network)
 
