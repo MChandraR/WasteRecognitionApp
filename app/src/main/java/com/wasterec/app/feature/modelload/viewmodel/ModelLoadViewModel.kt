@@ -45,7 +45,9 @@ class ModelLoadViewModel(
                 downloadBackboneModel()
                 loadClassifierParam()
             }else{
-                navHostController.navigate(Destination.ImportDataset)
+                CoroutineScope(Dispatchers.Main).launch{
+                    navHostController.navigate(Destination.ImportDataset)
+                }
             }
         })
     }

@@ -11,6 +11,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.navigation.NavHostController
 import com.wasterec.app.feature.importdataset.data.DatasetClass
 import com.wasterec.app.manager.DatasetManager
+import com.wasterec.app.model.Destination
 import com.wasterec.app.model.TrainingModel
 
 class ImportDatasetViewModel(
@@ -26,6 +27,7 @@ class ImportDatasetViewModel(
     val datasetManager = DatasetManager(trainignDataset)
     var classCount : MutableList<Int> = mutableStateListOf(0,0,0,0,0,0)
     val isClassCountMeetRequirement : MutableState<Boolean> = mutableStateOf(false)
+    val showCancelConfirmDialog = mutableStateOf(false)
 
     fun getTrainingDatasetCount():Int{
         return trainignDataset.size
@@ -52,6 +54,25 @@ class ImportDatasetViewModel(
 
     fun resetState(){
         isClassCountMeetRequirement.value = false
+    }
+
+    fun confirmTrainingCancellation(){
+        navigateToHome()
+        showCancelConfirmDialog.value = false
+    }
+
+    fun cancelTrainingCancellation(){
+        showCancelConfirmDialog.value = false
+    }
+
+    fun navigateToHome() {
+        navHostController.navigate(Destination.Home) {
+            // Pop semua rute di atas Home, tapi Home-nya sendiri tidak ikut dihapus (inclusive = false)
+            popUpTo(Destination.Home) {
+                inclusive = false
+            }
+            launchSingleTop = true
+        }
     }
 
 }
