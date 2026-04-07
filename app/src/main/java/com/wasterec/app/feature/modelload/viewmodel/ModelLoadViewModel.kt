@@ -47,7 +47,7 @@ class ModelLoadViewModel(
     fun getGlobalModel(){
         globalModelRepository.fetchGlobalModel({ error, result ->
             val modelVersion = sharedPreferenceService.getStringValue("model_version")
-            val isFileExist = File(context.filesDir, "Backbone.ptl").exists() && File(context.filesDir, "classifier_param.json").exists()
+            val isFileExist = File(context.filesDir, "Backbone.pte").exists() && File(context.filesDir, "classifier_param.json").exists()
             println("Model Version : $modelVersion")
 
             if( modelVersion == null || modelVersion != result?.model_version || !isFileExist){
@@ -76,7 +76,7 @@ class ModelLoadViewModel(
                 onResponse = { response->
                     globalModelDownloadTask = CoroutineScope(Dispatchers.IO).launch{
                         fileManager.saveDownloadFileToDisk(
-                            "Backbone.ptl",
+                            "Backbone.pte",
                             responseBody = response,
                             onProgress = {
                                 backboneModelDownloadProgress.value = it

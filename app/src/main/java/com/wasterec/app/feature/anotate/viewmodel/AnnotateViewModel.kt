@@ -49,10 +49,10 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
         confidentLevel.value = 0f
         predictedLabel.value = 0
         currentBitmap.value = null
-        val globalModelFile = File(context.filesDir, "Backbone.ptl")
+        val globalModelFile = File(context.filesDir, "Backbone.pte")
         if(globalModelFile.exists()){
             println("Ada file ${globalModelFile.absolutePath}")
-            efficientNetB0 = EfficientNetB0(context, "Backbone.ptl")
+            efficientNetB0 = EfficientNetB0(context, "Backbone.pte")
             this.currentBitmap.value?.let { bmp ->
                 this.classifyImage(bmp)
             }

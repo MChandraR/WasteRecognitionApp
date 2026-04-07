@@ -5,8 +5,7 @@ import com.wasterec.app.utils.IOUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.pytorch.LiteModuleLoader
-import org.pytorch.Module
+import org.pytorch.executorch.Module
 import kotlin.math.exp
 
 open class ModelManager(private val context : Context, private val modelPath : String) {
@@ -29,7 +28,7 @@ open class ModelManager(private val context : Context, private val modelPath : S
         //println("Lokasi model: $modelPath")
 
         if (model == null) {
-            model = LiteModuleLoader.load(modelPath)
+            model = Module.load(modelPath)
 
             loadClassifierParams(){
                 classifierWeights = it.first

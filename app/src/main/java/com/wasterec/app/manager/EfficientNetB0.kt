@@ -4,15 +4,17 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.google.gson.internal.`$Gson$Types`.arrayOf
 import com.wasterec.app.model.ClassifierWeightModel
 import com.wasterec.app.model.ModelConiguration
 import com.wasterec.app.model.SlidingArray
 import com.wasterec.app.model.TrainingModel
+import com.wasterec.app.utils.bitmapToFloatArray
+import com.wasterec.app.utils.bitmapToFloatBuffer
 import com.wasterec.app.utils.forceSoftwareBitmap
-import org.pytorch.IValue
-import org.pytorch.Module
-import org.pytorch.Tensor
-import org.pytorch.torchvision.TensorImageUtils
+import org.pytorch.executorch.EValue
+import org.pytorch.executorch.Module
+import org.pytorch.executorch.Tensor
 import kotlin.math.abs
 import kotlin.math.ln
 
@@ -20,94 +22,102 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
     val model: Module = this.loadModel()
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun predict(bitmap: Bitmap) : Pair<Int, Float>{
-        // ... (kode bitmap to tensor Anda tetap sama)
+    fun predict(bitmap: Bitmap): Pair<Int, Float> {
         val safeBitmap = forceSoftwareBitmap(bitmap)
 
-        val inputTensor = TensorImageUtils.bitmapToFloat32Tensor(safeBitmap,
-            TensorImageUtils.TORCHVISION_NORM_MEAN_RGB,
-            TensorImageUtils.TORCHVISION_NORM_STD_RGB
-        )
-        val outputTensor = model.forward(IValue.from(inputTensor)).toTensor()
-        val scores = outputTensor.dataAsFloatArray
+        val floatData = bitmapToFloatArray(safeBitmap)
 
-        scores.forEach{
-            println(it)
-        }
+        val shape = longArrayOf(1, 3, 224, 224) // Sesuaikan input EfficientNet
+        val inputTensor = Tensor.fromBlob(floatData, shape)
 
-        // Validasi apakah model mengeluarkan NaN
-        if (scores.any { it.isNaN() }) {
-            println("ERROR: Model output contains NaN")
-            return Pair(-1, 0f)
-        }
+        val inputs : Array<out EValue?> = arrayOf(EValue.from(inputTensor))
+        val outputs = model.forward(*inputs)
 
-        // STABLE SOFTMAX IMPLEMENTATION
+        val outputTensor = outputs[0].toTensor()
+        val scores = outputTensor.getDataAsFloatArray()
+
         val maxLogit = scores.maxOrNull() ?: 0f
         val expScores = scores.map { kotlin.math.exp(it - maxLogit) }
         val sumExp = expScores.sum()
-
         val probabilities = expScores.map { it / sumExp }
 
         val outputIdx = probabilities.indices.maxByOrNull { probabilities[it] } ?: -1
         val confidence = if (outputIdx != -1) probabilities[outputIdx] else 0f
 
-
         return Pair(outputIdx, confidence)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun backbonePredict(bitmap: Bitmap) : Pair<Int, Float>{
-        // ... (kode bitmap to tensor Anda tetap sama)
+    fun backbonePredict(bitmap: Bitmap): Pair<Int, Float> {
+        val startTime = System.currentTimeMillis()
+
+        // 1. Preprocessing (Bitmap to Buffer)
+        val startPre = System.currentTimeMillis()
         val safeBitmap = forceSoftwareBitmap(bitmap)
-        var classifierParam  = ClassifierWeightModel(arrayOf(floatArrayOf()), floatArrayOf())
 
-        loadClassifierParams{
-            classifierParam =  ClassifierWeightModel(it.first, it.second)
+        // Pastikan fungsi ini mengembalikan FloatBuffer/FloatArray yang sudah ternormalisasi
+        val floatData = bitmapToFloatBuffer(safeBitmap)
+        val endPre = System.currentTimeMillis()
+        println("⏱️ Preprocessing Time: ${endPre - startPre}ms")
+
+        // 2. Loading Params (Hati-hati: Jika loadClassifierParams async, ini bisa jadi masalah)
+        val startLoad = System.currentTimeMillis()
+        var classifierParam = ClassifierWeightModel(arrayOf(floatArrayOf()), floatArrayOf())
+        loadClassifierParams {
+            classifierParam = ClassifierWeightModel(it.first, it.second)
         }
+        val endLoad = System.currentTimeMillis()
+        println("⏱️ Load Params Time: ${endLoad - startLoad}ms")
 
-        val inputTensor = TensorImageUtils.bitmapToFloat32Tensor(safeBitmap,
-            TensorImageUtils.TORCHVISION_NORM_MEAN_RGB,
-            TensorImageUtils.TORCHVISION_NORM_STD_RGB
-        )
-        val outputTensor = model.forward(IValue.from(inputTensor)).toTensor()
-        val features = outputTensor.dataAsFloatArray
-        println(features.size)
+        // 3. Inference Backbone (ExecuTorch)
+        val startAray = System.currentTimeMillis()
 
-        val logits = FloatArray(classifierParam.bias.size){ i ->
-            var logit : Float = classifierParam.bias[i]
-            println("==========================")
-            for (j in 0 until  1280 ){
-                logit += features[j] * classifierParam.weights[i][j]
-                //println(features[j] * classifierParam.first[i][j])
+        val shape = longArrayOf(1, 3, 224, 224)
+        val inputTensor = Tensor.fromBlob(floatData, shape)
+        val inputArray = arrayOf(EValue.from(inputTensor))
+        val endAray = System.currentTimeMillis()
+
+        println("⏱️ Tensor Time: ${endAray - startAray}ms")
+        val startInference = System.currentTimeMillis()
+
+        val output = model.forward(*inputArray)
+        val outputTensor = output[0].toTensor()
+        val features = outputTensor.dataAsFloatArray // Gunakan getDataAsFloatArray untuk ExecuTorch
+        val endInference = System.currentTimeMillis()
+        println("⏱️ Backbone Inference Time: ${endInference - startInference}ms")
+
+        // 4. Manual Linear Layer (Matrix Multiplication)
+        val startLinear = System.currentTimeMillis()
+        val numClasses = classifierParam.bias.size
+        val logits = FloatArray(numClasses) { i ->
+            var logit: Float = classifierParam.bias[i]
+            val currentWeights = classifierParam.weights[i]
+            for (j in 0 until 1280) {
+                logit += features[j] * currentWeights[j]
             }
-            //println(logit)
             logit
         }
+        val endLinear = System.currentTimeMillis()
+        println("⏱️ Manual Linear Layer Time: ${endLinear - startLinear}ms")
 
+        // 5. Softmax & Final Result
+        val startSoftmax = System.currentTimeMillis()
         val maxLogits = logits.maxOrNull() ?: 0f
-        println("Max : $maxLogits")
-        val expLogits = logits.map{ kotlin.math.exp(it - maxLogits) }
-        expLogits.forEach {
-            println(it)
-        }
+        val expLogits = logits.map { kotlin.math.exp(it - maxLogits) }
         val totalExpLogits = expLogits.sum()
+        val probabilities = expLogits.map { it / totalExpLogits }
 
-        val probabilities = expLogits.map{it/totalExpLogits}
-
-        probabilities.forEach {
-            //println(it)
-        }
-
-        // Validasi apakah model mengeluarkan NaN
         if (features.any { it.isNaN() }) {
             println("ERROR: Model output contains NaN")
             return Pair(-1, 0f)
         }
 
-
         val outputIdx = probabilities.indices.maxByOrNull { probabilities[it] } ?: -1
         val confidence = if (outputIdx != -1) probabilities[outputIdx] else 0f
+        val endSoftmax = System.currentTimeMillis()
 
+        println("⏱️ Softmax Time: ${endSoftmax - startSoftmax}ms")
+        println("🚀 TOTAL PREDICTION TIME: ${endSoftmax - startTime}ms")
 
         return Pair(outputIdx, confidence)
     }
@@ -139,12 +149,13 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
                 data.Input.copy(Bitmap.Config.ARGB_8888, false)
             } else { data.Input }
 
-            val inputTensor = TensorImageUtils.bitmapToFloat32Tensor(
-                safeBitmap,
-                TensorImageUtils.TORCHVISION_NORM_MEAN_RGB,
-                TensorImageUtils.TORCHVISION_NORM_STD_RGB
-            )
-            val feat = this.model.forward(IValue.from(inputTensor)).toTensor().dataAsFloatArray
+            val floatData = bitmapToFloatBuffer(safeBitmap)
+            val shape = longArrayOf(1,3,224,224)
+            val inputTensor = Tensor.fromBlob(floatData, shape)
+            val inputs = arrayOf(EValue.from(inputTensor))
+            val outputs = model.forward(*inputs)[0].toTensor()
+
+            val feat = outputs.dataAsFloatArray
             Pair(feat, data.Label)
         }
 
@@ -229,37 +240,4 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
         onFinished(totalEpoch)
         return mapOf("weights" to weights, "bias" to bias)
     }
-
-    fun updateClassifierWeight(weights: Array<FloatArray>, bias: FloatArray) {
-        // 1. Validasi dimensi (Opsional tapi bagus untuk debugging)
-        val rows = weights.size        // 6
-        val cols = weights[0].size     // 1280
-
-        // 2. RATAKAN (FLATTEN) Array<FloatArray> menjadi satu FloatArray panjang
-        // Kita buat wadah kosong dengan ukuran total (6 * 1280)
-        val flatWeights = FloatArray(rows * cols)
-
-        // Salin data baris per baris ke array datar
-        for (i in weights.indices) {
-            // System.arraycopy(sumber, mulai_sumber, tujuan, mulai_tujuan, panjang)
-            System.arraycopy(weights[i], 0, flatWeights, i * cols, cols)
-        }
-
-        // 3. Buat Tensor dari Array yang sudah datar
-        // Masukkan flatWeights, tapi berikan shape [6, 1280] agar PyTorch tahu cara melipatnya
-        val weightTensor = Tensor.fromBlob(flatWeights, longArrayOf(rows.toLong(), cols.toLong()))
-
-        // Bias biasanya sudah flat, jadi aman
-        val biasTensor = Tensor.fromBlob(bias, longArrayOf(rows.toLong()))
-
-        // 4. Eksekusi Method
-        // Perbaikan: IValue.from() tidak boleh kosong, harus diisi Tensor
-        this.model.runMethod(
-            "update_last_layer",
-            IValue.from(weightTensor), // Masukkan Tensor Bobot
-            IValue.from(biasTensor)    // Masukkan Tensor Bias
-        )
-    }
-
-
 }

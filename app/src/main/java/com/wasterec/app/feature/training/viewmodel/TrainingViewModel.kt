@@ -81,9 +81,9 @@ class TrainingViewModel(
             totalLabelCount[idx] = value
         }
 
-        val backboneModelFile = File(app.baseContext.filesDir, "Backbone.ptl")
+        val backboneModelFile = File(app.baseContext.filesDir, "Backbone.pte")
         if(backboneModelFile.exists()){
-            efficientNetB0 = EfficientNetB0(app.baseContext, "Backbone.ptl")
+            efficientNetB0 = EfficientNetB0(app.baseContext, "Backbone.pte")
             println("Berhasil mengupdate backbone terbaru ")
         }
 

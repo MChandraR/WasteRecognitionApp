@@ -88,12 +88,10 @@ dependencies {
 
 
     //Torch
-    implementation ("org.pytorch:pytorch_android_lite:2.1.0")
-    implementation ("org.pytorch:pytorch_android_torchvision_lite:2.1.0")
     implementation ("com.squareup.okhttp3:okhttp:4.10.0")
     implementation ("com.google.code.gson:gson:2.10")
 
-    
+    implementation("org.pytorch:executorch-android:1.2.0")
 
     //Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
