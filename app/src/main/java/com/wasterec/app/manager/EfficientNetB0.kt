@@ -219,7 +219,7 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
             if(avgLoss < .2f){
                 break;
             }
-            if(abs(last3Loss.getList().get(0) - avgLoss) <= 0.001){
+            if(abs(last3Loss.getList().get(0) - avgLoss) <= 0.003){
                 totalEpoch = epoch
                 break;
             }

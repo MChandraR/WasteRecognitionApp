@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
@@ -35,6 +36,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
+import androidx.lifecycle.viewModelScope
 
 class TrainingViewModel(
     val app : Application,
@@ -112,15 +114,19 @@ class TrainingViewModel(
     }
 
     fun updateLossChartData(){
-        CoroutineScope(Dispatchers.IO).launch {
-            modelProducer.value.runTransaction {
-                lineSeries {
-                    // Vico menerima List untuk X dan List untuk Y
-                    series(
-                        x = lossList.indices.toList(), // x = 0, 1, 2, ...
-                        y = lossList                   // y = nilai loss
-                    )
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                modelProducer.value.runTransaction {
+                    lineSeries {
+                        // Vico menerima List untuk X dan List untuk Y
+                        series(
+                            x = lossList.indices.toList(), // x = 0, 1, 2, ...
+                            y = lossList                   // y = nilai loss
+                        )
+                    }
                 }
+            }catch (e : Exception){
+                println("Error updating chart data : ${e.message}")
             }
         }
     }
@@ -172,7 +178,8 @@ class TrainingViewModel(
 
                 },
                 onFinished = {
-
+                    modelConfig.value.epoch = it
+                    currentEpoch.value = it
                 }
             )
 

@@ -53,6 +53,8 @@ dependencies {
     // Jetpack Compose integration
     implementation(libs.androidx.navigation.compose)
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+
     // Views/Fragments integration
     implementation("androidx.navigation:navigation-fragment:$navVersion")
     implementation("androidx.navigation:navigation-ui:$navVersion")
@@ -90,6 +92,8 @@ dependencies {
     implementation ("org.pytorch:pytorch_android_torchvision_lite:2.1.0")
     implementation ("com.squareup.okhttp3:okhttp:4.10.0")
     implementation ("com.google.code.gson:gson:2.10")
+
+    
 
     //Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
