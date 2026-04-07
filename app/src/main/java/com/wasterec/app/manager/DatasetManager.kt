@@ -72,8 +72,8 @@ class DatasetManager (
             var imageData = forceSoftwareBitmap(item.Input)
             var currentTypes = item.Type
 
-            if (resizeImage) {
-                imageData = resizeAndCropCenter(imageData)
+            if (resizeImage ) {
+                if (!(imageData.width == 224 && imageData.height == 224))imageData = resizeAndCropCenter(imageData)
                 currentTypes += DataTypeModel.RESIZED
                 resizedCount++
             }
