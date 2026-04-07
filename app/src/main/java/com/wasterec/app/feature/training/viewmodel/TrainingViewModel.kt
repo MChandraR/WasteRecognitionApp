@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
@@ -55,10 +56,12 @@ class TrainingViewModel(
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
     val modelAccuracy = mutableIntStateOf(0)
     val globalModelRepository = GlobalModelRepository(app.baseContext)
+    var isTraining = false
 
-    var modelConfig = ModelConiguration(
+    var modelConfig = mutableStateOf(ModelConiguration(
         learningRate = 0.001f,
-        epoch = 300
+        epoch = 50
+    )
     )
 
 
@@ -133,13 +136,17 @@ class TrainingViewModel(
     }
 
     fun clearNavigationPathToHome(){
-        CoroutineScope(Dispatchers.Main).launch {
-            navHostController.navigate(Destination.Home) {
-                popUpTo(navHostController.graph.startDestinationId) {
-                    inclusive = false
+        if(!isTraining) {
+            CoroutineScope(Dispatchers.Main).launch {
+                navHostController.navigate(Destination.Home) {
+                    popUpTo(navHostController.graph.startDestinationId) {
+                        inclusive = false
+                    }
+                    launchSingleTop = true
                 }
-                launchSingleTop = true
             }
+        }else{
+            Toast.makeText(app.baseContext, "Harap tunggu proses training selesai", Toast.LENGTH_LONG).show()
         }
 
     }
@@ -147,21 +154,29 @@ class TrainingViewModel(
     @RequiresApi(Build.VERSION_CODES.O)
     //Fungsi buat memanggil model dan mulai training local
     fun startLocalTraining(){
+        isTraining = true
         CoroutineScope(Dispatchers.IO).launch {
             val data = efficientNetB0?.train(
-                config = modelConfig,
+                config = modelConfig.value,
                 dataset = annotateViewModel.datasetManager.getData(),
                 onProgressUpdate = { epoch, loss ->
-                    println("Progress pelatihan $epoch")
-                    currentEpoch.value = epoch+1
-                    currentLoss.value = loss
-                    if (!loss.isNaN() && !loss.isInfinite()) {
-                        lossList.add(loss)
-                        updateLossChartData()
+                    CoroutineScope(Dispatchers.Main).launch {
+                        println("Progress pelatihan $epoch")
+                        currentEpoch.value = epoch + 1
+                        currentLoss.value = loss
+                        if (!loss.isNaN() && !loss.isInfinite()) {
+                            lossList.add(loss)
+                            updateLossChartData()
+                        }
                     }
+
+                },
+                onFinished = {
 
                 }
             )
+
+            isTraining = false
 
             print("SENDING CLASSIFIER WEIGHT")
             globalModelRepository.uploadModelWeight(globalWeightModel = GlobalWeightModel(
