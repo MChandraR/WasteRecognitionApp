@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
@@ -28,6 +29,7 @@ import com.wasterec.app.feature.anotate.components.ModelLoadingComponent
 import com.wasterec.app.feature.anotate.viewmodel.AnnotateViewModel
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.model.Destination
+import com.wasterec.app.shared.components.AlertWithConfirmation
 import com.wasterec.app.shared.components.MyButton
 import com.wasterec.app.shared.components.SecondaryButton
 import com.wasterec.app.ui.color.ColorAsset
@@ -39,6 +41,10 @@ import kotlin.math.min
 @Composable
 fun AnnotateView(
     annotateViewModel: AnnotateViewModel? = null) {
+
+    BackHandler() {
+        annotateViewModel?.showCancellationConfirmationDialog?.value = true
+    }
 
     LaunchedEffect(Dispatchers.IO) {
         //anotateViewModel?.getLatestGlobalWeight()
@@ -60,6 +66,7 @@ fun AnnotateView(
                     "Proses anotasi :  ${(annotateViewModel?.currentAnnotateIndex?.value ?: 0) + 1} dari ${annotateViewModel?.datasetManager?.getDataSize()}",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
+                    color = ColorAsset.primaryBlue,
                     modifier = Modifier.padding(bottom = 20.dp)
                 )
 
@@ -114,6 +121,7 @@ fun AnnotateView(
                         textAlign = TextAlign.Center,
                         fontSize = Typography.titleLarge.fontSize,
                         fontWeight = FontWeight.Bold,
+                        color = ColorAsset.primaryBlue,
                         modifier = Modifier.fillMaxWidth().padding(top = 20.dp)
                     )
 
@@ -122,12 +130,13 @@ fun AnnotateView(
                             .padding(vertical = 20.dp)
                     ) {
                         Text(
-                            "Confident Lv.",
+                            "Confident Lv : ",
                             fontSize = Typography.titleLarge.fontSize
                         )
                         Text(
-                            (annotateViewModel.confidentLevel.value.times(100f)).toString() + "%",
+                            ( if (annotateViewModel.confidentLevel.value != 0f)  annotateViewModel.getConfidentLevelString() else "-"),
                             fontSize = Typography.titleLarge.fontSize,
+                            color = ColorAsset.darkerBlue,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -146,6 +155,7 @@ fun AnnotateView(
                                 annotateViewModel.classifyImage(bmp)
                             }
                         },
+                        enabled = !(annotateViewModel?.isOnInference?.value ?: false),
                         modifier = Modifier
                             .background(
                                 color = Color.LightGray,
@@ -189,6 +199,7 @@ fun AnnotateView(
                                 }
                                 annotateViewModel?.currentAnnotateIndex?.value = nextIndex
                             },
+                            enabled = !(annotateViewModel?.isOnInference?.value ?: false),
                             borderColor = ColorAsset.primaryGreen,
                             borderSize = 2,
                             modifier = Modifier.weight(.5f)
@@ -207,6 +218,7 @@ fun AnnotateView(
                             onClick = {
                                 annotateViewModel?.showLabelSelectionMenu?.value = true
                             },
+                            enabled = !(annotateViewModel?.isOnInference?.value ?: false),
                             borderColor = ColorAsset.primaryRed,
                             borderSize = 2,
                             modifier = Modifier.weight(.5f)
@@ -265,6 +277,21 @@ fun AnnotateView(
         if(annotateViewModel?.isModelLoading?.value == true){
             ModelLoadingComponent()
         }
+
+        AlertWithConfirmation(
+            title = "Keluar proses annotasi ?",
+            message = "Apakah anda yakin ingin kembail ? Anda harus mengulang proses annotasi dari awal.",
+            showAlert = annotateViewModel?.showCancellationConfirmationDialog?.value ?: false,
+            onConfirm = {
+                annotateViewModel?.let {
+                    annotateViewModel.showCancellationConfirmationDialog.value = false
+                    annotateViewModel.navigateBack()
+                }
+            },
+            onCancel = {
+                annotateViewModel?.showCancellationConfirmationDialog?.value = false
+            }
+        )
 
     }
 
