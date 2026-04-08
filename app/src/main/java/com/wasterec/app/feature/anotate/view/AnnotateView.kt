@@ -189,25 +189,33 @@ fun AnnotateView(
                                 }
                                 annotateViewModel?.currentAnnotateIndex?.value = nextIndex
                             },
+                            borderColor = ColorAsset.primaryGreen,
+                            borderSize = 2,
                             modifier = Modifier.weight(.5f)
                         ) {
                             Text(
                                 "Benar",
+                                fontWeight = FontWeight.Bold,
+                                color = ColorAsset.primaryGreen,
                                 modifier = Modifier.padding(5.dp)
                             )
                         }
 
-                        Spacer(modifier = Modifier.weight(.1f))
+                        Spacer(modifier = Modifier.width(20.dp))
 
                         SecondaryButton(
                             onClick = {
                                 annotateViewModel?.showLabelSelectionMenu?.value = true
                             },
+                            borderColor = ColorAsset.primaryRed,
+                            borderSize = 2,
                             modifier = Modifier.weight(.5f)
 
                         ) {
                             Text(
                                 "Salah",
+                                fontWeight = FontWeight.Bold,
+                                color = ColorAsset.primaryRed,
                                 modifier = Modifier.padding(5.dp)
                             )
                         }

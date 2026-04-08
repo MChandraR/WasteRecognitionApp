@@ -6,12 +6,14 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.wasterec.app.model.ClassifierWeightModel
 import com.wasterec.app.model.ModelConiguration
+import com.wasterec.app.model.SlidingArray
 import com.wasterec.app.model.TrainingModel
 import com.wasterec.app.utils.forceSoftwareBitmap
 import org.pytorch.IValue
 import org.pytorch.Module
 import org.pytorch.Tensor
 import org.pytorch.torchvision.TensorImageUtils
+import kotlin.math.abs
 import kotlin.math.ln
 
 class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl") : ModelManager(context, modelPath) {
@@ -116,11 +118,14 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun train(config: ModelConiguration, dataset: List<TrainingModel>, onProgressUpdate : (epoch:Int, loss : Float)->Unit): Map<String, Any> {
+    fun train(config: ModelConiguration, dataset: List<TrainingModel>, onProgressUpdate : (epoch:Int, loss : Float)->Unit, onFinished : (totalEpoch:Int)->Unit = {}): Map<String, Any> {
         var weights = this.classifierWeights
         var bias = this.classifierBias
+        var last3Loss = SlidingArray<Float>(maxSize = 3)
 
         if (weights == null || bias == null) return emptyMap()
+        var totalEpoch = config.epoch
+
 
         val smoothingValue = 0.1f
         val weightDecay = 0.01f
@@ -190,6 +195,9 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
                     }
                 }
                 totalLoss += sampleLoss
+                last3Loss.add(sampleLoss)
+
+
                 // 5. Backpropagation
                 for (i in 0 until numClasses) {
                     // Label Smoothing target
@@ -211,9 +219,14 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
             if(avgLoss < .2f){
                 break;
             }
+            if(abs(last3Loss.getList().get(0) - avgLoss) <= 0.003){
+                totalEpoch = epoch
+                break;
+            }
             //Log.i("TRAIN", "Epoch ${epoch + 1} Done. Avg Loss: $avgLoss")
         }
 
+        onFinished(totalEpoch)
         return mapOf("weights" to weights, "bias" to bias)
     }
 

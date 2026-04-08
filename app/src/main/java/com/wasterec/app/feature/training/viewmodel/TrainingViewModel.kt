@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
@@ -12,6 +13,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
@@ -34,6 +36,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
+import androidx.lifecycle.viewModelScope
 
 class TrainingViewModel(
     val app : Application,
@@ -41,7 +44,7 @@ class TrainingViewModel(
     val annotateViewModel: AnnotateViewModel,
     val datasetManager: MutableState<DatasetManager>
 ) : AndroidViewModel(app) {
-    var efficientNetB0 : EfficientNetB0 = EfficientNetB0(app.baseContext)
+    var efficientNetB0 : EfficientNetB0? = null
     val modelProducer : MutableState<CartesianChartModelProducer> = mutableStateOf(
         CartesianChartModelProducer())
     var currentEpoch : MutableState<Int>  = mutableIntStateOf(0)
@@ -55,10 +58,12 @@ class TrainingViewModel(
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
     val modelAccuracy = mutableIntStateOf(0)
     val globalModelRepository = GlobalModelRepository(app.baseContext)
+    var isTraining = false
 
-    var modelConfig = ModelConiguration(
+    var modelConfig = mutableStateOf(ModelConiguration(
         learningRate = 0.001f,
-        epoch = 300
+        epoch = 50
+    )
     )
 
 
@@ -85,7 +90,7 @@ class TrainingViewModel(
         CoroutineScope(Dispatchers.IO).launch {
             val newClassifierParam : ClassifierWeightModel? = classifierWeightFileManager.loadClassifierParamFromFile()
             newClassifierParam?.let{ newParam ->
-                efficientNetB0.setClassifierWeightAndBias(newParam.weights, newParam.bias)
+                efficientNetB0?.setClassifierWeightAndBias(newParam.weights, newParam.bias)
                 println("Berhasil memuat classifier param tebaru")
             }
             startLocalTraining()
@@ -109,15 +114,19 @@ class TrainingViewModel(
     }
 
     fun updateLossChartData(){
-        CoroutineScope(Dispatchers.IO).launch {
-            modelProducer.value.runTransaction {
-                lineSeries {
-                    // Vico menerima List untuk X dan List untuk Y
-                    series(
-                        x = lossList.indices.toList(), // x = 0, 1, 2, ...
-                        y = lossList                   // y = nilai loss
-                    )
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                modelProducer.value.runTransaction {
+                    lineSeries {
+                        // Vico menerima List untuk X dan List untuk Y
+                        series(
+                            x = lossList.indices.toList(), // x = 0, 1, 2, ...
+                            y = lossList                   // y = nilai loss
+                        )
+                    }
                 }
+            }catch (e : Exception){
+                println("Error updating chart data : ${e.message}")
             }
         }
     }
@@ -133,13 +142,17 @@ class TrainingViewModel(
     }
 
     fun clearNavigationPathToHome(){
-        CoroutineScope(Dispatchers.Main).launch {
-            navHostController.navigate(Destination.Home) {
-                popUpTo(navHostController.graph.startDestinationId) {
-                    inclusive = false
+        if(!isTraining) {
+            CoroutineScope(Dispatchers.Main).launch {
+                navHostController.navigate(Destination.Home) {
+                    popUpTo(navHostController.graph.startDestinationId) {
+                        inclusive = false
+                    }
+                    launchSingleTop = true
                 }
-                launchSingleTop = true
             }
+        }else{
+            Toast.makeText(app.baseContext, "Harap tunggu proses training selesai", Toast.LENGTH_LONG).show()
         }
 
     }
@@ -147,28 +160,39 @@ class TrainingViewModel(
     @RequiresApi(Build.VERSION_CODES.O)
     //Fungsi buat memanggil model dan mulai training local
     fun startLocalTraining(){
+        isTraining = true
         CoroutineScope(Dispatchers.IO).launch {
-            val data = efficientNetB0.train(
-                config = modelConfig,
+            val data = efficientNetB0?.train(
+                config = modelConfig.value,
                 dataset = annotateViewModel.datasetManager.getData(),
                 onProgressUpdate = { epoch, loss ->
-                    println("Progress pelatihan $epoch")
-                    currentEpoch.value = epoch+1
-                    currentLoss.value = loss
-                    if (!loss.isNaN() && !loss.isInfinite()) {
-                        lossList.add(loss)
-                        updateLossChartData()
+                    CoroutineScope(Dispatchers.Main).launch {
+                        println("Progress pelatihan $epoch")
+                        currentEpoch.value = epoch + 1
+                        currentLoss.value = loss
+                        if (!loss.isNaN() && !loss.isInfinite()) {
+                            lossList.add(loss)
+                            updateLossChartData()
+                        }
                     }
 
+                },
+                onFinished = {
+                    modelConfig.value.epoch = it
+                    currentEpoch.value = it
                 }
             )
+
+            isTraining = false
 
             print("SENDING CLASSIFIER WEIGHT")
             globalModelRepository.uploadModelWeight(globalWeightModel = GlobalWeightModel(
                 num_sample = annotateViewModel.datasetManager.getDataSize(),
                 label_count = annotateViewModel.datasetManager.getEachLabelCount(),
-                weights = encodeWeightsToBase64(data.get("weights") as Array<FloatArray>),
+                weights = encodeWeightsToBase64(data?.get("weights") as Array<FloatArray>),
                 bias = floatArrayToBase64(data.getValue("bias") as FloatArray),
+                loss = lossList,
+                average_loss = lossList.average().toFloat()
             )
             )
             //clearTrainingData()

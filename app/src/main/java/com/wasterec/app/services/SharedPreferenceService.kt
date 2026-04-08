@@ -17,4 +17,10 @@ class SharedPreferenceService(context : Context){
     fun getStringValue(key : String) : String?{
         return this.sharedPreferences.getString(key, "")
     }
+
+    fun removeStringValue(key : String){
+        this.sharedPreferences.edit {
+            this.remove(key)
+        }
+    }
 }

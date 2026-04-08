@@ -37,7 +37,7 @@ class DataProcessingViewModel(
     @RequiresApi(Build.VERSION_CODES.O)
     fun proProcessData(){
         datasetManager.value.loadData(trainingData)
-        datasetManager.value.preProcessTrainingData(resizeImage = false, onProgress = {dataProcessingProgress.floatValue = it}){
+        datasetManager.value.preProcessTrainingData(resizeImage = true, onProgress = {dataProcessingProgress.floatValue = it}){
             resizedCount.intValue = it[0]
             rotatedCount.intValue  = it[1]
             horizontallyFlippedCount.intValue = it[2]

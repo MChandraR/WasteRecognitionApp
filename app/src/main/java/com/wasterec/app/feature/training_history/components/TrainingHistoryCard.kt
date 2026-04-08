@@ -25,10 +25,10 @@ import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
 
 @Composable
-fun TrainingHistoryCard(number: Int, id : String, loss : String, date : String){
+fun TrainingHistoryCard(number: Int, id : String, loss : String, date : String, modifier : Modifier = Modifier){
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .border(2.dp, ColorAsset.shadeBlue, RoundedCornerShape(10.dp))
                 .padding(15.dp)

@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.collection.floatListOf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
@@ -41,9 +42,12 @@ import com.wasterec.app.feature.training.viewmodelfactory.FinishTrainingViewMode
 import com.wasterec.app.feature.training.viewmodelfactory.TrainingViewModelFactory
 import com.wasterec.app.feature.training_history.viewmodel.TrainingHistoryViewModel
 import com.wasterec.app.feature.training_history.viewmodel.TrainingHistoryViewModelFactory
+import com.wasterec.app.feature.training_history_detail.viewmodel.TrainingHistoryDetailViewModel
+import com.wasterec.app.feature.training_history_detail.viewmodel.TrainingHistoryDetailViewModelFactory
 import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.model.Destination
 import com.wasterec.app.model.TrainingModel
+import com.wasterec.app.model.domain.TrainingData
 
 class MainActivity : ComponentActivity() {
 
@@ -62,6 +66,11 @@ class MainActivity : ComponentActivity() {
             val selectedLabel : MutableState<DatasetClass> = remember {mutableStateOf(
                 datasetClassList[0]
             )}
+            val selectedTrainingData : MutableState<TrainingData> = remember {
+                mutableStateOf(
+                    TrainingData("", "", "", 0,listOf(),"", "", listOf(), 0f)
+                )
+            }
             val datasetManager: MutableState<DatasetManager> = remember { mutableStateOf(DatasetManager(listOf()))}
 
             var datasetClassList : SnapshotStateList<DatasetClass> = remember {
@@ -119,6 +128,7 @@ class MainActivity : ComponentActivity() {
                     selectedLabel
                 )
             )
+
             val annotateViewModel : AnnotateViewModel = viewModel(
                 factory = AnotateViewModelFactory(
                     application = application,
@@ -194,7 +204,17 @@ class MainActivity : ComponentActivity() {
 
             val trainingHistoryViewModel : TrainingHistoryViewModel = viewModel(
                 factory = TrainingHistoryViewModelFactory(
-                    application
+                    application,
+                    navController,
+                    selectedTrainingData
+                )
+            )
+
+            val trainingHistoryDetailViewModel : TrainingHistoryDetailViewModel = viewModel(
+                factory = TrainingHistoryDetailViewModelFactory(
+                    application,
+                    navController,
+                    selectedTrainingData
                 )
             )
 
@@ -211,7 +231,8 @@ class MainActivity : ComponentActivity() {
                 trainingViewModel,
                 modelLoadViewModel,
                 finishTrainingViewModel,
-                trainingHistoryViewModel
+                trainingHistoryViewModel,
+                trainingHistoryDetailViewModel
             )
 
             handler.postDelayed({
