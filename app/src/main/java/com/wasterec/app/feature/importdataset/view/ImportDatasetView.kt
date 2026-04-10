@@ -51,6 +51,7 @@ fun ImportDatasetView(
     }
 
     LaunchedEffect(Dispatchers.IO) {
+        importDatasetViewModel?.reInit()
         importDatasetViewModel?.getClassCount()
         importDatasetViewModel?.validateClassCount()
     }

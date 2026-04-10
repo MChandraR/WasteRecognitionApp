@@ -220,7 +220,7 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
                 break;
             }
             if(abs(last3Loss.getList().get(0) - avgLoss) <= 0.003){
-                totalEpoch = epoch
+                totalEpoch = epoch-1
                 break;
             }
             //Log.i("TRAIN", "Epoch ${epoch + 1} Done. Avg Loss: $avgLoss")

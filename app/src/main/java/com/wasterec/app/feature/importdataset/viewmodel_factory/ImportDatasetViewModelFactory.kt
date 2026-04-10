@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import com.wasterec.app.feature.importdataset.data.DatasetClass
 import com.wasterec.app.feature.importdataset.viewmodel.ImportDatasetViewModel
+import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.model.TrainingModel
 
 class ImportDatasetViewModelFactory(
@@ -17,12 +18,12 @@ class ImportDatasetViewModelFactory(
     val navHostController: NavHostController,
     val trainingDataset : SnapshotStateList<TrainingModel>,
     val selectedIndex : MutableState<Int>,
-    val selectedLabel : MutableState<DatasetClass>,
+    val datasetManager : MutableState<DatasetManager>,
     val datasetClassList : SnapshotStateList<DatasetClass>
 ): ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(ImportDatasetViewModel::class.java)){
-            return ImportDatasetViewModel(application = application, context = context, navHostController = navHostController,trainignDataset = trainingDataset, selectedIndex, selectedLabel,datasetClassList) as T
+            return ImportDatasetViewModel(application = application, context = context, navHostController = navHostController,trainignDataset = trainingDataset, selectedIndex, datasetManager,datasetClassList) as T
         }
         throw IllegalArgumentException("Incorrect view model class for importdataset view model")
     }

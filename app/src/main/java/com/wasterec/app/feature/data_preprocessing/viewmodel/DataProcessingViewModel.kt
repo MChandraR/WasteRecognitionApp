@@ -22,6 +22,7 @@ class DataProcessingViewModel(
     val datasetManager: MutableState<DatasetManager>
     ) : AndroidViewModel(application=application) {
 
+
     val dataTypeCount : MutableList<Int> = mutableListOf(0,0,0,0)
     val resizedCount : MutableIntState = mutableIntStateOf(0)
     val rotatedCount : MutableIntState = mutableIntStateOf(0)
@@ -36,20 +37,27 @@ class DataProcessingViewModel(
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun proProcessData(){
-        datasetManager.value.loadData(trainingData)
-        datasetManager.value.preProcessTrainingData(resizeImage = true, onProgress = {dataProcessingProgress.floatValue = it}){
-            resizedCount.intValue = it[0]
-            rotatedCount.intValue  = it[1]
-            horizontallyFlippedCount.intValue = it[2]
-            verticallyFlippedCount.intValue = it[3]
-            println("Total rotated dll : ${it.sum()}")
+        if (!datasetManager.value.lockTrainingDataFromPreprocessing) {
+            datasetManager.value.loadData(trainingData.map { it.copy() }.toMutableList())
+            datasetManager.value.preProcessTrainingData(
+                resizeImage = true,
+                onProgress = { dataProcessingProgress.floatValue = it }) {
+                resizedCount.intValue = it[0]
+                rotatedCount.intValue = it[1]
+                horizontallyFlippedCount.intValue = it[2]
+                verticallyFlippedCount.intValue = it[3]
+                println("Total rotated dll : ${it.sum()}")
+            }
+            datasetManager.value.lockTrainingDataFromPreprocessing = true
+        }else{
+            dataProcessingProgress.floatValue = 1f
         }
     }
 
 
     fun navigateToAnnotatePage(){
-        trainingData.clear()
-        trainingData.addAll(datasetManager.value.getData())
+//        trainingData.clear()
+//        trainingData.addAll(datasetManager.value.getData())
         navHostController.navigate(Destination.Annotate)
     }
 }

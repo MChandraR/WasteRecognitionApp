@@ -51,7 +51,7 @@ class GlobalModelRepository(val context: Context? = null) : ApiService() {
         this.getGlobamModelService{
             val response = it.getClassifierModelWeight()
             if(response.isSuccessful){
-                callback(null, response.body())
+                callback(null, response.body()?.data)
             }else{
                 callback(GlobalModelError.NoInternet(), null)
             }

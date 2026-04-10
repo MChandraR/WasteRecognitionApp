@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class AnnotateViewModel(application : Application, val context: Context, val navHostController: NavHostController, val trainingData : SnapshotStateList<TrainingModel>): AndroidViewModel(application = application) {
+class AnnotateViewModel(application : Application, val context: Context, val navHostController: NavHostController, val trainingData : SnapshotStateList<TrainingModel>, val datasetManager: MutableState<DatasetManager>): AndroidViewModel(application = application) {
     var currentAnnotateIndex : MutableState<Int> = mutableIntStateOf(0)
     var showLabelSelectionMenu : MutableState<Boolean> = mutableStateOf(false)
     var predictResult : MutableState<String> = mutableStateOf("")
@@ -32,15 +32,15 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
     var efficientNetB0 : EfficientNetB0? = null
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
     var isModelLoading : MutableState<Boolean> = mutableStateOf(true)
-    var datasetManager = DatasetManager(trainingData)
     var rightLabelCount : MutableIntState = mutableIntStateOf(0)
-
+    var isOnInference : MutableState<Boolean> = mutableStateOf(false)
+    var showCancellationConfirmationDialog : MutableState<Boolean> = mutableStateOf(false)
 
     //Deklarasikan ulang semua nilai variabel
     @RequiresApi(Build.VERSION_CODES.O)
     fun reInit(){
+        isOnInference.value = false
         rightLabelCount.intValue = 0
-        datasetManager = DatasetManager(trainingData)
         isModelLoading.value = true
         currentBitmap.value = null
         currentAnnotateIndex.value = 0
@@ -64,6 +64,8 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun classifyImage(bmp : Bitmap ){
+        isOnInference.value = true
+        confidentLevel.value = 0f
         currentBitmap.value = bmp
         efficientNetB0?.let { efficientNetB0 ->
             CoroutineScope(Dispatchers.IO).launch{
@@ -75,6 +77,7 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
                     val outputIdx = output.first
                     val labelResult = label.getOrNull(outputIdx)
                     withContext(Dispatchers.Main) {
+                        isOnInference.value = false
                         predictResult.value = labelResult ?: "Unknown"
                         println("Label : " + labelResult)
                         println("Index Label : " + outputIdx)
@@ -87,5 +90,13 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
                 }
             }
         }
+    }
+
+    fun getConfidentLevelString() : String{
+        return ((confidentLevel.value.times(100f)).toString() + "%")
+    }
+
+    fun navigateBack(){
+        navHostController.popBackStack()
     }
 }
