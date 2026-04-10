@@ -50,14 +50,13 @@ class ModelLoadViewModel(
             val isFileExist = File(context.filesDir, "Backbone.ptl").exists() && File(context.filesDir, "classifier_param.json").exists()
             println("Model Version : $modelVersion")
 
-            if( modelVersion == null || modelVersion != result?.model_version || !isFileExist){
+            if( (modelVersion == null || modelVersion != result?.model_version ) || !isFileExist){
                 result?.model_version?.let{
                     this.modelVersion = it
                 }
                 downloadBackboneModel()
                 loadClassifierParam()
             }else{
-                updateModelVersion(result.model_version)
                 CoroutineScope(Dispatchers.Main).launch{
                     navHostController.navigate(Destination.ImportDataset)
                 }
