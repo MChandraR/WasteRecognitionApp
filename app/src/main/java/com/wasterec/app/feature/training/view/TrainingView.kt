@@ -254,7 +254,7 @@ fun TrainingView(
 
         LaunchedEffect(Unit){
             trainingViewModel?.reInit()
-            Toast.makeText(trainingViewModel?.app?.baseContext, "Training dengan total : ${trainingViewModel?.annotateViewModel?.datasetManager?.getDataSize()}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(trainingViewModel?.app?.baseContext, "Training dengan total : ${trainingViewModel?.annotateViewModel?.datasetManager?.value?.getDataSize()}", Toast.LENGTH_SHORT).show()
         }
     }
 }

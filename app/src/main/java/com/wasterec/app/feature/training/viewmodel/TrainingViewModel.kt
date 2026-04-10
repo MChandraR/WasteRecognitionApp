@@ -68,7 +68,7 @@ class TrainingViewModel(
 
 
     fun getModelAccuracy():Int{
-        val accuracy = (annotateViewModel?.rightLabelCount?.intValue?:0).toFloat() / (annotateViewModel?.datasetManager?.getDataSize()?:1).toFloat()
+        val accuracy = (annotateViewModel?.rightLabelCount?.intValue?:0).toFloat() / (annotateViewModel?.datasetManager?.value?.getDataSize()?:1).toFloat()
         return (accuracy * 100).toInt()
     }
 
@@ -101,7 +101,7 @@ class TrainingViewModel(
 
         //UPload dataset ke server
         CoroutineScope(Dispatchers.IO).launch{
-            val dataset : List<Bitmap> = annotateViewModel.datasetManager.getData().map { it.Input }
+            val dataset : List<Bitmap> = annotateViewModel.datasetManager.value.getData().map { it.Input }
             val datasetToUpload = fileManager.convertBitmapToZipFile(dataset, File(app.baseContext.cacheDir, "Dataset.zip") )
             datasetToUpload?.let {
                 datasetRepository.uploadDatasetToServer(it)
@@ -132,7 +132,7 @@ class TrainingViewModel(
     }
 
     fun clearTrainingData(){
-        annotateViewModel.datasetManager.clearAlLData()
+        annotateViewModel.datasetManager.value.clearAlLData()
         annotateViewModel.trainingData.clear()
     }
 
@@ -164,7 +164,7 @@ class TrainingViewModel(
         CoroutineScope(Dispatchers.IO).launch {
             val data = efficientNetB0?.train(
                 config = modelConfig.value,
-                dataset = annotateViewModel.datasetManager.getData(),
+                dataset = annotateViewModel.datasetManager.value.getData(),
                 onProgressUpdate = { epoch, loss ->
                     CoroutineScope(Dispatchers.Main).launch {
                         println("Progress pelatihan $epoch")
@@ -178,6 +178,7 @@ class TrainingViewModel(
 
                 },
                 onFinished = {
+                    datasetManager.value.lockTrainingDataFromPreprocessing = false
                     modelConfig.value.epoch = it
                     currentEpoch.value = it
                 }
@@ -187,8 +188,8 @@ class TrainingViewModel(
 
             print("SENDING CLASSIFIER WEIGHT")
             globalModelRepository.uploadModelWeight(globalWeightModel = GlobalWeightModel(
-                num_sample = annotateViewModel.datasetManager.getDataSize(),
-                label_count = annotateViewModel.datasetManager.getEachLabelCount(),
+                num_sample = annotateViewModel.datasetManager.value.getDataSize(),
+                label_count = annotateViewModel.datasetManager.value.getEachLabelCount(),
                 weights = encodeWeightsToBase64(data?.get("weights") as Array<FloatArray>),
                 bias = floatArrayToBase64(data.getValue("bias") as FloatArray),
                 loss = lossList,

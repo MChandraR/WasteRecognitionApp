@@ -51,6 +51,7 @@ fun ImportDatasetView(
     }
 
     LaunchedEffect(Dispatchers.IO) {
+        importDatasetViewModel?.reInit()
         importDatasetViewModel?.getClassCount()
         importDatasetViewModel?.validateClassCount()
     }
@@ -134,7 +135,7 @@ fun ImportDatasetView(
                 modifier = Modifier.padding(10.dp).fillMaxWidth(),
                 enabled = ((importDatasetViewModel?.trainignDataset?.size
                     ?: 0) >= 100 && (importDatasetViewModel?.isClassCountMeetRequirement?.value
-                    ?: true)),
+                    ?: true)) || true,
                 onClick = {
                     importDatasetViewModel?.navHostController?.navigate(Destination.Preprocess)
                 }

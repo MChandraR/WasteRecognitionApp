@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
                     TrainingData("", "", "", 0,listOf(),"", "", listOf(), 0f)
                 )
             }
-            val datasetManager: MutableState<DatasetManager> = remember { mutableStateOf(DatasetManager(listOf()))}
+            val datasetManager: MutableState<DatasetManager> = remember { mutableStateOf(DatasetManager(mutableListOf()))}
 
             var datasetClassList : SnapshotStateList<DatasetClass> = remember {
                 mutableStateListOf(
@@ -134,7 +134,8 @@ class MainActivity : ComponentActivity() {
                     application = application,
                     context = this,
                     navHostController = navController,
-                    trainingData
+                    trainingData,
+                    datasetManager
                 )
             )
 
@@ -179,7 +180,7 @@ class MainActivity : ComponentActivity() {
                     navHostController = navController,
                     trainingData,
                     selectedLabelIndex,
-                    selectedLabel,
+                    datasetManager,
                     datasetClassList
                 )
             )

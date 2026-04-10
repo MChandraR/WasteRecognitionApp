@@ -20,28 +20,32 @@ class ImportDatasetViewModel(
     val navHostController: NavHostController,
     val trainignDataset : SnapshotStateList<TrainingModel>,
     val selectedIndex : MutableState<Int>,
-    val selectedLabel : MutableState<DatasetClass>,
+    val datasetManager : MutableState<DatasetManager>,
     val datasetClassList : SnapshotStateList<DatasetClass>
 ) : AndroidViewModel(application = application) {
 
-    val datasetManager = DatasetManager(trainignDataset)
     var classCount : MutableList<Int> = mutableStateListOf(0,0,0,0,0,0)
     val isClassCountMeetRequirement : MutableState<Boolean> = mutableStateOf(false)
     val showCancelConfirmDialog = mutableStateOf(false)
+
+    fun reInit() {
+        datasetManager.value.loadData(trainignDataset.map { it.copy() }.toMutableList())
+        datasetManager.value.lockTrainingDataFromPreprocessing = false
+    }
 
     fun getTrainingDatasetCount():Int{
         return trainignDataset.size
     }
 
     fun getClassCount(){
-        datasetManager.getEachLabelCount().forEachIndexed { idx, value ->
+        datasetManager.value.getEachLabelCount().forEachIndexed { idx, value ->
             classCount[idx] = value
         }
     }
 
     fun validateClassCount(){
         var isMeetMinMaxCount = true
-        datasetManager.getEachLabelCount().forEachIndexed { idx, value ->
+        datasetManager.value.getEachLabelCount().forEachIndexed { idx, value ->
             println("Label ${datasetClassList[idx].className} : $value , minium : ${datasetClassList[idx].minimunCount}")
             if(value < datasetClassList[idx].minimunCount ){
                 isMeetMinMaxCount = false
