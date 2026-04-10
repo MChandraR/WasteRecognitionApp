@@ -4,6 +4,8 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -58,7 +61,7 @@ fun TrainingHistoryView(
             color = ColorAsset.primaryBlue,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 75.dp)
+                .padding(top = 55.dp)
         )
 
 //        HorizontalDivider(modifier = Modifier.height(2.dp).padding(vertical = 10.dp))
@@ -68,7 +71,10 @@ fun TrainingHistoryView(
         if((trainingHistoryViewModel?.trainingHistoryData?.size ?: 0) > 0){
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f).scrollable(
+                    state = rememberScrollState(),
+                    orientation = Orientation.Vertical
+                ).padding(bottom = 100.dp)
             ) {
                 items(trainingHistoryViewModel?.trainingHistoryData?.size ?: 0){ idx ->
                     val trainingData = trainingHistoryViewModel?.trainingHistoryData?.get(idx) ?: return@items
@@ -82,7 +88,6 @@ fun TrainingHistoryView(
 
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
         }else{
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Spacer(modifier = Modifier.weight(1f))
