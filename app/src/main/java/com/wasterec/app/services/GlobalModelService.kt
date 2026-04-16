@@ -15,7 +15,7 @@ interface GlobalModelService {
     @GET("model/info")
     suspend fun getModelInfo():Response<ResponsesBody<GlobalModelInfoModel>>
 
-    @GET("model/weight")
+    @GET("model/classifier/weight")
     suspend fun getClassifierModelWeight():Response<ResponsesBody<ClassifierWeightModel>>
 
     @POST("model/weight")
