@@ -127,8 +127,8 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
         var totalEpoch = config.epoch
 
 
-        val smoothingValue = 0.1f
-        val weightDecay = 0.01f
+        val smoothingValue = 0.0000f
+        val weightDecay = 0.000f
         val numClasses = weights.size
         val numFeatures = weights[0].size
         val learningRate = config.learningRate
@@ -150,79 +150,69 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
 
         for( epoch in 0 ..< config.epoch) {
             var totalLoss = 0f
+            var batches = featureList.chunked(config.batchSize)
 
-            for ((features, label) in featureList) {
-                // 2. Forward Pass (Classifier Layer)
-                val logits = FloatArray(numClasses) { i ->
-                    var sum = bias[i]
-                    for (j in 0 until numFeatures) {
-                        sum += features[j] * weights[i][j]
-                    }
-                    sum
-                }
+            for(batch in batches){
+                var weightGrad = Array<FloatArray>(numClasses){ FloatArray(numFeatures) }
+                var biasGrad = FloatArray(numClasses)
+                var batchLoss = 0f
 
-                // 3. Stable Softmax
-                val maxLogit = logits.maxOrNull() ?: 0f
-                val expScore = logits.map { kotlin.math.exp(it - maxLogit) }
-                val sumExp = expScore.sum()
-                val probs = expScore.map { (it / sumExp) }
-
-                // 4. Cross Entropy Loss (Natural Log)
-                var sampleLoss = 0f
-
-                for (i in 0 until numClasses) {
-                    // Label Smoothing target
-                    val target = if (i == label) {
-                        (1f - smoothingValue + (smoothingValue / numClasses))
-                    } else {
-                        (smoothingValue / numClasses)
+                for((feature, label) in batch){
+                    val logits = FloatArray( numClasses){
+                        var sum = bias[it]
+                        for(j in 0 until feature.size){
+                            sum += feature[j] * weights[it][j]
+                        }
+                        sum
                     }
 
-                    // Kalkulasi Cross Entropy yang benar dengan Label Smoothing
-                    sampleLoss += -target * ln(probs[i].coerceAtLeast(1e-10f))
+                    val maxLogit = logits.maxOrNull() ?: 0f
+                    val expScore = logits.map{ kotlin.math.exp(it - maxLogit) }
+                    val totalScore = expScore.sum()
+                    val probs = expScore.map{it/totalScore}
 
-                    val gradOut = probs[i] - target
+                    for(i in 0 until numClasses){
+                        val target =
+                            if(i==label){
+                               ( 1f-smoothingValue + (smoothingValue/numClasses))
+                            }else{
+                                (smoothingValue/numClasses)
+                            }
 
-                    // Update Bias
-                    bias[i] -= learningRate * gradOut
+                        batchLoss += -target * ln(probs[i].coerceAtLeast(1e-10f))
+                        val gradOut = probs[i] - target
 
-                    // Update Weights
-                    for (j in 0 until numFeatures) {
-                        // PENTING: Normalisasi weight decay berdasarkan ukuran dataset
-                        // agar tidak terlalu agresif saat menggunakan batch-size 1
-                        val l2Reg = (weightDecay / dataset.size) * weights[i][j]
-                        weights[i][j] -= learningRate * (gradOut * features[j] + l2Reg)
+                        biasGrad[i] += gradOut
+                        for(j in 0 until numFeatures){
+                            weightGrad[i][j] += (gradOut * feature[j])
+
+                        }
+
                     }
                 }
-                totalLoss += sampleLoss
-                last3Loss.add(sampleLoss)
 
+                val batchSize = batch.size.toFloat()
+                for(i in 0 until numClasses){
+                    bias[i] -= (learningRate * ( biasGrad[i] / batchSize));
 
-                // 5. Backpropagation
-                for (i in 0 until numClasses) {
-                    // Label Smoothing target
-                    val target = if (i == label) (1f - smoothingValue + (smoothingValue / numClasses)) else (smoothingValue / numClasses)
-                    val gradOut = probs[i] - target
-
-                    // Update Bias
-                    bias[i] -= learningRate * gradOut
-
-                    // Update Weights with Weight Decay (L2)
-                    for (j in 0 until numFeatures) {
-                        val l2Reg = weightDecay * weights[i][j]
-                        weights[i][j] -= learningRate * (gradOut * features[j] + l2Reg)
+                    for(j in 0 until numFeatures){
+                        val l2Reg = (weightDecay * weights[i][j])
+                        val avgGrad = (weightGrad[i][j]/batchSize)
+                        weights[i][j] -= learningRate * (avgGrad + l2Reg)
                     }
                 }
+                totalLoss += batchLoss
             }
+
             val avgLoss = totalLoss / dataset.size
             onProgressUpdate(epoch, avgLoss)
-            if(avgLoss < .2f){
-                break;
-            }
-            if(abs(last3Loss.getList().get(0) - avgLoss) <= 0.003){
-                totalEpoch = epoch-1
-                break;
-            }
+//            if(avgLoss < .2f){
+//                break;
+//            }
+//            if(abs(last3Loss.getList().get(0) - avgLoss) <= 0.003){
+//                totalEpoch = epoch-1
+//                break;
+//            }
             //Log.i("TRAIN", "Epoch ${epoch + 1} Done. Avg Loss: $avgLoss")
         }
 

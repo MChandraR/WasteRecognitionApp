@@ -61,7 +61,7 @@ class TrainingViewModel(
     var isTraining = false
 
     var modelConfig = mutableStateOf(ModelConiguration(
-        learningRate = 0.001f,
+        learningRate = 0.01f,
         epoch = 50
     )
     )
