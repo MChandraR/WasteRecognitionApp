@@ -68,7 +68,7 @@ class LoginViewModel(application : Application, val context: Context,
     //Function for redirect user to next page after succesfully logged=in
     fun dismissAlert(){
         this.showAlert.value = false
-        navigateToHome()
+        if(isSuccess.value)navigateToHome()
     }
 
     fun navigateToHome(){
