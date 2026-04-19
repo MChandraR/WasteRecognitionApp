@@ -85,6 +85,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation("org.apache.commons:commons-math3:3.6.1")
 
 
     //Torch

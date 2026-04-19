@@ -50,6 +50,7 @@ fun HomeView(
         homeViewModel?.getGlobalModelInfo()
         homeViewModel?.getTrainingStatusForClient()
         homeViewModel?.checkIfUserLoggedIn()
+        homeViewModel?.checkRemainTrainingData()
     }
 
     Column(

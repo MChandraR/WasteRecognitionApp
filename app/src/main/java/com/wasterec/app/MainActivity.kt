@@ -36,6 +36,8 @@ import com.wasterec.app.feature.login.viewmodel.LoginViewModel
 import com.wasterec.app.feature.modelload.factory.ModelLoadViewModelFactory
 import com.wasterec.app.feature.modelload.viewmodel.ModelLoadViewModel
 import com.wasterec.app.feature.navigation.view.NavigationView
+import com.wasterec.app.feature.neural_search.NSViewModel
+import com.wasterec.app.feature.neural_search.NSViewModelFactory
 import com.wasterec.app.feature.training.viewmodel.FinishTrainingViewModel
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
 import com.wasterec.app.feature.training.viewmodelfactory.FinishTrainingViewModelFactory
@@ -48,6 +50,8 @@ import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.model.Destination
 import com.wasterec.app.model.TrainingModel
 import com.wasterec.app.model.domain.TrainingData
+import com.wasterec.app.utils.DirichletSampler
+import com.wasterec.app.utils.format
 
 class MainActivity : ComponentActivity() {
 
@@ -219,6 +223,10 @@ class MainActivity : ComponentActivity() {
                 )
             )
 
+            val nsViewModel : NSViewModel = viewModel(
+                factory = NSViewModelFactory(application)
+            )
+
             //DebugView(this)
             NavigationView(
                 this,
@@ -233,8 +241,11 @@ class MainActivity : ComponentActivity() {
                 modelLoadViewModel,
                 finishTrainingViewModel,
                 trainingHistoryViewModel,
-                trainingHistoryDetailViewModel
+                trainingHistoryDetailViewModel,
+                nsViewModel
             )
+
+
 
             handler.postDelayed({
                 navController.navigate(Destination.Home) {

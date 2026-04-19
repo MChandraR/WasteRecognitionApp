@@ -1,7 +1,6 @@
 package com.wasterec.app.feature.training.viewmodel
 
 import android.app.Application
-import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
 import android.widget.Toast
@@ -18,25 +17,23 @@ import androidx.navigation.NavHostController
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import com.wasterec.app.feature.anotate.viewmodel.AnnotateViewModel
-import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.manager.ClassifierWeightFileManager
 import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.manager.EfficientNetB0
 import com.wasterec.app.manager.FileManager
+import com.wasterec.app.manager.JsonFileManager
 import com.wasterec.app.model.ClassifierWeightModel
 import com.wasterec.app.model.Destination
-import com.wasterec.app.model.ModelConiguration
+import com.wasterec.app.model.ModelConfiguration
 import com.wasterec.app.model.globalmodel.GlobalWeightModel
 import com.wasterec.app.repositories.DatasetUploadRepository
 import com.wasterec.app.repositories.GlobalModelRepository
-import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.utils.encodeWeightsToBase64
 import com.wasterec.app.utils.floatArrayToBase64
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
-import androidx.lifecycle.viewModelScope
 
 class TrainingViewModel(
     val app : Application,
@@ -57,12 +54,14 @@ class TrainingViewModel(
     val totalLabelCount : MutableList<Int> = mutableListOf(0,0,0,0,0,0)
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
     val modelAccuracy = mutableIntStateOf(0)
-    val globalModelRepository = GlobalModelRepository(app.baseContext)
+    val globalModelRepository = GlobalModelRepository(app.baseContext, { handleExceptionAPI() })
     var isTraining = false
+    var listOfPendingTrainingData = mutableListOf<GlobalWeightModel>()
 
-    var modelConfig = mutableStateOf(ModelConiguration(
-        learningRate = 0.01f,
-        epoch = 50
+    var modelConfig = mutableStateOf(ModelConfiguration(
+        learningRate = 0.1f,
+        epoch = 50,
+        batchSize = 16
     )
     )
 
@@ -110,6 +109,23 @@ class TrainingViewModel(
         }
 
         lossList.clear()
+
+    }
+
+    fun savePendingTrainingData(globalWeight : List<GlobalWeightModel>){
+        viewModelScope.launch {
+            val jsonFileManager = JsonFileManager<MutableList<GlobalWeightModel>>(
+                app.baseContext,
+                "PendingTrainingData.json"
+            )
+
+            val listOfPendingTrainingData : MutableList<GlobalWeightModel> =
+                jsonFileManager.loadJsonFile<MutableList<GlobalWeightModel>>() ?: mutableListOf()
+
+            listOfPendingTrainingData.addAll(globalWeight)
+            jsonFileManager.saveJsonFiles(listOfPendingTrainingData)
+            listOfPendingTrainingData.clear()
+        }
 
     }
 
@@ -187,7 +203,7 @@ class TrainingViewModel(
             isTraining = false
 
             print("SENDING CLASSIFIER WEIGHT")
-            globalModelRepository.uploadModelWeight(globalWeightModel = GlobalWeightModel(
+            val newGlobalWeight = GlobalWeightModel(
                 num_sample = annotateViewModel.datasetManager.value.getDataSize(),
                 label_count = annotateViewModel.datasetManager.value.getEachLabelCount(),
                 weights = encodeWeightsToBase64(data?.get("weights") as Array<FloatArray>),
@@ -195,9 +211,24 @@ class TrainingViewModel(
                 loss = lossList,
                 average_loss = lossList.average().toFloat()
             )
+            CoroutineScope(Dispatchers.Main).launch {
+                listOfPendingTrainingData.add(newGlobalWeight)
+            }
+            globalModelRepository.uploadModelWeight(globalWeightModel = newGlobalWeight,
+                onFailed = {
+                    println("Gagal menupload param training")
+                },
+                onSuccess = {
+                    println("Berhasil mengunggah training data ke server !!")
+                }
             )
             //clearTrainingData()
         }
+    }
+
+    fun handleExceptionAPI(){
+        println("ALAMAAAAAK")
+        savePendingTrainingData(listOfPendingTrainingData)
     }
 
 

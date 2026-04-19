@@ -45,6 +45,7 @@ fun MainView(
     var selectedTab by remember { mutableIntStateOf(0) }
 
     Scaffold(
+        
         bottomBar = {
             NavigationBar(windowInsets = NavigationBarDefaults.windowInsets, containerColor = ColorAsset.darkerWhite)  {
                 entries.forEachIndexed { index, destination ->

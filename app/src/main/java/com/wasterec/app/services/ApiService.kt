@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 open class ApiService(
-    val baseUrl : String = "http://192.168.1.3:8000/api/",
+    val baseUrl : String = "http://192.168.1.4:8000/api/",
     var retrofit: Retrofit? = null,
     val authToken : String? = null,
 ){

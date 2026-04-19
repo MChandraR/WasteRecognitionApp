@@ -6,10 +6,15 @@ import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.wasterec.app.helper.GlobalModelError
+import com.wasterec.app.manager.JsonFileManager
 import com.wasterec.app.model.Destination
 import com.wasterec.app.model.api_response.model_info.GlobalModelInfoModel
+import com.wasterec.app.model.domain.TrainingData
+import com.wasterec.app.model.globalmodel.GlobalWeightModel
 import com.wasterec.app.repositories.DatasetUploadRepository
 import com.wasterec.app.repositories.GlobalModelRepository
 import com.wasterec.app.repositories.TrainingRepository
@@ -51,6 +56,39 @@ class HomeViewModel(
                 }
                 println(error.message)
             }
+        })
+    }
+
+    //Fungsi buat check apaah ada training yang belum terkirim
+    fun checkRemainTrainingData(){
+        viewModelScope.launch {
+            val jsonFileManager = JsonFileManager<MutableList<GlobalWeightModel>>(application.baseContext,"PendingTrainingData.json")
+            val pendingTrainingDataList = jsonFileManager.loadJsonFile<MutableList<GlobalWeightModel>>()
+            if(pendingTrainingDataList != null && pendingTrainingDataList.size > 0){
+                pendingTrainingDataList.forEachIndexed{ idx,trainignData  ->
+                    uploadRemainingTrainingDataToServer(trainignData){
+                        println("Hapus 1 data")
+                        pendingTrainingDataList.removeAt(idx)
+                        if(pendingTrainingDataList.isEmpty()){
+                            CoroutineScope(Dispatchers.IO).launch {
+                                jsonFileManager.saveJsonFiles(pendingTrainingDataList)
+                            }
+                        }
+
+                    }
+                }
+
+                println("Terdapat data yang pending")
+            }else{
+                println("Tidak ada data yang pending")
+            }
+        }
+
+    }
+
+    fun uploadRemainingTrainingDataToServer(globalWeight: GlobalWeightModel, onSucess : ()->Unit){
+        globalModelRepository.uploadModelWeight(globalWeight, onSuccess = {
+            onSucess()
         })
     }
 
