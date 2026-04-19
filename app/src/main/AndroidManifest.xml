@@ -17,7 +17,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.WasteRect"
         tools:targetApi="31">
-        <activity
+            <activity
+                android:windowSoftInputMode="adjustResize"
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.WasteRect">

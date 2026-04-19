@@ -5,6 +5,9 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.navigation.NavHostController
 import com.wasterec.app.model.Destination
@@ -23,7 +26,19 @@ class LoginViewModel(application : Application, val context: Context,
     var sharedPreferenceService : SharedPreferenceService = SharedPreferenceService(application.baseContext)
     var isSuccess : MutableState<Boolean> = mutableStateOf(false)
     var showPassword : MutableState<Boolean> = mutableStateOf(false)
+    var focusManager : FocusManager? = null
 
+    fun setLocalFoccues(focusManager : FocusManager){
+        this.focusManager = focusManager
+    }
+
+    fun changeFocusToNextElement(){
+        focusManager?.moveFocus(FocusDirection.Down)
+    }
+
+    fun changeFocusToDone(){
+        focusManager?.clearFocus()
+    }
 
     //Function to handle login and validate user input
     fun login(){
