@@ -30,10 +30,15 @@ import com.wasterec.app.ui.color.ColorAsset
 
 @Composable
 fun BottomNavBar(selected: MutableIntState){
+    val dynamicShape = getWideBottomBarShape(
+        horizontalRadiusDp = 45.dp, // Cekungan lebar ke samping
+        verticalDepthDp = 40.dp,    // Kedalaman yang pas untuk FAB melayang
+        cornerRadiusDp = 18.dp
+    )
     Surface(
         color = ColorAsset.darkerWhite,
         tonalElevation = 8.dp,
-        shape = WideBottomBarShape, // Menerapkan cekungan di sini
+        shape = dynamicShape, // Menerapkan cekungan di sini
         modifier = Modifier.fillMaxWidth().height(90.dp)
     ) {
         Row(

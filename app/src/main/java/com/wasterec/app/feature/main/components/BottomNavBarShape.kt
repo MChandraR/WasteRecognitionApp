@@ -1,7 +1,17 @@
 package com.wasterec.app.feature.main.components
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.shape.GenericShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.wasterec.app.feature.main.MainView
 
 val SmoothBottomBarShape = GenericShape { size, _ ->
     val fabRadius = 100f       // Radius untuk lubang FAB
@@ -45,9 +55,63 @@ val SmoothBottomBarShape = GenericShape { size, _ ->
     close()
 }
 
+@Composable
+fun getWideBottomBarShape(
+    horizontalRadiusDp: Dp = 50.dp, // Lebar cekungan
+    verticalDepthDp: Dp = 35.dp,    // Kedalaman cekungan
+    cornerRadiusDp: Dp = 15.dp      // Kehalusan sudut
+): Shape {
+    val density = LocalDensity.current
+
+    return remember(density, horizontalRadiusDp, verticalDepthDp, cornerRadiusDp) {
+        GenericShape { size, _ ->
+            // Konversi DP ke Pixel menggunakan density
+            val horizontalRadius = with(density) { horizontalRadiusDp.toPx() }
+            val verticalDepth = with(density) { verticalDepthDp.toPx() }
+            val cornerRadius = with(density) { cornerRadiusDp.toPx() }
+            val center = size.width / 2
+
+            moveTo(0f, 0f)
+
+            // 1. Garis lurus ke bibir cekungan
+            lineTo(center - horizontalRadius - cornerRadius, 0f)
+
+            // 2. Sudut masuk (Bezier)
+            quadraticBezierTo(
+                x1 = center - horizontalRadius, y1 = 0f,
+                x2 = center - horizontalRadius, y2 = cornerRadius
+            )
+
+            // 3. Cekungan utama
+            arcTo(
+                rect = Rect(
+                    left = center - horizontalRadius,
+                    top = -verticalDepth + cornerRadius,
+                    right = center + horizontalRadius,
+                    bottom = verticalDepth + cornerRadius
+                ),
+                startAngleDegrees = 180f,
+                sweepAngleDegrees = -180f,
+                forceMoveTo = false
+            )
+
+            // 4. Sudut keluar (Bezier)
+            quadraticBezierTo(
+                x1 = center + horizontalRadius, y1 = 0f,
+                x2 = center + horizontalRadius + cornerRadius, y2 = 0f
+            )
+
+            lineTo(size.width, 0f)
+            lineTo(size.width, size.height)
+            lineTo(0f, size.height)
+            close()
+        }
+    }
+}
+
 val WideBottomBarShape = GenericShape { size, _ ->
     val horizontalRadius = 120f   // Diperlebar ke samping (sebelumnya 110f)
-    val verticalDepth = 100f      // Kedalaman tetap (atur sesuai selera)
+    val verticalDepth = 600.dp.toString().toFloat()   // Kedalaman tetap (atur sesuai selera)
     val cornerRadius = 50f       // Transisi sudut diperhalus
     val center = size.width / 2
 
@@ -105,4 +169,11 @@ val BottomBarShape = GenericShape { size, _ ->
     lineTo(size.width, size.height)
     lineTo(0f, size.height)
     close()
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview
+@Composable
+fun BottomNavBarShapePreview(){
+    MainView()
 }
