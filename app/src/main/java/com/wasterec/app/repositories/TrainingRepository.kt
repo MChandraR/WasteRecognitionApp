@@ -1,6 +1,7 @@
 package com.wasterec.app.repositories
 
 import android.content.Context
+import com.wasterec.app.helper.ExpiredAuthTokenException
 import com.wasterec.app.model.api_response.training.TrainingDataResponse
 import com.wasterec.app.model.api_response.training.TrainingStatusResponse
 import com.wasterec.app.model.domain.TrainingData
@@ -11,7 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class TrainingRepository(val context: Context): ApiService() {
+class TrainingRepository(val context: Context, val onException : (e : Exception) -> Unit = {}): ApiService() {
     private fun getTrainingService(request : suspend (trainingService : TrainingService)->Unit){
         val authToken = SharedPreferenceService(context).getStringValue("authToken")
         authToken?.let{addAuthorizationBerer(authToken)}
@@ -21,6 +22,7 @@ class TrainingRepository(val context: Context): ApiService() {
                 try{
                     request(trainingService)
                 }catch (e: Exception){
+                    onException(e)
                     println("Training Service Exception : ${e.message}")
                 }
             }
@@ -51,9 +53,11 @@ class TrainingRepository(val context: Context): ApiService() {
                     onSuccess(it.map { TrainingData(it.session_id, it.user_id, it.weight_id, it.num_data, it.label_count, it.created_at, it.status, it.loss, it.average_loss) })
                 }
             } else {
-                println("Response : ${response.errorBody()}")
+                println("Response : ${response.code()}")
                 onFailed(response.message())
-
+                if(response.code() == 401){
+                    onException(ExpiredAuthTokenException("Token Expired"))
+                }
             }
         }
     }

@@ -2,7 +2,9 @@ package com.wasterec.app.repositories
 
 import android.content.Context
 import com.wasterec.app.helper.AppError
+import com.wasterec.app.helper.ExpiredAuthTokenException
 import com.wasterec.app.helper.GlobalModelError
+import com.wasterec.app.helper.InternalServerErrorException
 import com.wasterec.app.model.globalmodel.ClassifierWeightModel
 import com.wasterec.app.model.api_response.model_info.GlobalModelInfoModel
 import com.wasterec.app.model.globalmodel.GlobalWeightModel
@@ -14,7 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 
-class GlobalModelRepository(val context: Context? = null) : ApiService() {
+class GlobalModelRepository(val context: Context? = null, val onException : (exception : Exception)->Unit = {}) : ApiService() {
     fun getGlobamModelService(request : suspend (globalModelService : GlobalModelService)->Unit) {
         //If there's context get stored AuthToken from SP and inject to Request Header
         context?.let{
@@ -26,7 +28,8 @@ class GlobalModelRepository(val context: Context? = null) : ApiService() {
                try{
                    request(it)
                }catch (e : Exception){
-
+                    onException(e)
+                    println("Exception ${e.toString()}")
                }
            }
        }
@@ -51,19 +54,29 @@ class GlobalModelRepository(val context: Context? = null) : ApiService() {
         this.getGlobamModelService{
             val response = it.getClassifierModelWeight()
             if(response.isSuccessful){
-                callback(null, response.body()?.data)
+                if(response.body()?.status == 400)  callback(GlobalModelError.Unauthorized(), null)
+                else callback(null, response.body()?.data)
             }else{
+                if(response.code() == 401){
+                    onException(ExpiredAuthTokenException("Token Expired"))
+                }
                 callback(GlobalModelError.NoInternet(), null)
             }
         }
     }
 
-    fun uploadModelWeight(globalWeightModel: GlobalWeightModel){
+    fun uploadModelWeight(globalWeightModel: GlobalWeightModel,
+                          onSuccess : ()->Unit = {},
+                          onFailed : (message : String)->Unit = {}
+                          ){
         this.getGlobamModelService{
             val response = it.updateModelWeight(globalWeight = globalWeightModel)
             if(response.isSuccessful){
                 println("response ${response.body().toString()}")
+                onSuccess()
             }else{
+                onException(InternalServerErrorException("Token Expired"));
+                onFailed(response.errorBody().toString())
                 println("Gagal ${response.errorBody().toString()} ${response.body().toString()}")
             }
         }
@@ -86,6 +99,9 @@ class GlobalModelRepository(val context: Context? = null) : ApiService() {
             if (downloadResponse.body() != null) {
                 onResponse(downloadResponse.body()!!)
             } else {
+                if(downloadResponse.code() == 401){
+                    onException(ExpiredAuthTokenException("Token Expired"))
+                }
                 onFailure(downloadResponse.message().toString())
             }
 

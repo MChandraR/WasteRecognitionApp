@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -18,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +42,8 @@ fun CustomTextInputField(
     backgroundColor : Color = TextFieldDefaults.colors().unfocusedContainerColor,
     visualTransformation : VisualTransformation = VisualTransformation.None,
     maxLines : Int = Int.MAX_VALUE,
+    keyboardOption : KeyboardOptions = KeyboardOptions(),
+    keyboaredAction : KeyboardActions  = KeyboardActions(),
     placeholder : (@Composable () -> Unit)? = null,
     ){
 
@@ -85,6 +90,8 @@ fun CustomTextInputField(
                 },
                 colorFilter = ColorFilter.tint(trailingColor)
             ),
+            keyboardOptions = keyboardOption,
+            keyboardActions = keyboaredAction,
             colors = TextFieldDefaults.colors(
                 focusedTrailingIconColor = trailingColor,
                 unfocusedTrailingIconColor = trailingColor,

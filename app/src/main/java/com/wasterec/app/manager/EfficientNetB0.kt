@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.wasterec.app.model.ClassifierWeightModel
-import com.wasterec.app.model.ModelConiguration
+import com.wasterec.app.model.ModelConfiguration
 import com.wasterec.app.model.SlidingArray
 import com.wasterec.app.model.TrainingModel
 import com.wasterec.app.utils.forceSoftwareBitmap
@@ -13,7 +13,6 @@ import org.pytorch.IValue
 import org.pytorch.Module
 import org.pytorch.Tensor
 import org.pytorch.torchvision.TensorImageUtils
-import kotlin.math.abs
 import kotlin.math.ln
 
 class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl") : ModelManager(context, modelPath) {
@@ -75,7 +74,6 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
 
         val logits = FloatArray(classifierParam.bias.size){ i ->
             var logit : Float = classifierParam.bias[i]
-            println("==========================")
             for (j in 0 until  1280 ){
                 logit += features[j] * classifierParam.weights[i][j]
                 //println(features[j] * classifierParam.first[i][j])
@@ -85,7 +83,6 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
         }
 
         val maxLogits = logits.maxOrNull() ?: 0f
-        println("Max : $maxLogits")
         val expLogits = logits.map{ kotlin.math.exp(it - maxLogits) }
         expLogits.forEach {
             println(it)
@@ -100,7 +97,6 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
 
         // Validasi apakah model mengeluarkan NaN
         if (features.any { it.isNaN() }) {
-            println("ERROR: Model output contains NaN")
             return Pair(-1, 0f)
         }
 
@@ -118,17 +114,13 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun train(config: ModelConiguration, dataset: List<TrainingModel>, onProgressUpdate : (epoch:Int, loss : Float)->Unit, onFinished : (totalEpoch:Int)->Unit = {}): Map<String, Any> {
+    fun train(config: ModelConfiguration, dataset: List<TrainingModel>, onProgressUpdate : (epoch:Int, loss : Float)->Unit, onFinished : (totalEpoch:Int, data : Map<String, Any>? )->Unit ): Map<String, Any> {
         var weights = this.classifierWeights
         var bias = this.classifierBias
-        var last3Loss = SlidingArray<Float>(maxSize = 3)
 
         if (weights == null || bias == null) return emptyMap()
         var totalEpoch = config.epoch
 
-
-        val smoothingValue = 0.1f
-        val weightDecay = 0.01f
         val numClasses = weights.size
         val numFeatures = weights[0].size
         val learningRate = config.learningRate
@@ -150,79 +142,155 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
 
         for( epoch in 0 ..< config.epoch) {
             var totalLoss = 0f
+            val batches = featureList.shuffled().chunked(config.batchSize)
 
-            for ((features, label) in featureList) {
-                // 2. Forward Pass (Classifier Layer)
-                val logits = FloatArray(numClasses) { i ->
-                    var sum = bias[i]
-                    for (j in 0 until numFeatures) {
-                        sum += features[j] * weights[i][j]
-                    }
-                    sum
-                }
+            for(batch in batches){
+                val weightGrad = Array<FloatArray>(numClasses){ FloatArray(numFeatures) }
+                val biasGrad = FloatArray(numClasses)
+                var batchLoss = 0f
 
-                // 3. Stable Softmax
-                val maxLogit = logits.maxOrNull() ?: 0f
-                val expScore = logits.map { kotlin.math.exp(it - maxLogit) }
-                val sumExp = expScore.sum()
-                val probs = expScore.map { (it / sumExp) }
-
-                // 4. Cross Entropy Loss (Natural Log)
-                var sampleLoss = 0f
-
-                for (i in 0 until numClasses) {
-                    // Label Smoothing target
-                    val target = if (i == label) {
-                        (1f - smoothingValue + (smoothingValue / numClasses))
-                    } else {
-                        (smoothingValue / numClasses)
+                for((feature, label) in batch){
+                    val logits = FloatArray( numClasses){
+                        var sum = bias[it]
+                        for(j in 0 until feature.size){
+                            sum += feature[j] * weights[it][j]
+                        }
+                        sum
                     }
 
-                    // Kalkulasi Cross Entropy yang benar dengan Label Smoothing
-                    sampleLoss += -target * ln(probs[i].coerceAtLeast(1e-10f))
+                    val maxLogit = logits.maxOrNull() ?: 0f
+                    val expScore = logits.map{ kotlin.math.exp(it - maxLogit) }
+                    val totalScore = expScore.sum()
+                    val probs = expScore.map{it/totalScore}
 
-                    val gradOut = probs[i] - target
+                    for(i in 0 until numClasses){
+                        val target =
+                            if(i==label){
+                                1f
+                            }else{
+                                0f
+                            }
 
-                    // Update Bias
-                    bias[i] -= learningRate * gradOut
+                        batchLoss += -target * ln(probs[i].coerceAtLeast(1e-10f))
+                        val gradOut = probs[i] - target
 
-                    // Update Weights
-                    for (j in 0 until numFeatures) {
-                        // PENTING: Normalisasi weight decay berdasarkan ukuran dataset
-                        // agar tidak terlalu agresif saat menggunakan batch-size 1
-                        val l2Reg = (weightDecay / dataset.size) * weights[i][j]
-                        weights[i][j] -= learningRate * (gradOut * features[j] + l2Reg)
+                        biasGrad[i] += gradOut
+                        for(j in 0 until numFeatures){
+                            weightGrad[i][j] += (gradOut * feature[j])
+
+                        }
+
                     }
                 }
-                totalLoss += sampleLoss
-                last3Loss.add(sampleLoss)
 
+                val batchSize = batch.size.toFloat()
+                for(i in 0 until numClasses){
+                    bias[i] -= (learningRate * ( biasGrad[i] / batchSize));
 
-                // 5. Backpropagation
-                for (i in 0 until numClasses) {
-                    // Label Smoothing target
-                    val target = if (i == label) (1f - smoothingValue + (smoothingValue / numClasses)) else (smoothingValue / numClasses)
-                    val gradOut = probs[i] - target
-
-                    // Update Bias
-                    bias[i] -= learningRate * gradOut
-
-                    // Update Weights with Weight Decay (L2)
-                    for (j in 0 until numFeatures) {
-                        val l2Reg = weightDecay * weights[i][j]
-                        weights[i][j] -= learningRate * (gradOut * features[j] + l2Reg)
+                    for(j in 0 until numFeatures){
+                        val avgGrad = (weightGrad[i][j]/batchSize)
+                        weights[i][j] -= learningRate * avgGrad
                     }
                 }
+                totalLoss += batchLoss
             }
+
             val avgLoss = totalLoss / dataset.size
             onProgressUpdate(epoch, avgLoss)
-            if(avgLoss < .2f){
-                break;
+//            if(avgLoss < .2f){
+//                break;
+//            }
+//            if(abs(last3Loss.getList().get(0) - avgLoss) <= 0.003){
+//                totalEpoch = epoch-1
+//                break;
+//            }
+            //Log.i("TRAIN", "Epoch ${epoch + 1} Done. Avg Loss: $avgLoss")
+        }
+
+        onFinished(totalEpoch,  mapOf("weights" to weights, "bias" to bias))
+        return mapOf("weights" to weights, "bias" to bias)
+    }
+
+    fun trainWithFeature(featureList : List<Pair<FloatArray, Int>>, config: ModelConfiguration, dataset: List<TrainingModel>, onProgressUpdate : (epoch:Int, loss : Float)->Unit, onFinished : (totalEpoch:Int)->Unit = {}): Map<String, Any> {
+        val weights = this.classifierWeights
+        val bias = this.classifierBias
+
+        if (weights == null || bias == null) return emptyMap()
+        var totalEpoch = config.epoch
+
+
+
+        val numClasses = weights.size
+        val numFeatures = weights[0].size
+        val learningRate = config.learningRate
+
+        // 1. Ekstraksi fitur (Caching) - Backbone Frozen
+        val featureList = featureList
+
+        for( epoch in 0 ..< config.epoch) {
+            var totalLoss = 0f
+            var batches = featureList.shuffled().chunked(config.batchSize)
+
+            for(batch in batches){
+                var weightGrad = Array<FloatArray>(numClasses){ FloatArray(numFeatures) }
+                var biasGrad = FloatArray(numClasses)
+                var batchLoss = 0f
+
+                for((feature, label) in batch){
+                    val logits = FloatArray(numClasses) {
+                        var sum = bias[it]
+                        for (j in 0 until feature.size) {
+                            sum += feature[j] * weights[it][j]
+                        }
+                        sum
+                    }
+
+                    val maxLogit = logits.maxOrNull() ?: 0f
+                    val expScore = logits.map{ kotlin.math.exp(it - maxLogit) }
+                    val totalScore = expScore.sum()
+                    val probs = expScore.map{it/totalScore}
+
+                    for(i in 0 until numClasses){
+                        val target =
+                            if(i==label){
+                                1f
+                            }else{
+                                0f
+                            }
+
+                        batchLoss += -target * ln(probs[i].coerceAtLeast(1e-10f))
+                        val gradOut = probs[i] - target
+
+                        biasGrad[i] += gradOut
+                        for(j in 0 until numFeatures){
+                            weightGrad[i][j] += (gradOut * feature[j])
+
+                        }
+
+                    }
+                }
+
+                val batchSize = batch.size.toFloat()
+                for(i in 0 until numClasses){
+                    bias[i] -= (learningRate * ( biasGrad[i] / batchSize));
+
+                    for(j in 0 until numFeatures){
+                        val avgGrad = (weightGrad[i][j]/batchSize)
+                        weights[i][j] -= learningRate * avgGrad
+                    }
+                }
+                totalLoss += batchLoss
             }
-            if(abs(last3Loss.getList().get(0) - avgLoss) <= 0.003){
-                totalEpoch = epoch-1
-                break;
-            }
+
+            val avgLoss = totalLoss / dataset.size
+            onProgressUpdate(epoch, avgLoss)
+//            if(avgLoss < .2f){
+//                break;
+//            }
+//            if(abs(last3Loss.getList().get(0) - avgLoss) <= 0.003){
+//                totalEpoch = epoch-1
+//                break;
+//            }
             //Log.i("TRAIN", "Epoch ${epoch + 1} Done. Avg Loss: $avgLoss")
         }
 

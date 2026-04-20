@@ -191,10 +191,11 @@ fun AnnotateView(
                                     }
                                 }
                                 //Validasi jika index terakhir / gambar terakhir maka lanjut ke halaman selanjutnya
-                                if ((annotateViewModel?.currentAnnotateIndex?.value
+                                if (!(annotateViewModel?.isRedirected?.value ?: false) &&  (annotateViewModel?.currentAnnotateIndex?.value
                                         ?: 0) >= (annotateViewModel?.datasetManager?.value?.getDataSize()
                                         ?: 0) - 1
                                 ) {
+                                    annotateViewModel?.isRedirected?.value = true
                                     annotateViewModel?.navHostController?.navigate(Destination.Training)
                                 }
                                 annotateViewModel?.currentAnnotateIndex?.value = nextIndex
@@ -263,10 +264,11 @@ fun AnnotateView(
                     }
 
                     //Validasi , jika sudah di akhir index / gambar , lanjut ke training
-                    if ((annotateViewModel.currentAnnotateIndex.value
+                    if (!annotateViewModel.isRedirected.value &&  (annotateViewModel.currentAnnotateIndex.value
                                 ) >= (annotateViewModel.datasetManager.value.getDataSize() ?: 0) - 1
                     ) {
                         annotateViewModel.navHostController.navigate(Destination.Training)
+                        annotateViewModel.isRedirected.value = true
                     }
                     annotateViewModel.currentAnnotateIndex.value = nextIndex
                 }

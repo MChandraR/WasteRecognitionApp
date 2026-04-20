@@ -8,19 +8,25 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,15 +37,17 @@ import com.wasterec.app.feature.login.viewmodel.LoginViewModel
 import com.wasterec.app.shared.components.Alert
 import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
+import kotlinx.coroutines.Dispatchers
 
 @Composable
 fun LoginView(loginViewModel: LoginViewModel){
+    loginViewModel.setLocalFoccues(LocalFocusManager.current)
 
     Box{
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding().fillMaxSize().background(Color.White).padding(20.dp)
+            modifier = Modifier.padding().fillMaxSize().background(Color.White).padding(20.dp).imePadding()
         ) {
             Spacer(modifier = Modifier.weight(1f))
             Text(
@@ -66,7 +74,15 @@ fun LoginView(loginViewModel: LoginViewModel){
                 maxLines = 1,
                 placeholder = {
                     Text("Masukkan username")
-                }
+                },
+                keyboardOption = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
+                keyboaredAction = KeyboardActions(
+                    onNext = {
+                        loginViewModel.changeFocusToNextElement()
+                    }
+                )
             )
 
             Spacer(Modifier.height(20.dp))
@@ -87,7 +103,15 @@ fun LoginView(loginViewModel: LoginViewModel){
                 backgroundColor = ColorAsset.alpha5,
                 placeholder = {
                     Text("Masukkan password")
-                }
+                },
+                keyboardOption = KeyboardOptions(
+                    imeAction = ImeAction.Done
+                ),
+                keyboaredAction = KeyboardActions(
+                    onNext = {
+                        loginViewModel.changeFocusToNextElement()
+                    }
+                )
             )
 
             Spacer(modifier = Modifier.weight(1f))

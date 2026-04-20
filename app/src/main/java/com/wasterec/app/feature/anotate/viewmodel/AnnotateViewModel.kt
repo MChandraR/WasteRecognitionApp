@@ -34,11 +34,13 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
     var isModelLoading : MutableState<Boolean> = mutableStateOf(true)
     var rightLabelCount : MutableIntState = mutableIntStateOf(0)
     var isOnInference : MutableState<Boolean> = mutableStateOf(false)
+    val isRedirected : MutableState<Boolean> = mutableStateOf(false)
     var showCancellationConfirmationDialog : MutableState<Boolean> = mutableStateOf(false)
 
     //Deklarasikan ulang semua nilai variabel
     @RequiresApi(Build.VERSION_CODES.O)
     fun reInit(){
+        isRedirected.value = false
         isOnInference.value = false
         rightLabelCount.intValue = 0
         isModelLoading.value = true
@@ -79,8 +81,8 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
                     withContext(Dispatchers.Main) {
                         isOnInference.value = false
                         predictResult.value = labelResult ?: "Unknown"
-                        println("Label : " + labelResult)
-                        println("Index Label : " + outputIdx)
+//                        println("Label : " + labelResult)
+//                        println("Index Label : " + outputIdx)
                         confidentLevel.value = output.second
                         if (confidentLevel.value == 0.0f) {
                             predictResult.value = "Unknown"

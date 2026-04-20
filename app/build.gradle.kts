@@ -49,6 +49,7 @@ android {
 
 
 dependencies {
+    implementation(libs.androidx.compose.ui.graphics)
     val navVersion = "2.9.5"
     // Jetpack Compose integration
     implementation(libs.androidx.navigation.compose)
@@ -85,6 +86,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation("org.apache.commons:commons-math3:3.6.1")
 
 
     //Torch

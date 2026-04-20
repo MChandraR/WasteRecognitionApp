@@ -42,5 +42,8 @@ object Destination {
 
     @Serializable
     data object TrainingHistoryDetail : Route
+
+    @Serializable
+    data object Testing : Route
 }
 

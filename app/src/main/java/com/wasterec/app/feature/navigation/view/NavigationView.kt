@@ -25,6 +25,8 @@ import com.wasterec.app.feature.login.viewmodel.LoginViewModel
 import com.wasterec.app.feature.main.MainView
 import com.wasterec.app.feature.modelload.view.ModelLoadView
 import com.wasterec.app.feature.modelload.viewmodel.ModelLoadViewModel
+import com.wasterec.app.feature.neural_search.NSView
+import com.wasterec.app.feature.neural_search.NSViewModel
 import com.wasterec.app.feature.splash.view.SplashView
 import com.wasterec.app.feature.training.view.FinishTrainingView
 import com.wasterec.app.feature.training.view.TrainingView
@@ -50,7 +52,8 @@ fun NavigationView(
     modelLoadViewModel: ModelLoadViewModel,
     finishTrainingViewModel: FinishTrainingViewModel,
     trainingHistoryViewModel: TrainingHistoryViewModel,
-    trainingHistoryDetailViewModel: TrainingHistoryDetailViewModel
+    trainingHistoryDetailViewModel: TrainingHistoryDetailViewModel,
+    nsViewModel : NSViewModel
 ) {
     val startDestination = Destination.Splash
     var selectedDestination by rememberSaveable { mutableIntStateOf(0) }
@@ -71,7 +74,7 @@ fun NavigationView(
         composable<Destination.FinishTraining>{ FinishTrainingView(finishTrainingViewModel) }
         composable<Destination.WeightLoading>{ ModelLoadView(modelLoadViewModel) }
         composable<Destination.TrainingHistoryDetail>{ TrainingHistoryDetailView(trainingHistoryDetailViewModel) }
-
+        composable<Destination.Testing>{ NSView(nsViewModel) }
     }
 
 }
