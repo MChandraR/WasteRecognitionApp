@@ -74,7 +74,6 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
 
         val logits = FloatArray(classifierParam.bias.size){ i ->
             var logit : Float = classifierParam.bias[i]
-            println("==========================")
             for (j in 0 until  1280 ){
                 logit += features[j] * classifierParam.weights[i][j]
                 //println(features[j] * classifierParam.first[i][j])
@@ -84,7 +83,6 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
         }
 
         val maxLogits = logits.maxOrNull() ?: 0f
-        println("Max : $maxLogits")
         val expLogits = logits.map{ kotlin.math.exp(it - maxLogits) }
         expLogits.forEach {
             println(it)
@@ -99,7 +97,6 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
 
         // Validasi apakah model mengeluarkan NaN
         if (features.any { it.isNaN() }) {
-            println("ERROR: Model output contains NaN")
             return Pair(-1, 0f)
         }
 
@@ -117,17 +114,13 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun train(config: ModelConfiguration, dataset: List<TrainingModel>, onProgressUpdate : (epoch:Int, loss : Float)->Unit, onFinished : (totalEpoch:Int)->Unit = {}): Map<String, Any> {
+    fun train(config: ModelConfiguration, dataset: List<TrainingModel>, onProgressUpdate : (epoch:Int, loss : Float)->Unit, onFinished : (totalEpoch:Int, data : Map<String, Any>? )->Unit ): Map<String, Any> {
         var weights = this.classifierWeights
         var bias = this.classifierBias
-        var last3Loss = SlidingArray<Float>(maxSize = 3)
 
         if (weights == null || bias == null) return emptyMap()
         var totalEpoch = config.epoch
 
-
-        val smoothingValue = 0.0000f
-        val weightDecay = 0.000f
         val numClasses = weights.size
         val numFeatures = weights[0].size
         val learningRate = config.learningRate
@@ -149,11 +142,11 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
 
         for( epoch in 0 ..< config.epoch) {
             var totalLoss = 0f
-            var batches = featureList.chunked(config.batchSize)
+            val batches = featureList.shuffled().chunked(config.batchSize)
 
             for(batch in batches){
-                var weightGrad = Array<FloatArray>(numClasses){ FloatArray(numFeatures) }
-                var biasGrad = FloatArray(numClasses)
+                val weightGrad = Array<FloatArray>(numClasses){ FloatArray(numFeatures) }
+                val biasGrad = FloatArray(numClasses)
                 var batchLoss = 0f
 
                 for((feature, label) in batch){
@@ -173,9 +166,9 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
                     for(i in 0 until numClasses){
                         val target =
                             if(i==label){
-                               ( 1f-smoothingValue + (smoothingValue/numClasses))
+                                1f
                             }else{
-                                (smoothingValue/numClasses)
+                                0f
                             }
 
                         batchLoss += -target * ln(probs[i].coerceAtLeast(1e-10f))
@@ -195,9 +188,8 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
                     bias[i] -= (learningRate * ( biasGrad[i] / batchSize));
 
                     for(j in 0 until numFeatures){
-                        val l2Reg = (weightDecay * weights[i][j])
                         val avgGrad = (weightGrad[i][j]/batchSize)
-                        weights[i][j] -= learningRate * (avgGrad + l2Reg)
+                        weights[i][j] -= learningRate * avgGrad
                     }
                 }
                 totalLoss += batchLoss
@@ -215,21 +207,19 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
             //Log.i("TRAIN", "Epoch ${epoch + 1} Done. Avg Loss: $avgLoss")
         }
 
-        onFinished(totalEpoch)
+        onFinished(totalEpoch,  mapOf("weights" to weights, "bias" to bias))
         return mapOf("weights" to weights, "bias" to bias)
     }
 
     fun trainWithFeature(featureList : List<Pair<FloatArray, Int>>, config: ModelConfiguration, dataset: List<TrainingModel>, onProgressUpdate : (epoch:Int, loss : Float)->Unit, onFinished : (totalEpoch:Int)->Unit = {}): Map<String, Any> {
-        var weights = this.classifierWeights
-        var bias = this.classifierBias
-        var last3Loss = SlidingArray<Float>(maxSize = 3)
+        val weights = this.classifierWeights
+        val bias = this.classifierBias
 
         if (weights == null || bias == null) return emptyMap()
         var totalEpoch = config.epoch
 
 
-        val smoothingValue = 0.0000f
-        val weightDecay = 0.000f
+
         val numClasses = weights.size
         val numFeatures = weights[0].size
         val learningRate = config.learningRate
@@ -239,7 +229,7 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
 
         for( epoch in 0 ..< config.epoch) {
             var totalLoss = 0f
-            var batches = featureList.chunked(config.batchSize)
+            var batches = featureList.shuffled().chunked(config.batchSize)
 
             for(batch in batches){
                 var weightGrad = Array<FloatArray>(numClasses){ FloatArray(numFeatures) }
@@ -263,9 +253,9 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
                     for(i in 0 until numClasses){
                         val target =
                             if(i==label){
-                                ( 1f-smoothingValue + (smoothingValue/numClasses))
+                                1f
                             }else{
-                                (smoothingValue/numClasses)
+                                0f
                             }
 
                         batchLoss += -target * ln(probs[i].coerceAtLeast(1e-10f))
@@ -285,9 +275,8 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
                     bias[i] -= (learningRate * ( biasGrad[i] / batchSize));
 
                     for(j in 0 until numFeatures){
-                        val l2Reg = (weightDecay * weights[i][j])
                         val avgGrad = (weightGrad[i][j]/batchSize)
-                        weights[i][j] -= learningRate * (avgGrad + l2Reg)
+                        weights[i][j] -= learningRate * avgGrad
                     }
                 }
                 totalLoss += batchLoss

@@ -2,10 +2,13 @@ package com.wasterec.app.feature.modelload.viewmodel
 
 import android.app.Application
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
 import androidx.navigation.NavHostController
+import com.wasterec.app.helper.ExpiredAuthTokenException
 import com.wasterec.app.manager.ClassifierWeightFileManager
 import com.wasterec.app.manager.FileManager
 import com.wasterec.app.model.Destination
@@ -27,7 +30,7 @@ class ModelLoadViewModel(
 
     val backboneModelDownloadProgress : MutableState<Float> = mutableFloatStateOf(0f)
     val classifierWeightDownloadProgress : MutableState<Float> = mutableFloatStateOf(0f)
-    val globalModelRepository : GlobalModelRepository = GlobalModelRepository(context)
+    val globalModelRepository : GlobalModelRepository = GlobalModelRepository(context, {handleAPIException(it)})
     val fileManager: FileManager = FileManager(context = context)
     val sharedPreferenceService = SharedPreferenceService(application.baseContext)
     val classifierWeightFileManager: ClassifierWeightFileManager = ClassifierWeightFileManager(context)
@@ -136,6 +139,21 @@ class ModelLoadViewModel(
                 inclusive = true
             }
             launchSingleTop = true
+        }
+    }
+
+    fun handleAPIException(e: Exception){
+        when(e){
+            is ExpiredAuthTokenException -> {
+                CoroutineScope(Dispatchers.Main).launch{
+                    Toast.makeText(application.baseContext, "Sesi telah kadaluarsa silahkan login kembali !", Toast.LENGTH_SHORT).show()
+                    navigateToHome()
+                }
+
+            }
+            else -> {
+
+            }
         }
     }
 }

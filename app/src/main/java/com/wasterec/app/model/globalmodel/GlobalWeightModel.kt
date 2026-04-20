@@ -9,7 +9,10 @@ data class GlobalWeightModel(
     val weights : String,
     val bias : String,
     val loss : List<Float>,
-    val average_loss : Float
+    val last_loss : Float,
+    val training_time : Long,
+    val memory_usage : List<Long>,
+    val energy_usage : List<Long>
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

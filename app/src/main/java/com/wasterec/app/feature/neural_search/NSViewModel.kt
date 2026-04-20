@@ -187,6 +187,21 @@ class NSViewModel(val app: Application) : AndroidViewModel(app) {
     }
 
     fun sampler(){
+        try {
+            // Menjalankan perintah 'top' satu kali (batch mode)
+            val process = Runtime.getRuntime().exec("top -n 1 -d 1")
+            val reader = process.inputStream.bufferedReader()
+            val output = reader.readText()
+
+            // Cari baris yang mengandung package name aplikasi kamu
+            val appLine = output.lines().find { it.contains(app.baseContext.packageName) }
+
+            // Biasanya persentase CPU ada di kolom ke-9 atau ke-10 (tergantung versi Android)
+            println(appLine ?: "Data tidak ditemukan")
+        } catch (e: Exception) {
+            "Error: ${e.message}"
+        }
+
         var minVal = 1000.0
         viewModelScope.launch {
             val k = 6 // Misal membagi data ke 5 klien

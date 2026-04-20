@@ -1,7 +1,9 @@
 package com.wasterec.app.feature.training.viewmodel
 
 import android.app.Application
+import android.content.Context
 import android.graphics.Bitmap
+import android.os.BatteryManager
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -12,11 +14,14 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import com.wasterec.app.feature.anotate.viewmodel.AnnotateViewModel
+import com.wasterec.app.helper.InternalServerErrorException
+import com.wasterec.app.helper.NoConnectivityException
 import com.wasterec.app.manager.ClassifierWeightFileManager
 import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.manager.EfficientNetB0
@@ -34,6 +39,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.Objects
 
 class TrainingViewModel(
     val app : Application,
@@ -47,9 +53,10 @@ class TrainingViewModel(
     var currentEpoch : MutableState<Int>  = mutableIntStateOf(0)
     var currentLoss : MutableState<Float> = mutableFloatStateOf(0f)
     val lossList = mutableStateListOf<Float>()
+    val backgroundLossList = mutableStateListOf<Float>()
     val classifierWeightFileManager : ClassifierWeightFileManager = ClassifierWeightFileManager(app.baseContext)
     val totalDatasetCount: MutableIntState = mutableIntStateOf(0)
-    val datasetRepository : DatasetUploadRepository = DatasetUploadRepository(app.baseContext)
+    val datasetRepository : DatasetUploadRepository = DatasetUploadRepository(app.baseContext, {handleAPIException(it)})
     val fileManager : FileManager = FileManager(app.baseContext)
     val totalLabelCount : MutableList<Int> = mutableListOf(0,0,0,0,0,0)
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
@@ -74,6 +81,8 @@ class TrainingViewModel(
     //Fungsi untuk reinit nilai atau reset variabel
     @RequiresApi(Build.VERSION_CODES.O)
     fun reInit(){
+        listOfPendingTrainingData.clear()
+        modelProducer.value =  CartesianChartModelProducer()
         modelAccuracy.intValue = getModelAccuracy()
         totalDatasetCount.intValue = datasetManager.value.getDataSize()
         datasetManager.value.getEachLabelCount().forEachIndexed { idx, value ->
@@ -83,14 +92,12 @@ class TrainingViewModel(
         val backboneModelFile = File(app.baseContext.filesDir, "Backbone.ptl")
         if(backboneModelFile.exists()){
             efficientNetB0 = EfficientNetB0(app.baseContext, "Backbone.ptl")
-            println("Berhasil mengupdate backbone terbaru ")
         }
 
         CoroutineScope(Dispatchers.IO).launch {
             val newClassifierParam : ClassifierWeightModel? = classifierWeightFileManager.loadClassifierParamFromFile()
             newClassifierParam?.let{ newParam ->
                 efficientNetB0?.setClassifierWeightAndBias(newParam.weights, newParam.bias)
-                println("Berhasil memuat classifier param tebaru")
             }
             startLocalTraining()
             modelProducer.value.runTransaction {
@@ -107,7 +114,7 @@ class TrainingViewModel(
                 println("Berhasil upload dataset ke server")
             }
         }
-
+        backgroundLossList.clear()
         lossList.clear()
 
     }
@@ -127,6 +134,26 @@ class TrainingViewModel(
             listOfPendingTrainingData.clear()
         }
 
+    }
+
+    fun storeUnSentDataset(){
+        println("Menyimpan dataset ke offline folder")
+        val dataset : List<Bitmap> = annotateViewModel.datasetManager.value.getData().map { it.Input }
+        val datasetToUpload = fileManager.convertBitmapToZipFile(dataset, File(app.baseContext.dataDir, "dataset/${System.currentTimeMillis()}.zip") )
+    }
+
+    fun handleAPIException(e: Exception){
+        when(e){
+            is InternalServerErrorException -> {
+                storeUnSentDataset()
+            }
+            is NoConnectivityException -> {
+                storeUnSentDataset()
+            }
+            else -> {
+
+            }
+        }
     }
 
     fun updateLossChartData(){
@@ -178,56 +205,82 @@ class TrainingViewModel(
     fun startLocalTraining(){
         isTraining = true
         CoroutineScope(Dispatchers.IO).launch {
+            val startTrainingTime = System.currentTimeMillis()
+            datasetManager.value.lockTrainingDataFromPreprocessing = true
+            val batteryManager = application.baseContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+            var energyUsageStart = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER)
+            var memoryUsage : Long = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
+            val listOfMemoryUsage = mutableListOf<Long>()
+            val listOfEnergyUsage = mutableListOf<Long>()
             val data = efficientNetB0?.train(
                 config = modelConfig.value,
                 dataset = annotateViewModel.datasetManager.value.getData(),
                 onProgressUpdate = { epoch, loss ->
-                    CoroutineScope(Dispatchers.Main).launch {
-                        println("Progress pelatihan $epoch")
+                    //println("Progress pelatihan $epoch")
+                    listOfMemoryUsage.add(
+                        (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) - memoryUsage
+                    )
+                    val currentEnergyUsage = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER)
+                    listOfEnergyUsage.add(
+                        currentEnergyUsage - energyUsageStart
+                    )
+                    backgroundLossList.add(loss)
+                    energyUsageStart = currentEnergyUsage
+                    memoryUsage  = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
+                    viewModelScope.launch {
                         currentEpoch.value = epoch + 1
                         currentLoss.value = loss
-                        if (!loss.isNaN() && !loss.isInfinite()) {
+                        if (!loss.isNaN()) {
                             lossList.add(loss)
                             updateLossChartData()
                         }
+
                     }
 
                 },
-                onFinished = {
+                onFinished = { it, data ->
                     datasetManager.value.lockTrainingDataFromPreprocessing = false
                     modelConfig.value.epoch = it
                     currentEpoch.value = it
+
+
+                    isTraining = false
+                    val endTrainingTime = System.currentTimeMillis()
+
+                    print("SENDING CLASSIFIER WEIGHT")
+                    val newGlobalWeight = GlobalWeightModel(
+                        num_sample = annotateViewModel.datasetManager.value.getDataSize(),
+                        label_count = annotateViewModel.datasetManager.value.getEachLabelCount(),
+                        weights = encodeWeightsToBase64(data?.get("weights") as Array<FloatArray>),
+                        bias = floatArrayToBase64(data.getValue("bias") as FloatArray),
+                        loss = backgroundLossList,
+                        last_loss = currentLoss.value,
+                        training_time =  endTrainingTime - startTrainingTime,
+                        memory_usage = listOfMemoryUsage.toList(),
+                        energy_usage = listOfEnergyUsage
+                    )
+
+
+                    CoroutineScope(Dispatchers.Main).launch {
+                        listOfPendingTrainingData.add(newGlobalWeight)
+                    }
+                    globalModelRepository.uploadModelWeight(globalWeightModel = newGlobalWeight,
+                        onFailed = {
+                            println("Gagal menupload param training")
+                        },
+                        onSuccess = {
+                            println("Berhasil mengunggah training data ke server !!")
+                        }
+                    )
                 }
             )
 
-            isTraining = false
 
-            print("SENDING CLASSIFIER WEIGHT")
-            val newGlobalWeight = GlobalWeightModel(
-                num_sample = annotateViewModel.datasetManager.value.getDataSize(),
-                label_count = annotateViewModel.datasetManager.value.getEachLabelCount(),
-                weights = encodeWeightsToBase64(data?.get("weights") as Array<FloatArray>),
-                bias = floatArrayToBase64(data.getValue("bias") as FloatArray),
-                loss = lossList,
-                average_loss = lossList.average().toFloat()
-            )
-            CoroutineScope(Dispatchers.Main).launch {
-                listOfPendingTrainingData.add(newGlobalWeight)
-            }
-            globalModelRepository.uploadModelWeight(globalWeightModel = newGlobalWeight,
-                onFailed = {
-                    println("Gagal menupload param training")
-                },
-                onSuccess = {
-                    println("Berhasil mengunggah training data ke server !!")
-                }
-            )
             //clearTrainingData()
         }
     }
 
     fun handleExceptionAPI(){
-        println("ALAMAAAAAK")
         savePendingTrainingData(listOfPendingTrainingData)
     }
 

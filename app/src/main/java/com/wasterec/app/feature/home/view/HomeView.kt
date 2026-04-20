@@ -51,6 +51,7 @@ fun HomeView(
         homeViewModel?.getTrainingStatusForClient()
         homeViewModel?.checkIfUserLoggedIn()
         homeViewModel?.checkRemainTrainingData()
+        homeViewModel?.checkIfTheresDatasetRemain()
     }
 
     Column(
@@ -178,7 +179,7 @@ fun HomeView(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                enabled = homeViewModel?.isTrainingOpenForClient?.value ?: false,
+                enabled = (homeViewModel?.isTrainingOpenForClient?.value ?: false) && !homeViewModel.isThereRemainDataset.value,
                 colors = ButtonDefaults.buttonColors(ColorAsset.primaryBlue),
                 shape = RoundedCornerShape(10.dp),
                 onClick = {
