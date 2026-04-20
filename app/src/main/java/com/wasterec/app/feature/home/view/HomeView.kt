@@ -1,6 +1,10 @@
 package com.wasterec.app.feature.home.view
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,7 +35,11 @@ import com.wasterec.app.model.Destination
 import com.wasterec.app.shared.components.GifLoader
 import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
+import com.wasterec.app.utils.getDateTimeFromTimestamp
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeView(
     homeViewModel: HomeViewModel? = null,
@@ -38,6 +48,10 @@ fun HomeView(
 
     LaunchedEffect(Unit) {
         homeViewModel?.getGlobalModelInfo()
+        homeViewModel?.getTrainingStatusForClient()
+        homeViewModel?.checkIfUserLoggedIn()
+        homeViewModel?.checkRemainTrainingData()
+        homeViewModel?.checkIfTheresDatasetRemain()
     }
 
     Column(
@@ -56,6 +70,17 @@ fun HomeView(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            if(homeViewModel?.isUserAlreadyLoggedIn?.value == true) {
+                Column(horizontalAlignment = Alignment.End, modifier = Modifier.fillMaxWidth()) {
+                    Image(
+                        painter = painterResource(R.drawable.outline_exit_to_app_24), "",
+                        colorFilter = ColorFilter.tint(ColorAsset.primaryBlue),
+                        modifier = Modifier.clickable {
+                            homeViewModel?.logout()
+                        }
+                    )
+                }
+            }
             Spacer(modifier = Modifier.weight(1f))
             GifLoader(R.drawable.network)
 
@@ -94,18 +119,7 @@ fun HomeView(
                     modifier = Modifier
                         .weight(1f)
                 ) {
-                    Text(
-                        "Akurasi :",
-                    )
-                    Text(
-                        "80%",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = Typography.titleLarge.fontSize,
-                        modifier = Modifier
-                            .padding(top=2.dp)
-                            .padding(bottom = 20.dp),
-                        color = ColorAsset.primaryBlue
-                    )
+
                     Text(
                         "Model :",
                     )
@@ -113,6 +127,18 @@ fun HomeView(
                         (homeViewModel?.globalModelInfoModel?.value)?.model_name ?: "EfficientNet-B0" ,
                         fontWeight = FontWeight.Bold,
                         fontSize = Typography.titleSmall.fontSize,
+                        modifier = Modifier
+                            .padding(top=2.dp)
+                            .padding(bottom = 20.dp),
+                        color = ColorAsset.primaryBlue
+                    )
+                    Text(
+                        "Akurasi :",
+                    )
+                    Text(
+                        "%.2f".format(Locale.ROOT, (homeViewModel?.globalModelInfoModel?.value)?.accuracy?.toFloat()?.times(100f)) + "%",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = Typography.titleLarge.fontSize,
                         modifier = Modifier
                             .padding(top=2.dp),
                         color = ColorAsset.primaryBlue
@@ -124,10 +150,10 @@ fun HomeView(
                         .weight(1f)
                 ) {
                     Text(
-                        "Round :",
+                        "Version :",
                     )
                     Text(
-                        "1 (On Queue)",
+                        homeViewModel?.globalModelInfoModel?.value?.model_version ?: "",
                         fontWeight = FontWeight.Bold,
                         fontSize = Typography.titleSmall.fontSize,
                         modifier = Modifier
@@ -139,7 +165,8 @@ fun HomeView(
                         "Terakhir Diperbarui :",
                     )
                     Text(
-                        (homeViewModel?.globalModelInfoModel?.value)?.last_updated ?: "-" ,
+                        "${getDateTimeFromTimestamp(homeViewModel?.globalModelInfoModel?.value?.last_updated?.toLong() ?: 0L)?.format(
+                            DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"))}" ,
                         fontWeight = FontWeight.Bold,
                         fontSize = Typography.titleSmall.fontSize,
                         modifier = Modifier
@@ -152,6 +179,7 @@ fun HomeView(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
+                enabled = (homeViewModel?.isTrainingOpenForClient?.value ?: false) && !homeViewModel.isThereRemainDataset.value,
                 colors = ButtonDefaults.buttonColors(ColorAsset.primaryBlue),
                 shape = RoundedCornerShape(10.dp),
                 onClick = {
@@ -163,9 +191,19 @@ fun HomeView(
             ) {
                 Text(
                     "Start Training",
+                    fontSize = Typography.titleSmall.fontSize,
                     modifier = Modifier.padding(10.dp)
                 )
             }
+
+            if((homeViewModel?.isTrainingOpenForClient?.value ?: false) == false){
+                Text("Anda sudah melakukan training sebelumnya, harap tunggu hingga ronde selanjutnya",
+                    textAlign = TextAlign.Center,
+                    fontSize = Typography.bodySmall.fontSize,
+                    color = ColorAsset.primaryYellow,
+                    modifier = Modifier.padding(vertical = 10.dp))
+            }
+
 
             Spacer(modifier = Modifier.weight(1f))
         }
@@ -174,6 +212,7 @@ fun HomeView(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun homeViewPreview(){

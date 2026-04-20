@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.collection.floatListOf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
@@ -35,13 +36,22 @@ import com.wasterec.app.feature.login.viewmodel.LoginViewModel
 import com.wasterec.app.feature.modelload.factory.ModelLoadViewModelFactory
 import com.wasterec.app.feature.modelload.viewmodel.ModelLoadViewModel
 import com.wasterec.app.feature.navigation.view.NavigationView
+import com.wasterec.app.feature.neural_search.NSViewModel
+import com.wasterec.app.feature.neural_search.NSViewModelFactory
 import com.wasterec.app.feature.training.viewmodel.FinishTrainingViewModel
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
 import com.wasterec.app.feature.training.viewmodelfactory.FinishTrainingViewModelFactory
 import com.wasterec.app.feature.training.viewmodelfactory.TrainingViewModelFactory
+import com.wasterec.app.feature.training_history.viewmodel.TrainingHistoryViewModel
+import com.wasterec.app.feature.training_history.viewmodel.TrainingHistoryViewModelFactory
+import com.wasterec.app.feature.training_history_detail.viewmodel.TrainingHistoryDetailViewModel
+import com.wasterec.app.feature.training_history_detail.viewmodel.TrainingHistoryDetailViewModelFactory
 import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.model.Destination
 import com.wasterec.app.model.TrainingModel
+import com.wasterec.app.model.domain.TrainingData
+import com.wasterec.app.utils.DirichletSampler
+import com.wasterec.app.utils.format
 
 class MainActivity : ComponentActivity() {
 
@@ -60,7 +70,12 @@ class MainActivity : ComponentActivity() {
             val selectedLabel : MutableState<DatasetClass> = remember {mutableStateOf(
                 datasetClassList[0]
             )}
-            val datasetManager: MutableState<DatasetManager> = remember { mutableStateOf(DatasetManager(listOf()))}
+            val selectedTrainingData : MutableState<TrainingData> = remember {
+                mutableStateOf(
+                    TrainingData("", "", "", 0,listOf(),"", "", listOf(), 0f)
+                )
+            }
+            val datasetManager: MutableState<DatasetManager> = remember { mutableStateOf(DatasetManager(mutableListOf()))}
 
             var datasetClassList : SnapshotStateList<DatasetClass> = remember {
                 mutableStateListOf(
@@ -117,12 +132,14 @@ class MainActivity : ComponentActivity() {
                     selectedLabel
                 )
             )
+
             val annotateViewModel : AnnotateViewModel = viewModel(
                 factory = AnotateViewModelFactory(
                     application = application,
                     context = this,
                     navHostController = navController,
-                    trainingData
+                    trainingData,
+                    datasetManager
                 )
             )
 
@@ -167,7 +184,7 @@ class MainActivity : ComponentActivity() {
                     navHostController = navController,
                     trainingData,
                     selectedLabelIndex,
-                    selectedLabel,
+                    datasetManager,
                     datasetClassList
                 )
             )
@@ -190,6 +207,26 @@ class MainActivity : ComponentActivity() {
                 )
             )
 
+            val trainingHistoryViewModel : TrainingHistoryViewModel = viewModel(
+                factory = TrainingHistoryViewModelFactory(
+                    application,
+                    navController,
+                    selectedTrainingData
+                )
+            )
+
+            val trainingHistoryDetailViewModel : TrainingHistoryDetailViewModel = viewModel(
+                factory = TrainingHistoryDetailViewModelFactory(
+                    application,
+                    navController,
+                    selectedTrainingData
+                )
+            )
+
+            val nsViewModel : NSViewModel = viewModel(
+                factory = NSViewModelFactory(application)
+            )
+
             //DebugView(this)
             NavigationView(
                 this,
@@ -202,8 +239,13 @@ class MainActivity : ComponentActivity() {
                 importImageViewModel,
                 trainingViewModel,
                 modelLoadViewModel,
-                finishTrainingViewModel
+                finishTrainingViewModel,
+                trainingHistoryViewModel,
+                trainingHistoryDetailViewModel,
+                nsViewModel
             )
+
+
 
             handler.postDelayed({
                 navController.navigate(Destination.Home) {

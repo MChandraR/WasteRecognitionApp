@@ -1,5 +1,6 @@
 package com.wasterec.app.feature.anotate.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +10,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +21,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
 
 @Composable
@@ -43,11 +46,19 @@ fun LabelSelectionComponent(modifier : Modifier, onSelect : (selectedIndex : Int
                         onClick = { onOptionSelected(text) },
                         role = Role.RadioButton
                     )
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 16.dp)
+                    .clickable(){
+                        onSelect(radioOptions.indexOf(text))
+                    }
+                ,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RadioButton(
                     selected = (text == selectedOption),
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = ColorAsset.primaryBlue,
+                        unselectedColor = ColorAsset.primaryBlue
+                    ),
                     onClick = {
                         onSelect(radioOptions.indexOf(text))
                     } // null recommended for accessibility with screen readers

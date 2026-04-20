@@ -8,7 +8,8 @@
 <a href="https://www.flaticon.com/free-animated-icons/automation" title="automation animated icons">Automation animated icons created by Freepik - Flaticon</a>
 <a href="https://www.flaticon.com/free-animated-icons/data-collection" title="data collection animated icons">Data collection animated icons created by Freepik - Flaticon</a>
 <a href="https://www.flaticon.com/free-animated-icons/uploading" title="uploading animated icons">Uploading animated icons created by Freepik - Flaticon</a>
-
-
-
-
+<a href="https://www.flaticon.com/free-animated-icons/security" title="security animated icons">Security animated icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/close" title="close icons">Close icons created by Fathema Khanom - Flaticon</a>
+<a href="https://www.flaticon.com/free-icons/no-data" title="no data icons">No data icons created by yaicon - Flaticon</a>
+<a href="https://www.flaticon.com/free-animated-icons/machine-learning" title="machine learning animated icons">Machine learning animated icons created by Freepik - Flaticon</a>
+<a href="https://www.flaticon.com/free-animated-icons/neural-network" title="neural network animated icons">Neural network animated icons created by Freepik - Flaticon</a>

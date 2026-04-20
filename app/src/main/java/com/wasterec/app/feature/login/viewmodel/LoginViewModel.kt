@@ -5,6 +5,9 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.lifecycle.AndroidViewModel
 import androidx.navigation.NavHostController
 import com.wasterec.app.model.Destination
@@ -20,10 +23,22 @@ class LoginViewModel(application : Application, val context: Context,
     var showAlert : MutableState<Boolean> = mutableStateOf(false)
     val alertMessage : MutableState<String> = mutableStateOf("")
     var loginAPIService = UserRepository()
-    var sharedPreferenceService : SharedPreferenceService = SharedPreferenceService(context)
+    var sharedPreferenceService : SharedPreferenceService = SharedPreferenceService(application.baseContext)
     var isSuccess : MutableState<Boolean> = mutableStateOf(false)
     var showPassword : MutableState<Boolean> = mutableStateOf(false)
+    var focusManager : FocusManager? = null
 
+    fun setLocalFoccues(focusManager : FocusManager){
+        this.focusManager = focusManager
+    }
+
+    fun changeFocusToNextElement(){
+        focusManager?.moveFocus(FocusDirection.Down)
+    }
+
+    fun changeFocusToDone(){
+        focusManager?.clearFocus()
+    }
 
     //Function to handle login and validate user input
     fun login(){
@@ -53,6 +68,15 @@ class LoginViewModel(application : Application, val context: Context,
     //Function for redirect user to next page after succesfully logged=in
     fun dismissAlert(){
         this.showAlert.value = false
-        if(isSuccess.value)this.navController.navigate(Destination.Home)
+        if(isSuccess.value)navigateToHome()
+    }
+
+    fun navigateToHome(){
+        navController.navigate(Destination.Home) {
+            popUpTo(navController.graph.startDestinationId) {
+                inclusive = true
+            }
+            launchSingleTop = true
+        }
     }
 }

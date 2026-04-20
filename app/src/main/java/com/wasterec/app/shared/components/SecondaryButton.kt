@@ -13,15 +13,20 @@ import androidx.compose.ui.unit.dp
 fun SecondaryButton(
     onClick : () -> Unit,
     modifier:Modifier = Modifier,
+    borderColor : Color = Color.DarkGray,
+    borderSize : Int = 1,
+    contentColor : Color = Color.Black,
+    enabled : Boolean = true,
     content : @Composable () -> Unit,
     ){
     Button(
         onClick = {
             onClick()
         },
+        enabled = enabled,
         shape = RoundedCornerShape(10.dp),
-        border = BorderStroke(1.dp , Color.DarkGray),
-        colors = ButtonColors(containerColor = Color.Transparent, contentColor = Color.Black, disabledContainerColor = Color.LightGray, disabledContentColor = Color.Black),
+        border = BorderStroke(borderSize.dp , borderColor),
+        colors = ButtonColors(containerColor = Color.Transparent, contentColor = contentColor, disabledContainerColor = Color.LightGray, disabledContentColor = Color.Black),
         modifier = modifier
     ) {
         content()

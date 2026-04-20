@@ -13,23 +13,24 @@ import com.wasterec.app.utils.resizeAndCropCenter
 import com.wasterec.app.utils.rotateBitmap
 
 class DatasetManager (
-    var trainingData : List<TrainingModel>
+    var trainingData : MutableList<TrainingModel>
 ){
-
+    var lockTrainingDataFromPreprocessing = false
     val resizedCount = 0
     val rotatedCount = 0
     val horizontallyFlippedCount = 0
     val verticallyFlippedCount = 0
 
-    fun loadData(trainingData : List<TrainingModel>){
+    fun loadData(trainingData : MutableList<TrainingModel>){
+        this.trainingData.clear()
         this.trainingData = trainingData
     }
 
     fun clearAlLData(){
-        this.trainingData = listOf<TrainingModel>()
+        this.trainingData = mutableListOf<TrainingModel>()
     }
 
-    fun getData() : List<TrainingModel>{
+    fun getData() : MutableList<TrainingModel>{
         return this.trainingData
     }
 
@@ -60,11 +61,16 @@ class DatasetManager (
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun preProcessTrainingData(resizeImage: Boolean = false, onProgress : (progress:Float)->Unit, onResult : ((dataType : List<Int> )->Unit)? = null): DatasetManager {
+        if(lockTrainingDataFromPreprocessing) {
+            onProgress(1f)
+            return this
+        }
         var resizedCount = 0
         var rotatedCount = 0
         var horizontallyFlippedCount = 0
         var verticallyFlippedCount = 0
         var totalDataCount = 0
+        var ogTrainingData = mutableListOf<TrainingModel>()
 
         val processedTrainingData = trainingData.map { item ->
             totalDataCount+=1
@@ -72,8 +78,8 @@ class DatasetManager (
             var imageData = forceSoftwareBitmap(item.Input)
             var currentTypes = item.Type
 
-            if (resizeImage) {
-                imageData = resizeAndCropCenter(imageData)
+            if (resizeImage ) {
+                if (!(imageData.width == 224 && imageData.height == 224))imageData = resizeAndCropCenter(imageData)
                 currentTypes += DataTypeModel.RESIZED
                 resizedCount++
             }
@@ -96,6 +102,8 @@ class DatasetManager (
                         imageData = vFlippedImg
                         currentTypes += DataTypeModel.FLIPPED_VERTICALLY
                         verticallyFlippedCount++
+                    }else{
+                        ogTrainingData.add( TrainingModel(imageData, item.Label, currentTypes) )
                     }
                 }
             }
@@ -103,7 +111,8 @@ class DatasetManager (
             TrainingModel(imageData, item.Label, currentTypes)
         }
 
-        this.trainingData = processedTrainingData
+        this.trainingData = processedTrainingData.toMutableList()
+        this.trainingData.addAll(ogTrainingData)
         onResult?.invoke(listOf(resizedCount, rotatedCount, horizontallyFlippedCount, verticallyFlippedCount))
 
         println("Image count : ${trainingData.size}")

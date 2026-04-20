@@ -5,6 +5,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,10 +25,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -46,6 +49,7 @@ import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
 import com.wasterec.app.utils.resizeAndCropCenter
 import com.wasterec.app.utils.uriToBitmap
+import kotlinx.coroutines.Dispatchers
 
 @Composable
 fun ImportImageView(
@@ -56,27 +60,28 @@ fun ImportImageView(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
     ) { uris ->
-        val datasetCount = (importImageViewModel?.imageDatasetList?.size)?:0
+        val datasetCount = (importImageViewModel?.importedImageList?.size?:0)
+        println("datasetCount ${datasetCount} max ${(importImageViewModel?.selectedLabel?.value?.maximumCount
+            ?: 0)}")
         uris.forEachIndexed { idx,uri ->
-
-            if( datasetCount.plus(idx) < (importImageViewModel?.selectedLabel?.value?.maximumCount
+            println("Data count ${(datasetCount).plus(idx)} max ${(importImageViewModel?.selectedLabel?.value?.maximumCount
+                ?: 0)}")
+            if( (datasetCount).plus(idx) < (importImageViewModel?.selectedLabel?.value?.maximumCount
                     ?: 0)
             ){
                 val bitmap = uriToBitmap(context, uri)
                 bitmap?.let {
-                    importImageViewModel?.increaseItemCountForSelectedLabelinDataset()
-                    importImageViewModel?.imageDatasetList?.add(
-                        TrainingModel(
-                            resizeAndCropCenter(it),
-                            importImageViewModel.selectedLabelIndex.value
-                        )
-                    )
+                    importImageViewModel?.addDataToImportedImageList(it)
                 }
             }
 
 
         }
-        println("Jumlah data dari picker : " + importImageViewModel?.imageDatasetList?.size.toString())
+        println("Jumlah data dari picker : " + importImageViewModel?.importedImageList?.size.toString())
+    }
+
+    LaunchedEffect(Dispatchers.IO){
+        importImageViewModel?.reInit()
     }
 
     Box(Modifier.fillMaxSize().padding(16.dp)) {
@@ -95,7 +100,7 @@ fun ImportImageView(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         "Jumlah gambar :",
@@ -106,7 +111,7 @@ fun ImportImageView(
                     )
 
                     Text(
-                        " ${(importImageViewModel?.getTotalOfDatasetForSelectedLabel()) ?: 0}",
+                        " ${(importImageViewModel?.importedImageList?.size) ?: 0}",
                         modifier = Modifier,
                         textAlign = TextAlign.Center,
                         fontSize = Typography.titleLarge.fontSize,
@@ -136,14 +141,14 @@ fun ImportImageView(
 
 
 
-            if ((importImageViewModel?.getDatasetForSelectedLabel()?.size ?: 0) > 0) {
+            if ((importImageViewModel?.importedImageList?.size ?: 0) > 0) {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
-                    modifier = Modifier.weight(.5f)
+                    modifier = Modifier.weight(1f)
                 ) {
-                    items(importImageViewModel?.getDatasetForSelectedLabel()?.size ?: 0) { index ->
-                        importImageViewModel?.getDatasetForSelectedLabel()[index]?.Input?.let { bitmap ->
-                            Box {
+                    items((importImageViewModel?.importedImageList?.size ?: 0)) { index ->
+                        importImageViewModel?.importedImageList[index]?.let { bitmap ->
+                            Box (contentAlignment = Alignment.TopEnd){
                                 Image(
                                     bitmap = bitmap.asImageBitmap(),
                                     contentDescription = null,
@@ -154,24 +159,30 @@ fun ImportImageView(
                                         .clip(RoundedCornerShape(8.dp))
                                 )
 
-                                Button(
-                                    onClick = {
+                                Image(
+                                    painter = painterResource(R.drawable.baseline_auto_delete_24),
+                                    "Delete Icon",
+                                    colorFilter = ColorFilter.tint(ColorAsset.primaryRed),
+                                    modifier = Modifier.padding(10.dp).clickable(){
                                         importImageViewModel.selectedImageIndex.value = index
                                         importImageViewModel.showConfirmImageDeletionDialog.value = true
-                                    },
-                                    shape = CircleShape,
-                                    colors = ButtonColors(
-                                        containerColor = Color.Transparent,
-                                        contentColor = Color.Black,
-                                        disabledContentColor = Color.Black,
-                                        disabledContainerColor = Color.LightGray
-                                    )
-                                ) {
-                                    Image(
-                                        painter = painterResource(R.drawable.baseline_auto_delete_24),
-                                        "Delete Icon"
-                                    )
-                                }
+                                    }
+                                )
+//                                Button(
+//                                    onClick = {
+//                                        importImageViewModel.selectedImageIndex.value = index
+//                                        importImageViewModel.showConfirmImageDeletionDialog.value = true
+//                                    },
+//                                    shape = CircleShape,
+//                                    colors = ButtonColors(
+//                                        containerColor = Color.Transparent,
+//                                        contentColor = Color.Black,
+//                                        disabledContentColor = Color.Black,
+//                                        disabledContainerColor = Color.LightGray
+//                                    )
+//                                ) {
+//
+//                                }
                             }
                         }
 
@@ -230,9 +241,10 @@ fun ImportImageView(
 
                 Button(
                     onClick = {
+                        importImageViewModel?.saveImportedImageListToDataset()
                         navHostControlelr?.popBackStack()
                     },
-                    enabled = (importImageViewModel?.imageDatasetList?.size ?: 0) >= 1,
+                    enabled = (importImageViewModel?.importedImageList?.size ?: 0) >= (importImageViewModel?.selectedLabel?.value?.minimunCount ?: Int.MAX_VALUE),
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonColors(
@@ -256,7 +268,7 @@ fun ImportImageView(
         if(importImageViewModel?.showConfirmImageDeletionDialog?.value == true) {
             ConfirmationDialog(
                 onConfirm = {
-                    importImageViewModel.deleteDataFromDataset(importImageViewModel.selectedImageIndex.value)
+                    importImageViewModel.removeDataFromImportedImageList(importImageViewModel.selectedImageIndex.value)
                     importImageViewModel.showConfirmImageDeletionDialog.value = false
                     importImageViewModel.increaseItemCountForSelectedLabelinDataset()
 

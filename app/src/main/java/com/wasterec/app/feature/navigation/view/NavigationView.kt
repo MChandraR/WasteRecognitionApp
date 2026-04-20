@@ -25,11 +25,16 @@ import com.wasterec.app.feature.login.viewmodel.LoginViewModel
 import com.wasterec.app.feature.main.MainView
 import com.wasterec.app.feature.modelload.view.ModelLoadView
 import com.wasterec.app.feature.modelload.viewmodel.ModelLoadViewModel
+import com.wasterec.app.feature.neural_search.NSView
+import com.wasterec.app.feature.neural_search.NSViewModel
 import com.wasterec.app.feature.splash.view.SplashView
 import com.wasterec.app.feature.training.view.FinishTrainingView
 import com.wasterec.app.feature.training.view.TrainingView
 import com.wasterec.app.feature.training.viewmodel.FinishTrainingViewModel
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
+import com.wasterec.app.feature.training_history.viewmodel.TrainingHistoryViewModel
+import com.wasterec.app.feature.training_history_detail.view.TrainingHistoryDetailView
+import com.wasterec.app.feature.training_history_detail.viewmodel.TrainingHistoryDetailViewModel
 import com.wasterec.app.model.Destination
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -45,7 +50,10 @@ fun NavigationView(
     importImageViewModel: ImportImageViewModel,
     trainingViewModel: TrainingViewModel,
     modelLoadViewModel: ModelLoadViewModel,
-    finishTrainingViewModel: FinishTrainingViewModel
+    finishTrainingViewModel: FinishTrainingViewModel,
+    trainingHistoryViewModel: TrainingHistoryViewModel,
+    trainingHistoryDetailViewModel: TrainingHistoryDetailViewModel,
+    nsViewModel : NSViewModel
 ) {
     val startDestination = Destination.Splash
     var selectedDestination by rememberSaveable { mutableIntStateOf(0) }
@@ -54,7 +62,7 @@ fun NavigationView(
         navController = navController,
         startDestination = startDestination,
     ) {
-        composable<Destination.Home> { MainView(homeViewModel) }
+        composable<Destination.Home> { MainView(homeViewModel, trainingHistoryViewModel) }
         composable<Destination.Info>{  }
         composable<Destination.Preprocess>{ DataProcessingView(dataestProcessingViewModel) }
         composable<Destination.Login>{ LoginView(loginViewModel) }
@@ -65,7 +73,8 @@ fun NavigationView(
         composable<Destination.Annotate>{ AnnotateView(annotateViewModel) }
         composable<Destination.FinishTraining>{ FinishTrainingView(finishTrainingViewModel) }
         composable<Destination.WeightLoading>{ ModelLoadView(modelLoadViewModel) }
-
+        composable<Destination.TrainingHistoryDetail>{ TrainingHistoryDetailView(trainingHistoryDetailViewModel) }
+        composable<Destination.Testing>{ NSView(nsViewModel) }
     }
 
 }

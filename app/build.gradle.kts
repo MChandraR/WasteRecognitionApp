@@ -49,10 +49,13 @@ android {
 
 
 dependencies {
+    implementation(libs.androidx.compose.ui.graphics)
     val navVersion = "2.9.5"
     // Jetpack Compose integration
     implementation(libs.androidx.navigation.compose)
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+
     // Views/Fragments integration
     implementation("androidx.navigation:navigation-fragment:$navVersion")
     implementation("androidx.navigation:navigation-ui:$navVersion")
@@ -83,13 +86,16 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation("org.apache.commons:commons-math3:3.6.1")
 
 
     //Torch
-    implementation ("org.pytorch:pytorch_android_lite:2.1.0")
-    implementation ("org.pytorch:pytorch_android_torchvision_lite:2.1.0")
     implementation ("com.squareup.okhttp3:okhttp:4.10.0")
     implementation ("com.google.code.gson:gson:2.10")
+    implementation("com.facebook.fbjni:fbjni-java-only:0.2.2")
+    implementation("com.facebook.soloader:nativeloader:0.10.5")
+    implementation(files("libs/pytorch_android-release.aar"))
+    implementation(files("libs/pytorch_android_torchvision-release.aar"))
 
     //Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

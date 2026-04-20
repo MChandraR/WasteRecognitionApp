@@ -51,8 +51,19 @@ class FileManager(val context : Context) {
         }
     }
 
+    fun getFilesFromFolder(folder : File) : List<File>{
+        if (!folder.exists()) return listOf()
+        val listOfFile = folder.listFiles()
+        if(listOfFile != null){
+            return listOfFile.toList()
+        }
+        return listOf()
+    }
+
     fun convertBitmapToZipFile(bitmap : List<Bitmap>, destinationFile : File):File?{
         try{
+            val folder = destinationFile.path.split("/")[0]
+            File(destinationFile.parent, folder).mkdir()
             ZipOutputStream(FileOutputStream(destinationFile)).use { zipOut ->
                 bitmap.forEachIndexed { index, bitmap ->
                     val imageFile = ZipEntry("image_$index.png")

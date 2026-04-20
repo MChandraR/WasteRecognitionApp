@@ -8,18 +8,25 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,15 +37,17 @@ import com.wasterec.app.feature.login.viewmodel.LoginViewModel
 import com.wasterec.app.shared.components.Alert
 import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
+import kotlinx.coroutines.Dispatchers
 
 @Composable
 fun LoginView(loginViewModel: LoginViewModel){
+    loginViewModel.setLocalFoccues(LocalFocusManager.current)
 
     Box{
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding().fillMaxSize().background(Color.White).padding(20.dp)
+            modifier = Modifier.padding().fillMaxSize().background(Color.White).padding(20.dp).imePadding()
         ) {
             Spacer(modifier = Modifier.weight(1f))
             Text(
@@ -59,11 +68,21 @@ fun LoginView(loginViewModel: LoginViewModel){
             CustomTextInputField(
                 text =  loginViewModel.username.value,
                 onChange = {  loginViewModel.username.value = it},
-                leadingResId = R.drawable.outline_contacts_product_24,
+                leadingResId = R.drawable.outline_person_24,
+                leadingColor = ColorAsset.primaryBlue,
                 backgroundColor = ColorAsset.alpha5,
+                maxLines = 1,
                 placeholder = {
                     Text("Masukkan username")
-                }
+                },
+                keyboardOption = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
+                keyboaredAction = KeyboardActions(
+                    onNext = {
+                        loginViewModel.changeFocusToNextElement()
+                    }
+                )
             )
 
             Spacer(Modifier.height(20.dp))
@@ -72,18 +91,27 @@ fun LoginView(loginViewModel: LoginViewModel){
             CustomTextInputField(
                 text = loginViewModel.password.value,
                 onChange = {  loginViewModel.password.value = it},
-                leadingResId = R.drawable.outline_contacts_product_24,
-                trailingResId = R.drawable.baseline_add_location_24,
+                leadingResId = R.drawable.outline_key_vertical_24,
+                trailingResId = R.drawable.outline_eye_tracking_24,
                 trailingColor = ColorAsset.primaryBlue,
                 leadingColor = ColorAsset.primaryBlue,
                 visualTransformation = if(loginViewModel.showPassword.value) VisualTransformation.None else PasswordVisualTransformation() ,
                 onTrailingClick = {
                     loginViewModel.showPassword.value = !loginViewModel.showPassword.value
                 },
+                maxLines = 1,
                 backgroundColor = ColorAsset.alpha5,
                 placeholder = {
                     Text("Masukkan password")
-                }
+                },
+                keyboardOption = KeyboardOptions(
+                    imeAction = ImeAction.Done
+                ),
+                keyboaredAction = KeyboardActions(
+                    onNext = {
+                        loginViewModel.changeFocusToNextElement()
+                    }
+                )
             )
 
             Spacer(modifier = Modifier.weight(1f))
@@ -99,7 +127,9 @@ fun LoginView(loginViewModel: LoginViewModel){
                 colors = ButtonColors(contentColor = Color.White, disabledContentColor = ColorAsset.lightGray, containerColor = ColorAsset.primaryBlue, disabledContainerColor = ColorAsset.lightGray)
             ){
                 Text("Login",
-                    modifier = Modifier.padding(5.dp, 10.dp)
+                    modifier = Modifier.padding(5.dp, 10.dp),
+                    fontSize = Typography.titleLarge.fontSize,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
@@ -107,7 +137,8 @@ fun LoginView(loginViewModel: LoginViewModel){
         //Alert to show information about login status
         Alert(
             title = if (loginViewModel.isSuccess.value) "Login Sukses" else "Login Gagal",
-            message = loginViewModel.alertMessage.value,
+            message = if (loginViewModel.isSuccess.value) "Silahkan masuk ke aplikasi" else "Username atau password yang dimasukkan tidak sesuai !",
+            icon = if (loginViewModel.isSuccess.value) R.drawable.shield else R.drawable.close ,
             showAlert = loginViewModel.showAlert.value,
         ) {
             loginViewModel.dismissAlert()
@@ -150,6 +181,7 @@ fun LoginViewPreview(){
                 leadingResId = R.drawable.outline_contacts_product_24,
                 leadingColor = ColorAsset.primaryBlue,
                 backgroundColor = ColorAsset.alpha5,
+                maxLines = 1,
                 placeholder = {
                     Text("Masukkan username")
                 }
@@ -161,11 +193,12 @@ fun LoginViewPreview(){
             CustomTextInputField(
                 text = password.value,
                 onChange = { password.value = it},
-                leadingResId = R.drawable.outline_contacts_product_24,
-                trailingResId = R.drawable.baseline_add_location_24,
+                leadingResId = R.drawable.outline_key_vertical_24,
+                trailingResId = R.drawable.outline_eye_tracking_24,
                 trailingColor = ColorAsset.primaryBlue,
                 leadingColor = ColorAsset.primaryBlue,
                 backgroundColor = ColorAsset.alpha5,
+                maxLines = 1,
                 placeholder = {
                     Text("Masukkan password")
                 }
@@ -194,7 +227,7 @@ fun LoginViewPreview(){
         Alert(
             title = "Login Sukses",
             message = "Ini contoh message",
-            showAlert = false,
+            showAlert = true,
         ) {
         }
     }

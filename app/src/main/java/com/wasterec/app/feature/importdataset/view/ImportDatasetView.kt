@@ -1,8 +1,10 @@
 package com.wasterec.app.feature.importdataset.view
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,13 +21,22 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.wasterec.app.feature.importdataset.components.LabelListCard
 import com.wasterec.app.feature.importdataset.data.datasetClassList
 import com.wasterec.app.feature.importdataset.viewmodel.ImportDatasetViewModel
+import com.wasterec.app.feature.training.ui.trainingColorList
 import com.wasterec.app.model.Destination
+import com.wasterec.app.shared.components.AlertWithConfirmation
 import com.wasterec.app.shared.components.MyButton
 import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
@@ -35,60 +46,121 @@ import kotlinx.coroutines.Dispatchers
 fun ImportDatasetView(
     importDatasetViewModel: ImportDatasetViewModel? = null,
 ){
-    LaunchedEffect(Dispatchers.IO) {
-        importDatasetViewModel?.getClassCount()
+    BackHandler() {
+        importDatasetViewModel?.showCancelConfirmDialog?.value = true
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
+    LaunchedEffect(Dispatchers.IO) {
+        importDatasetViewModel?.reInit()
+        importDatasetViewModel?.getClassCount()
+        importDatasetViewModel?.validateClassCount()
+    }
 
-        Text("Pilih 100 gambar sebagai dataset pelatihan",
-            fontSize = Typography.titleLarge.fontSize,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Text("Jumlah gambar dipilih ${importDatasetViewModel?.getTrainingDatasetCount()?:0} /100",
-            fontSize = Typography.titleLarge.fontSize,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
+    Box (modifier = Modifier.fillMaxSize()){
         Column(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.padding(10.dp)
+            modifier = Modifier.fillMaxSize()
         ) {
-            (importDatasetViewModel?.datasetClassList?: datasetClassList).forEachIndexed { idx,value ->
-                LabelListCard(
-                    value.className,
-                    "(${ (importDatasetViewModel?.classCount?.get(idx))?:0 }/${value.minimunCount} min)",
-                    leadingIcon = value.icon,
-                    modifier = Modifier.height(65.dp).clickable{
-                        importDatasetViewModel?.selectedIndex?.value = importDatasetViewModel.datasetClassList.indexOf(value)
-                        importDatasetViewModel?.navHostController?.navigate(Destination.Import)
-                        Toast.makeText(importDatasetViewModel?.context, "Selected index ${importDatasetViewModel?.selectedIndex?.value}", Toast.LENGTH_LONG).show()
+            Spacer(modifier = Modifier.weight(1f))
+
+            Text(
+                buildAnnotatedString {
+                    append("Pilih")
+                    withStyle(
+                        style = SpanStyle(
+                            fontSize = Typography.titleMedium.fontSize,
+                            color = ColorAsset.primaryBlue,
+                            fontWeight = FontWeight.Bold
+                        )
+                    ) {
+                        append(" 100 ")
                     }
+                    append("gambar sebagai dataset pelatihan")
+                },
+                fontSize = Typography.titleLarge.fontSize,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 20.dp)
+            )
+            Text(
+                buildAnnotatedString {
+                    append("Jumlah gambar dipilih ")
+                    withStyle(
+                        style = SpanStyle(
+                            fontSize = Typography.titleLarge.fontSize,
+                            fontWeight = FontWeight.Bold,
+                            color = ColorAsset.primaryYellow
+                        )
+                    ) {
+                        append("${importDatasetViewModel?.getTrainingDatasetCount() ?: 0}")
+                    }
+                    withStyle(
+                        style = SpanStyle(
+                            fontSize = Typography.titleMedium.fontSize,
+                            fontWeight = FontWeight.Bold,
+                            color = ColorAsset.primaryBlue
+                        )
+                    ) {
+                        append("/100")
+                    }
+                },
+                fontSize = Typography.titleMedium.fontSize,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.weight(.5f))
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.padding(10.dp)
+            ) {
+                (importDatasetViewModel?.datasetClassList
+                    ?: datasetClassList).forEachIndexed { idx, value ->
+                    LabelListCard(
+                        value.className,
+                        "(${(importDatasetViewModel?.classCount?.get(idx)) ?: 0} gambar)",
+                        leadingIcon = value.icon,
+                        modifier = Modifier.height(75.dp).clickable {
+                            importDatasetViewModel?.resetState()
+                            importDatasetViewModel?.selectedIndex?.value =
+                                importDatasetViewModel.datasetClassList.indexOf(value)
+                            importDatasetViewModel?.navHostController?.navigate(Destination.Import)
+                        }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            MyButton(
+                modifier = Modifier.padding(10.dp).fillMaxWidth(),
+                enabled = ((importDatasetViewModel?.trainignDataset?.size
+                    ?: 0) >= 100 && (importDatasetViewModel?.isClassCountMeetRequirement?.value
+                    ?: true)) || true,
+                onClick = {
+                    importDatasetViewModel?.navHostController?.navigate(Destination.Preprocess)
+                }
+            ) {
+                Text(
+                    "Selanjutnya",
+                    fontSize = Typography.titleMedium.fontSize,
+                    modifier = Modifier.padding(10.dp)
                 )
             }
-        }
-        
-        Spacer(modifier = Modifier.weight(1f))
 
-        MyButton(
-            modifier = Modifier.padding(10.dp).fillMaxWidth(),
-            enabled = (importDatasetViewModel?.trainignDataset?.size?:0) > 0,
-            onClick = {
-                    importDatasetViewModel?.navHostController?.navigate(Destination.Preprocess)
+        }
+
+        //Alert untuk konfirm ke user apakah ingin membatalkan training ?
+        AlertWithConfirmation(
+            title = "Batalkan Training",
+            message = "Apakah anda yakin ingin membatalkan training?",
+            showAlert = importDatasetViewModel?.showCancelConfirmDialog?.value  ?:  false,
+            onCancel = {
+                importDatasetViewModel?.cancelTrainingCancellation()
+            },
+            onConfirm = {
+                importDatasetViewModel?.confirmTrainingCancellation()
             }
-        ) {
-            Text("Selanjutnya",
-                fontSize = Typography.titleMedium.fontSize,
-                modifier = Modifier.padding(10.dp))
-        }
-
+        )
     }
 }
 

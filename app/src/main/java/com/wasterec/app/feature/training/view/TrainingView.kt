@@ -39,17 +39,20 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
+import com.wasterec.app.R
 import com.wasterec.app.feature.training.ui.trainingColorList
 import com.wasterec.app.feature.training.viewmodel.TrainingViewModel
 import com.wasterec.app.model.Destination
+import com.wasterec.app.shared.components.GifLoader
 import com.wasterec.app.shared.components.MyButton
 import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
 import kotlinx.coroutines.delay
 import java.lang.Integer.max
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TrainingView(
@@ -72,7 +75,9 @@ fun TrainingView(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
+            .padding(20.dp)
+            .background(Color.White)
+        ,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
@@ -91,10 +96,6 @@ fun TrainingView(
             modifier = Modifier
                 .padding(20.dp)
         ) {
-            Text("Performa model lokal",
-                fontSize = Typography.titleSmall.fontSize,
-                fontWeight = FontWeight.Bold
-            )
             Column (
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -112,7 +113,7 @@ fun TrainingView(
                     color = ColorAsset.primaryBlue,
                     modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = 20.dp)
                 )
-                Text("Akurasi",
+                Text("Akurasi lokal",
                     color = ColorAsset.primaryBlue,
                     modifier = Modifier.padding(bottom = 20.dp))
             }
@@ -191,7 +192,7 @@ fun TrainingView(
             }
         }
 
-        if(trainingViewModel != null) {
+        if(trainingViewModel != null && !trainingViewModel.lossList.isEmpty()) {
             CartesianChartHost(
                 modifier = Modifier.padding(top = 50.dp),
                 chart = rememberCartesianChart(
@@ -201,29 +202,36 @@ fun TrainingView(
                 ),
                 modelProducer = trainingViewModel.modelProducer.value,
             )
+        }else{
+            GifLoader(R.drawable.neural_net, modifier = Modifier.padding(top = 30.dp))
         }
 
         Spacer(Modifier.weight(1f))
 
-//        GifLoader(R.drawable.network)
-        Text(
-            "Loss ${trainingViewModel?.currentLoss?.value}" + ".".repeat(loadIdx),
-            fontSize = Typography.titleLarge.fontSize
-        )
-        
+        if(trainingViewModel?.lossList?.isEmpty() == true){
+            Text(
+                "Memuat model"+".".repeat(loadIdx),
+                fontSize = Typography.titleLarge.fontSize
+            )
+        }else {
+            Text(
+                "Loss : ${trainingViewModel?.currentLoss?.value}",
+                fontSize = Typography.titleLarge.fontSize
+            )
+        }
 
 
         Spacer(Modifier.weight(1f))
 
         Text(
-            "Iterasi ${trainingViewModel?.currentEpoch?.value?:0}/${trainingViewModel?.modelConfig?.epoch}",
+            "Iterasi ${trainingViewModel?.currentEpoch?.value?:0}/${trainingViewModel?.modelConfig?.value?.epoch}",
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.End,
             fontSize = Typography.bodyLarge.fontSize
         )
 
         LinearProgressIndicator(
-            progress = { ((trainingViewModel?.currentEpoch?.value?: 0).toFloat() / ((trainingViewModel?.modelConfig?.epoch?:1).toFloat())) },
+            progress = { ((trainingViewModel?.currentEpoch?.value?: 0).toFloat() / ((trainingViewModel?.modelConfig?.value?.epoch?:1).toFloat())) },
             modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp).height(10.dp),
             color = ColorAsset.primaryBlue,
             trackColor = ColorAsset.primaryBlue25,
@@ -239,14 +247,14 @@ fun TrainingView(
             },
             modifier = Modifier
                 .fillMaxWidth()
-        ) { 
+        ) {
             Text("Selanjutnya",
                 modifier = Modifier.padding(10.dp))
         }
 
         LaunchedEffect(Unit){
             trainingViewModel?.reInit()
-            Toast.makeText(trainingViewModel?.app?.baseContext, "Training dengan total : ${trainingViewModel?.annotateViewModel?.datasetManager?.getDataSize()}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(trainingViewModel?.app?.baseContext, "Training dengan total : ${trainingViewModel?.annotateViewModel?.datasetManager?.value?.getDataSize()}", Toast.LENGTH_SHORT).show()
         }
     }
 }
