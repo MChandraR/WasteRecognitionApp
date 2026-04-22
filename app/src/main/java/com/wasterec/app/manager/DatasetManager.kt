@@ -87,29 +87,33 @@ class DatasetManager (
             val (rotatedImg, isRotated) = applyRandomRotation(imageData)
 
             if (isRotated) {
+                ogTrainingData.add( TrainingModel(imageData, item.Label, currentTypes) )
                 imageData = rotatedImg
                 currentTypes += DataTypeModel.ROTATED
                 rotatedCount++
             } else {
                 val (hFlippedImg, isHFlipped) = applyRandomHorizontalFlip(imageData)
                 if (isHFlipped) {
+                    ogTrainingData.add( TrainingModel(imageData, item.Label, currentTypes) )
                     imageData = hFlippedImg
                     currentTypes += DataTypeModel.FLIPPED_HORIZONTALLY
                     horizontallyFlippedCount++
                 } else {
                     val (vFlippedImg, isVFlipped) = applyRandomVerticallyFlip(imageData)
                     if (isVFlipped) {
+                        ogTrainingData.add( TrainingModel(imageData, item.Label, currentTypes) )
                         imageData = vFlippedImg
                         currentTypes += DataTypeModel.FLIPPED_VERTICALLY
                         verticallyFlippedCount++
-                    }else{
-                        ogTrainingData.add( TrainingModel(imageData, item.Label, currentTypes) )
                     }
                 }
             }
 
             TrainingModel(imageData, item.Label, currentTypes)
         }
+
+        println("Total proses : ${processedTrainingData.size}")
+        println("Total og : ${ogTrainingData.size}")
 
         this.trainingData = processedTrainingData.toMutableList()
         this.trainingData.addAll(ogTrainingData)
@@ -129,7 +133,7 @@ class DatasetManager (
         return this
     }
 
-    fun applyRandomRotation(bitmap : Bitmap, chance : Double = .2): Pair<Bitmap, Boolean> {
+    fun applyRandomRotation(bitmap : Bitmap, chance : Double = .1): Pair<Bitmap, Boolean> {
         val angles = listOf(30f,45f,50f )
         if(generateBooleanWithChance(chance)){
             return Pair(rotateBitmap(bitmap, angles.random()), true)
@@ -137,14 +141,14 @@ class DatasetManager (
         return Pair(bitmap,false)
     }
 
-    fun applyRandomHorizontalFlip(bitmap: Bitmap, chance:Double = 0.2): Pair<Bitmap, Boolean>{
+    fun applyRandomHorizontalFlip(bitmap: Bitmap, chance:Double = 0.1): Pair<Bitmap, Boolean>{
         if(generateBooleanWithChance(chance)){
             return Pair(flipHorizontal(bitmap), true)
         }
         return Pair(bitmap, false)
     }
 
-    fun applyRandomVerticallyFlip(bitmap: Bitmap, chance:Double = 0.2): Pair<Bitmap, Boolean>{
+    fun applyRandomVerticallyFlip(bitmap: Bitmap, chance:Double = 0.1): Pair<Bitmap, Boolean>{
         if(generateBooleanWithChance(chance)){
             return Pair(flipVertical(bitmap), true)
         }

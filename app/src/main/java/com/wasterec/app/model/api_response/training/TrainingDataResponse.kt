@@ -9,5 +9,5 @@ data class TrainingDataResponse(
     val created_at : String,
     val status : String,
     val loss : List<Float>,
-    val average_loss : Float
+    val last_loss : Float
 )

@@ -21,13 +21,16 @@ import androidx.compose.ui.unit.sp
 import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import com.wasterec.app.R
 import com.wasterec.app.feature.anotate.components.LabelSelectionComponent
 import com.wasterec.app.feature.anotate.components.ModelLoadingComponent
 import com.wasterec.app.feature.anotate.viewmodel.AnnotateViewModel
-import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
 import com.wasterec.app.model.Destination
 import com.wasterec.app.shared.components.AlertWithConfirmation
 import com.wasterec.app.shared.components.MyButton
@@ -35,6 +38,7 @@ import com.wasterec.app.shared.components.SecondaryButton
 import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
 import kotlinx.coroutines.Dispatchers
+import java.util.Locale
 import kotlin.math.min
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -80,18 +84,18 @@ fun AnnotateView(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 if (annotateViewModel?.datasetManager?.value?.getImageDataBitmap(
-                        annotateViewModel.currentAnnotateIndex?.value ?: 0
+                        annotateViewModel.currentAnnotateIndex.value
                     ) != null
                 ) {
-                    annotateViewModel?.datasetManager?.value?.getImageDataBitmap(
-                        annotateViewModel.currentAnnotateIndex?.value ?: 0
+                    annotateViewModel.datasetManager.value.getImageDataBitmap(
+                        annotateViewModel.currentAnnotateIndex.value
                     )
                         ?.let { bmp ->
                             // Jalankan inference di background saat URI berubah
                             LaunchedEffect(Dispatchers.IO) {
-                                annotateViewModel?.classifyImage(bmp)
+                                annotateViewModel.classifyImage(bmp)
                             }
-                            annotateViewModel?.currentBitmap?.value = bmp
+                            annotateViewModel.currentBitmap.value = bmp
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Image(
                                     bitmap = bmp.asImageBitmap(),
@@ -115,32 +119,65 @@ fun AnnotateView(
                     )
                 }
 
-                if (annotateViewModel?.predictResult != null) {
-                    Text(
-                        annotateViewModel.predictResult.value,
-                        textAlign = TextAlign.Center,
-                        fontSize = Typography.titleLarge.fontSize,
-                        fontWeight = FontWeight.Bold,
-                        color = ColorAsset.primaryBlue,
-                        modifier = Modifier.fillMaxWidth().padding(top = 20.dp)
-                    )
+                Spacer(modifier = Modifier.weight(.5f))
 
-                    Row(
-                        modifier = Modifier
-                            .padding(vertical = 20.dp)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                    Icon(painterResource(R.drawable.outline_chevron_backward_24), "",
+                        tint = ColorAsset.primaryBlue,
+                        modifier = Modifier.padding(0.dp, 10.dp).size(40.dp).clickable(true){
+                            annotateViewModel?.goToPreviousData()
+                            annotateViewModel?.datasetManager?.value?.trainingData?.get(annotateViewModel?.currentAnnotateIndex?.value ?:0)?.Input?.let { bitmap ->
+                                annotateViewModel.classifyImage(bitmap)
+                            }
+                        }
+
+                        )
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.Center
                     ) {
+
                         Text(
-                            "Confident Lv : ",
-                            fontSize = Typography.titleLarge.fontSize
-                        )
-                        Text(
-                            ( if (annotateViewModel.confidentLevel.value != 0f)  annotateViewModel.getConfidentLevelString() else "-"),
+                            annotateViewModel?.predictResult?.value ?: "Logam",
+                            textAlign = TextAlign.Center,
                             fontSize = Typography.titleLarge.fontSize,
-                            color = ColorAsset.darkerBlue,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = ColorAsset.primaryBlue,
+                            modifier = Modifier.fillMaxWidth().padding(top = 20.dp)
                         )
+
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 20.dp)
+                        ) {
+                            Text(
+                                "Confident Lv : ",
+                                fontSize = Typography.titleLarge.fontSize,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                ( if (annotateViewModel?.confidentLevel?.value != 0f)  "%.2f".format(Locale.ROOT, (annotateViewModel?.getConfidentLevelString() ?: 17.2937f )) else "-") + "%",
+                                fontSize = Typography.titleLarge.fontSize,
+                                color = ColorAsset.darkerBlue,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
+
+                    Icon(painterResource(R.drawable.outline_chevron_right_24), "",
+                        tint = ColorAsset.primaryBlue,
+                        modifier = Modifier.padding(0.dp, 10.dp).size(40.dp).clickable(true){
+                                annotateViewModel?.goToNextData()
+                                annotateViewModel?.datasetManager?.value?.trainingData?.get(annotateViewModel?.currentAnnotateIndex?.value ?:0)?.Input?.let { bitmap ->
+                                    annotateViewModel.classifyImage(bitmap)
+                                }
+                            }
+                        )
                 }
+
+
 
                 Spacer(Modifier.weight(1f))
 
@@ -149,24 +186,31 @@ fun AnnotateView(
                     verticalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    MyButton(
-                        onClick = {
-                            annotateViewModel?.currentBitmap?.value?.let{ bmp->
-                                annotateViewModel.classifyImage(bmp)
-                            }
-                        },
-                        enabled = !(annotateViewModel?.isOnInference?.value ?: false),
-                        modifier = Modifier
-                            .background(
-                                color = Color.LightGray,
-                                shape = RoundedCornerShape(10)
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically){
+
+
+                        MyButton(
+                            onClick = {
+                                annotateViewModel?.currentBitmap?.value?.let{ bmp->
+                                    annotateViewModel.classifyImage(bmp)
+                                }
+                            },
+                            enabled = !(annotateViewModel?.isOnInference?.value ?: false),
+                            modifier = Modifier
+                                .weight(0.9f)
+                                .background(
+                                    color = Color.LightGray,
+                                    shape = RoundedCornerShape(10)
+                                )
+                        ) {
+                            Text(
+                                "Klasifikasi",
+                                modifier = Modifier.padding(10.dp)
                             )
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            "Klasifikasi",
-                            modifier = Modifier.padding(10.dp)
-                        )
+                        }
+
+
+
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -176,19 +220,16 @@ fun AnnotateView(
                             onClick = {
                                 annotateViewModel?.rightLabelCount?.intValue += 1
                                 annotateViewModel?.datasetManager?.value?.setLabelForImage(
-                                    annotateViewModel.currentAnnotateIndex?.value ?: 0,
-                                    annotateViewModel.predictedLabel?.value ?: 0
+                                    annotateViewModel.currentAnnotateIndex.value ,
+                                    annotateViewModel.predictedLabel.value
                                 )
                                 println("Ditandai sebagai benar dengan label ${annotateViewModel?.predictResult?.value} index : ${annotateViewModel?.predictedLabel?.value}")
                                 val nextIndex = min(
                                     (annotateViewModel?.datasetManager?.value?.getDataSize() ?: 0) - 1,
                                     (annotateViewModel?.currentAnnotateIndex?.value ?: 0) + 1
                                 )
-                                if (annotateViewModel != null) {
-
-                                    annotateViewModel?.datasetManager?.value?.trainingData?.get(nextIndex)?.Input?.let { bitmap ->
-                                        annotateViewModel.classifyImage(bitmap)
-                                    }
+                                annotateViewModel?.datasetManager?.value?.trainingData?.get(nextIndex)?.Input?.let { bitmap ->
+                                    annotateViewModel.classifyImage(bitmap)
                                 }
                                 //Validasi jika index terakhir / gambar terakhir maka lanjut ke halaman selanjutnya
                                 if (!(annotateViewModel?.isRedirected?.value ?: false) &&  (annotateViewModel?.currentAnnotateIndex?.value
@@ -255,17 +296,17 @@ fun AnnotateView(
                         selectedIndex
                     )
                    val nextIndex = min(
-                        (annotateViewModel.datasetManager.value.getDataSize() ?: 0) - 1,
+                        annotateViewModel.datasetManager.value.getDataSize() - 1,
                         annotateViewModel.currentAnnotateIndex.value + 1
                     )
                     annotateViewModel.showLabelSelectionMenu.value = false
-                    annotateViewModel.datasetManager?.value?.trainingData?.get(nextIndex)?.Input?.let { bitmap ->
+                    annotateViewModel.datasetManager.value.trainingData.get(nextIndex).Input.let { bitmap ->
                         annotateViewModel.classifyImage(bitmap)
                     }
 
                     //Validasi , jika sudah di akhir index / gambar , lanjut ke training
                     if (!annotateViewModel.isRedirected.value &&  (annotateViewModel.currentAnnotateIndex.value
-                                ) >= (annotateViewModel.datasetManager.value.getDataSize() ?: 0) - 1
+                                ) >= annotateViewModel.datasetManager.value.getDataSize() - 1
                     ) {
                         annotateViewModel.navHostController.navigate(Destination.Training)
                         annotateViewModel.isRedirected.value = true

@@ -62,7 +62,17 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
         isModelLoading.value = false
     }
 
+    fun goToPreviousData(){
+        if (currentAnnotateIndex.value > 0){
+            currentAnnotateIndex.value -= 1
+        }
+    }
 
+    fun goToNextData(){
+        if ( currentAnnotateIndex.value + 1 < datasetManager.value.trainingData.size){
+            currentAnnotateIndex.value += 1
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun classifyImage(bmp : Bitmap ){
@@ -94,8 +104,8 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
         }
     }
 
-    fun getConfidentLevelString() : String{
-        return ((confidentLevel.value.times(100f)).toString() + "%")
+    fun getConfidentLevelString() : Float{
+        return ((confidentLevel.value.times(100f)))
     }
 
     fun navigateBack(){
