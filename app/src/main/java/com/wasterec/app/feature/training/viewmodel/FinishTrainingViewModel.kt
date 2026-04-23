@@ -19,7 +19,7 @@ class FinishTrainingViewModel(
     fun navigateBackToHome(){
         clearAllData()
         navHostController.navigate(Destination.Home) {
-            popUpTo(navHostController.graph.startDestinationId) {
+            popUpTo(Destination.Home) {
                 inclusive = true
             }
             launchSingleTop = true
