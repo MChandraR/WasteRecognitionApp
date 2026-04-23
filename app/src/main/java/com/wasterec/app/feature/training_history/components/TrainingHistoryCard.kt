@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.wasterec.app.R
@@ -46,7 +47,7 @@ fun TrainingHistoryCard(number: Int, id : String, loss : String, date : String, 
                     color= ColorAsset.tertiaryBlue,
                     modifier = Modifier.padding(bottom = 2.dp)
                 )
-                Text("Loss : ${loss}",
+                Text("Loss : ${"%.5f".format(java.util.Locale.ROOT, loss.toFloat())}",
                     fontSize = Typography.titleLarge.fontSize,
                     fontWeight = FontWeight.Bold,
                     color= ColorAsset.primaryBlue
@@ -69,7 +70,7 @@ fun TrainingHistoryCard(number: Int, id : String, loss : String, date : String, 
 @Composable
 fun TrainingHistoryCardPreview(){
     Column(modifier = Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.Center) {
-        TrainingHistoryCard(1, "s890df", "0.1232", "2023-01-01 at 09:00")
+        TrainingHistoryCard(1, "s890df", "0.1232323212312332", "2023-01-01 at 09:00")
 
     }
     //TrainingHistoryView()

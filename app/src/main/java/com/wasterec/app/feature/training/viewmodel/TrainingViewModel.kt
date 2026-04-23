@@ -39,7 +39,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
-import java.util.Objects
+import kotlin.math.abs
 
 class TrainingViewModel(
     val app : Application,
@@ -56,12 +56,12 @@ class TrainingViewModel(
     val backgroundLossList = mutableStateListOf<Float>()
     val classifierWeightFileManager : ClassifierWeightFileManager = ClassifierWeightFileManager(app.baseContext)
     val totalDatasetCount: MutableIntState = mutableIntStateOf(0)
-    val datasetRepository : DatasetUploadRepository = DatasetUploadRepository(app.baseContext, {handleAPIException(it)})
+    val datasetRepository : DatasetUploadRepository = DatasetUploadRepository(app.baseContext){handleAPIException(it)}
     val fileManager : FileManager = FileManager(app.baseContext)
     val totalLabelCount : MutableList<Int> = mutableListOf(0,0,0,0,0,0)
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
     val modelAccuracy = mutableIntStateOf(0)
-    val globalModelRepository = GlobalModelRepository(app.baseContext, { handleExceptionAPI() })
+    val globalModelRepository = GlobalModelRepository(app.baseContext) { handleExceptionAPI() }
     var isTraining = false
     var listOfPendingTrainingData = mutableListOf<GlobalWeightModel>()
 
@@ -74,7 +74,8 @@ class TrainingViewModel(
 
 
     fun getModelAccuracy():Int{
-        val accuracy = (annotateViewModel?.rightLabelCount?.intValue?:0).toFloat() / (annotateViewModel?.datasetManager?.value?.getDataSize()?:1).toFloat()
+        val accuracy = annotateViewModel.rightLabelCount.intValue.toFloat() / annotateViewModel.datasetManager.value.getDataSize()
+            .toFloat()
         return (accuracy * 100).toInt()
     }
 
@@ -108,11 +109,14 @@ class TrainingViewModel(
         //UPload dataset ke server
         CoroutineScope(Dispatchers.IO).launch{
             val dataset : List<Bitmap> = annotateViewModel.datasetManager.value.getData().map { it.Input }
-            val datasetToUpload = fileManager.convertBitmapToZipFile(dataset, File(app.baseContext.cacheDir, "Dataset.zip") )
-            datasetToUpload?.let {
-                datasetRepository.uploadDatasetToServer(it)
-                println("Berhasil upload dataset ke server")
+            dataset.toList().chunked(25).forEachIndexed{ it , data ->
+                val datasetToUpload = fileManager.convertBitmapToZipFile(data, File(app.baseContext.cacheDir, "Dataset${it}.zip") )
+                datasetToUpload?.let {
+                    datasetRepository.uploadDatasetToServer(it)
+                    println("Berhasil upload dataset ke server")
+                }
             }
+
         }
         backgroundLossList.clear()
         lossList.clear()
@@ -139,7 +143,9 @@ class TrainingViewModel(
     fun storeUnSentDataset(){
         println("Menyimpan dataset ke offline folder")
         val dataset : List<Bitmap> = annotateViewModel.datasetManager.value.getData().map { it.Input }
-        val datasetToUpload = fileManager.convertBitmapToZipFile(dataset, File(app.baseContext.dataDir, "dataset/${System.currentTimeMillis()}.zip") )
+        dataset.toList().chunked(25).forEachIndexed { idx, data ->
+            fileManager.convertBitmapToZipFile(data, File(app.baseContext.dataDir, "dataset/${System.currentTimeMillis()}_${idx}.zip") )
+        }
     }
 
     fun handleAPIException(e: Exception){
@@ -208,25 +214,21 @@ class TrainingViewModel(
             val startTrainingTime = System.currentTimeMillis()
             datasetManager.value.lockTrainingDataFromPreprocessing = true
             val batteryManager = application.baseContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
-            var energyUsageStart = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER)
-            var memoryUsage : Long = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
+            val energyUsageStart = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER)
             val listOfMemoryUsage = mutableListOf<Long>()
             val listOfEnergyUsage = mutableListOf<Long>()
-            val data = efficientNetB0?.train(
+            efficientNetB0?.train(
                 config = modelConfig.value,
                 dataset = annotateViewModel.datasetManager.value.getData(),
                 onProgressUpdate = { epoch, loss ->
-                    //println("Progress pelatihan $epoch")
-                    listOfMemoryUsage.add(
-                        (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) - memoryUsage
-                    )
+
+                    val currentMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
+                    listOfMemoryUsage.add(currentMemory)
                     val currentEnergyUsage = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER)
-                    listOfEnergyUsage.add(
-                        currentEnergyUsage - energyUsageStart
-                    )
+
+                    listOfEnergyUsage.add(abs(currentEnergyUsage - energyUsageStart))
                     backgroundLossList.add(loss)
-                    energyUsageStart = currentEnergyUsage
-                    memoryUsage  = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
+
                     viewModelScope.launch {
                         currentEpoch.value = epoch + 1
                         currentLoss.value = loss
@@ -247,6 +249,7 @@ class TrainingViewModel(
                     isTraining = false
                     val endTrainingTime = System.currentTimeMillis()
 
+
                     print("SENDING CLASSIFIER WEIGHT")
                     val newGlobalWeight = GlobalWeightModel(
                         num_sample = annotateViewModel.datasetManager.value.getDataSize(),
@@ -257,7 +260,7 @@ class TrainingViewModel(
                         last_loss = currentLoss.value,
                         training_time =  endTrainingTime - startTrainingTime,
                         memory_usage = listOfMemoryUsage.toList(),
-                        energy_usage = listOfEnergyUsage
+                        energy_usage = listOfEnergyUsage.toList()
                     )
 
 

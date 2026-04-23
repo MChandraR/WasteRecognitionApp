@@ -50,7 +50,7 @@ class TrainingRepository(val context: Context, val onException : (e : Exception)
 
             if (response.isSuccessful) {
                 response.body()?.data?.let {
-                    onSuccess(it.map { TrainingData(it.session_id, it.user_id, it.weight_id, it.num_data, it.label_count, it.created_at, it.status, it.loss, it.average_loss) })
+                    onSuccess(it.map { TrainingData(it.session_id, it.user_id, it.weight_id, it.num_data, it.label_count, it.created_at, it.status, it.loss, it.last_loss) })
                 }
             } else {
                 println("Response : ${response.code()}")

@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -43,11 +42,9 @@ import androidx.navigation.NavHostController
 import com.wasterec.app.R
 import com.wasterec.app.feature.importimage.components.ConfirmationDialog
 import com.wasterec.app.feature.importimage.viewmodel.ImportImageViewModel
-import com.wasterec.app.model.TrainingModel
 import com.wasterec.app.shared.components.RoundedColoredBox
 import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
-import com.wasterec.app.utils.resizeAndCropCenter
 import com.wasterec.app.utils.uriToBitmap
 import kotlinx.coroutines.Dispatchers
 

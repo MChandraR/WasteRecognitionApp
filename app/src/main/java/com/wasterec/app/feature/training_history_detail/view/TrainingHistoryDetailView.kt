@@ -89,7 +89,7 @@ fun TrainingHistoryDetailView(
                     .fillMaxWidth()
             ){
                 Text(
-                    "%.3f".format(trainingHistoryDetailViewModel?.selectedTrainingHistory?.value?.average_loss),
+                    "%.3f".format(trainingHistoryDetailViewModel?.selectedTrainingHistory?.value?.last_loss),
                     fontSize = Typography.displayLarge.fontSize * 1.5,
                     fontWeight = FontWeight.Bold,
                     color = ColorAsset.primaryBlue,

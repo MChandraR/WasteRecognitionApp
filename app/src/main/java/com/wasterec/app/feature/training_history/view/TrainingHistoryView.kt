@@ -78,7 +78,7 @@ fun TrainingHistoryView(
             ) {
                 items(trainingHistoryViewModel?.trainingHistoryData?.size ?: 0){ idx ->
                     val trainingData = trainingHistoryViewModel?.trainingHistoryData?.get(idx) ?: return@items
-                    TrainingHistoryCard(idx + 1, trainingData.session_id, "${trainingData.average_loss}",
+                    TrainingHistoryCard(idx + 1, trainingData.session_id, "${trainingData.last_loss}",
                         trainingData.created_at.slice(IntRange(0,18)),
                         modifier = Modifier.clickable(true){
                             trainingHistoryViewModel.selectedTrainingData?.value = trainingData

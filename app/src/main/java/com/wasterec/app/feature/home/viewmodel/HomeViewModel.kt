@@ -85,7 +85,7 @@ class HomeViewModel(
         viewModelScope.launch {
             val jsonFileManager = JsonFileManager<MutableList<GlobalWeightModel>>(application.baseContext,"PendingTrainingData.json")
             val pendingTrainingDataList = jsonFileManager.loadJsonFile<MutableList<GlobalWeightModel>>()
-            isThereRemainDataset.value = pendingTrainingDataList?.isNotEmpty() ?: true
+            isThereRemainDataset.value = pendingTrainingDataList?.isNotEmpty() ?: false
 
             if(pendingTrainingDataList != null && pendingTrainingDataList.size > 0){
                 pendingTrainingDataList.forEachIndexed{ idx,trainignData  ->
