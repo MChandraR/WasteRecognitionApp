@@ -194,8 +194,8 @@ class TrainingViewModel(
         if(!isTraining) {
             CoroutineScope(Dispatchers.Main).launch {
                 navHostController.navigate(Destination.Home) {
-                    popUpTo(navHostController.graph.startDestinationId) {
-                        inclusive = false
+                    popUpTo(Destination.Home) {
+                        inclusive = true
                     }
                     launchSingleTop = true
                 }

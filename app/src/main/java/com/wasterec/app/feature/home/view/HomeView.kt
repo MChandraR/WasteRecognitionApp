@@ -183,7 +183,6 @@ fun HomeView(
                 colors = ButtonDefaults.buttonColors(ColorAsset.primaryBlue),
                 shape = RoundedCornerShape(10.dp),
                 onClick = {
-                    println("Hallo")
                     homeViewModel?.navHostController?.navigate(route = Destination.WeightLoading)
                 },
                 modifier = Modifier
