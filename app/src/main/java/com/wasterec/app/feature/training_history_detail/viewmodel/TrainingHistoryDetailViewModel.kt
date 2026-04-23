@@ -1,6 +1,7 @@
 package com.wasterec.app.feature.training_history_detail.viewmodel
 
 import android.app.Application
+import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -25,17 +26,23 @@ class TrainingHistoryDetailViewModel (
 
 
     fun updateLossChartData(){
-        selectedTrainingHistory?.value?.loss?.let {
-            CoroutineScope(Dispatchers.IO).launch {
-                modelProducer.value.runTransaction {
-                    lineSeries {
-                        series(
-                            x = it.indices.toList(),
-                            y = it
-                        )
+        selectedTrainingHistory?.value?.loss?.let { data ->
+            (0 until data.size step 5).map { data[it] }.let { loss ->
+                CoroutineScope(Dispatchers.IO).launch {
+                    modelProducer.value.runTransaction {
+                        lineSeries {
+                            series(
+                                x = loss.indices.toList().map { it * 5 },
+                                y = loss
+                            )
+                        }
                     }
                 }
             }
         }
+    }
+
+    fun deleteTrainingData(){
+        Toast.makeText(app.baseContext, "Belum dapat menghapus data", Toast.LENGTH_SHORT).show()
     }
 }
