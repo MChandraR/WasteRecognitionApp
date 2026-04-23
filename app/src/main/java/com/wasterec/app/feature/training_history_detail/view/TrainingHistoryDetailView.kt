@@ -1,7 +1,5 @@
 package com.wasterec.app.feature.training_history_detail.view
 
-import android.widget.Space
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -11,23 +9,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.SliderDefaults.drawStopIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
@@ -36,6 +28,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLa
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
+import com.wasterec.app.feature.importdataset.data.datasetClassList
 import com.wasterec.app.feature.training.ui.trainingColorList
 import com.wasterec.app.feature.training_history_detail.viewmodel.TrainingHistoryDetailViewModel
 import com.wasterec.app.shared.components.MyButton
@@ -78,39 +71,16 @@ fun TrainingHistoryDetailView(
                 color = ColorAsset.tertiaryBlue
             )
 
-            Spacer(modifier = Modifier.weight(.5f))
+            Spacer(modifier = Modifier.weight(1f))
 
-            Column (
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .padding(bottom = 10.dp)
-                    .border(2.dp, ColorAsset.shadeBlue, RoundedCornerShape(10.dp))
-                    .fillMaxWidth()
-            ){
-                Text(
-                    "%.3f".format(trainingHistoryDetailViewModel?.selectedTrainingHistory?.value?.last_loss),
-                    fontSize = Typography.displayLarge.fontSize * 1.5,
-                    fontWeight = FontWeight.Bold,
-                    color = ColorAsset.primaryBlue,
-                    modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = 20.dp)
-                )
-                Text("Average Loss",
-                    fontSize = Typography.bodyLarge.fontSize,
-                    fontWeight = FontWeight.Bold,
-                    color = ColorAsset.primaryBlue,
-                    modifier = Modifier.padding(bottom = 20.dp))
-            }
-
-            Spacer(Modifier.weight(.1f))
 
             Column (verticalArrangement = Arrangement.spacedBy(10.dp)){
-                Text(
-                    "Detail Dataset",
-                    fontSize = Typography.titleSmall.fontSize,
-                    fontWeight = FontWeight.Bold,
-                    color = ColorAsset.darkerBlue
-                )
+//                Text(
+//                    "Detail Dataset",
+//                    fontSize = Typography.titleSmall.fontSize,
+//                    fontWeight = FontWeight.Bold,
+//                    color = ColorAsset.darkerBlue
+//                )
 
                 ConstraintLayout(
                     modifier = Modifier
@@ -137,7 +107,7 @@ fun TrainingHistoryDetailView(
                     ) {
                         Text(
                             "${trainingHistoryDetailViewModel?.selectedTrainingHistory?.value?.label_count?.sum() ?: 0}",
-                            fontSize = Typography.displayMedium.fontSize * 1.2,
+                            fontSize = Typography.displayMedium.fontSize ,
                             fontWeight = FontWeight.Bold,
                             color = ColorAsset.primaryBlue
                         )
@@ -158,20 +128,27 @@ fun TrainingHistoryDetailView(
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                             for(i in 0 ..< 3){
-                                Box(modifier = Modifier.border(1.dp, trainingColorList.get(i), RoundedCornerShape(5.dp))){
-                                    Text("${(trainingHistoryDetailViewModel?.label?.get(i) ?: "" ).padEnd(7 + (kotlin.math.max(0,(i - 2)) * 2))} : ${trainingHistoryDetailViewModel?.selectedTrainingHistory?.value?.label_count?.get(i) ?: 0}", modifier = Modifier.padding(10.dp,8.dp), fontWeight = FontWeight.Bold, color = trainingColorList.get(i))
+                                Box(modifier = Modifier.border(1.dp,
+                                    trainingColorList[i], RoundedCornerShape(5.dp))){
+                                    Text(
+                                        "${(trainingHistoryDetailViewModel?.label?.get(i) ?: datasetClassList[i].className).padEnd(7 + (kotlin.math.max(0,(i - 2)) * 2))} : ${trainingHistoryDetailViewModel?.selectedTrainingHistory?.value?.label_count?.get(i) ?: 0}", modifier = Modifier.padding(10.dp,8.dp), fontWeight = FontWeight.Bold, color = trainingColorList[i],
+                                        fontSize = Typography.bodySmall.fontSize)
                                 }
                             }
                         }
 
                         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                             for(i in 3 ..< 6){
-                                Box(modifier = Modifier.border(1.dp, trainingColorList.get(i), RoundedCornerShape(5.dp))){
-                                    Text("${(trainingHistoryDetailViewModel?.label?.get(i) ?: "" ).padEnd(7 - kotlin.math.max(0,(i - 4)))} : ${
+                                Box(modifier = Modifier.border(1.dp,
+                                    trainingColorList[i], RoundedCornerShape(5.dp))){
+                                    Text("${(trainingHistoryDetailViewModel?.label?.get(i) ?: datasetClassList[i].className ).padEnd(7 - kotlin.math.max(0,(i - 4)))} : ${
                                         trainingHistoryDetailViewModel?.selectedTrainingHistory?.value?.label_count?.get(
                                             i
                                         ) ?: 0
-                                    }", modifier = Modifier.padding(10.dp,8.dp), fontWeight = FontWeight.Bold, color = trainingColorList.get(i))
+                                    }",
+                                        fontSize = Typography.bodySmall.fontSize,
+                                        modifier = Modifier.padding(10.dp,8.dp), fontWeight = FontWeight.Bold, color = trainingColorList[i]
+                                    )
                                 }
                             }
                         }
@@ -179,10 +156,38 @@ fun TrainingHistoryDetailView(
                     }
                 }
             }
+            
+            Spacer(modifier = Modifier.weight(1f))
+
+            Row (
+//                verticalArrangement = Arrangement.Center,
+//                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .fillMaxWidth()
+//                    .border(2.dp, ColorAsset.shadeBlue, RoundedCornerShape(10.dp))
+            ){
+                Text("Average Loss",
+                    fontSize = Typography.titleSmall.fontSize,
+                    fontWeight = FontWeight.Bold,
+                    color = ColorAsset.primaryBlue,
+                    modifier = Modifier
+                )
+                Text(
+                    "%.3f".format(trainingHistoryDetailViewModel?.selectedTrainingHistory?.value?.last_loss ?: 0f),
+                    fontSize = Typography.titleLarge.fontSize ,
+                    fontWeight = FontWeight.Bold,
+                    color = ColorAsset.primaryBlue,
+//                    modifier = Modifier.padding(start = 30.dp, end = 30.dp, top = 20.dp)
+                )
+
+            }
 
             if(trainingHistoryDetailViewModel != null) {
                 CartesianChartHost(
-                    modifier = Modifier.padding(top = 50.dp),
+                    modifier = Modifier.padding(top = 10.dp),
                     chart = rememberCartesianChart(
                         rememberLineCartesianLayer(),
                         startAxis = VerticalAxis.rememberStart(),
@@ -197,6 +202,7 @@ fun TrainingHistoryDetailView(
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 SecondaryButton(
                     onClick = {
+                        trainingHistoryDetailViewModel?.deleteTrainingData()
                     },
                     borderColor = ColorAsset.primaryRed,
                     borderSize = 2,
