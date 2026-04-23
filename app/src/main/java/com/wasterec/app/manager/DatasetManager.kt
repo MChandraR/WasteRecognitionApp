@@ -9,8 +9,10 @@ import com.wasterec.app.utils.flipHorizontal
 import com.wasterec.app.utils.flipVertical
 import com.wasterec.app.utils.forceSoftwareBitmap
 import com.wasterec.app.utils.generateBooleanWithChance
-import com.wasterec.app.utils.resizeAndCropCenter
+import com.wasterec.app.utils.resizeWithEdgePadding
 import com.wasterec.app.utils.rotateBitmap
+import kotlin.math.ceil
+import kotlin.random.Random
 
 class DatasetManager (
     var trainingData : MutableList<TrainingModel>
@@ -20,10 +22,14 @@ class DatasetManager (
     val rotatedCount = 0
     val horizontallyFlippedCount = 0
     val verticallyFlippedCount = 0
+    var chancePreprocessPerLabel = arrayOf(5,5,5,5,5,5)
 
     fun loadData(trainingData : MutableList<TrainingModel>){
         this.trainingData.clear()
         this.trainingData = trainingData
+        getEachLabelCount().forEachIndexed {  idx, value ->
+            this.chancePreprocessPerLabel[idx] = ceil(value.toFloat() * 0.3f).toInt()
+        }
     }
 
     fun clearAlLData(){
@@ -72,42 +78,48 @@ class DatasetManager (
         var totalDataCount = 0
         var ogTrainingData = mutableListOf<TrainingModel>()
 
-        val processedTrainingData = trainingData.map { item ->
+        val processedTrainingData = trainingData.shuffled().map { item ->
             totalDataCount+=1
             onProgress(((totalDataCount/trainingData.size).toFloat()))
             var imageData = forceSoftwareBitmap(item.Input)
             var currentTypes = item.Type
 
             if (resizeImage ) {
-                if (!(imageData.width == 224 && imageData.height == 224))imageData = resizeAndCropCenter(imageData)
+                if (!(imageData.width == 224 && imageData.height == 224))imageData = resizeWithEdgePadding(imageData)
                 currentTypes += DataTypeModel.RESIZED
                 resizedCount++
             }
 
-            val (rotatedImg, isRotated) = applyRandomRotation(imageData)
+           if(chancePreprocessPerLabel[item.Label] > 0){
+               chancePreprocessPerLabel[item.Label] -= 1
+               val preprocessType = Random.nextInt(0,3)
+               if(preprocessType == 0){
+                   val (rotatedImg, isRotated) = applyRandomRotation(imageData, chance = 1.0)
 
-            if (isRotated) {
-                ogTrainingData.add( TrainingModel(imageData, item.Label, currentTypes) )
-                imageData = rotatedImg
-                currentTypes += DataTypeModel.ROTATED
-                rotatedCount++
-            } else {
-                val (hFlippedImg, isHFlipped) = applyRandomHorizontalFlip(imageData)
-                if (isHFlipped) {
-                    ogTrainingData.add( TrainingModel(imageData, item.Label, currentTypes) )
-                    imageData = hFlippedImg
-                    currentTypes += DataTypeModel.FLIPPED_HORIZONTALLY
-                    horizontallyFlippedCount++
-                } else {
-                    val (vFlippedImg, isVFlipped) = applyRandomVerticallyFlip(imageData)
-                    if (isVFlipped) {
-                        ogTrainingData.add( TrainingModel(imageData, item.Label, currentTypes) )
-                        imageData = vFlippedImg
-                        currentTypes += DataTypeModel.FLIPPED_VERTICALLY
-                        verticallyFlippedCount++
-                    }
-                }
-            }
+                   ogTrainingData.add( TrainingModel(imageData, item.Label, currentTypes) )
+                   imageData = rotatedImg
+                   currentTypes += DataTypeModel.ROTATED
+                   rotatedCount++
+
+               }
+
+               if(preprocessType == 1){
+                   val (hFlippedImg, isHFlipped) = applyRandomHorizontalFlip(imageData, 1.0)
+                   ogTrainingData.add( TrainingModel(imageData, item.Label, currentTypes) )
+                   imageData = hFlippedImg
+                   currentTypes += DataTypeModel.FLIPPED_HORIZONTALLY
+                   horizontallyFlippedCount++
+               }
+
+               if(preprocessType == 2){
+                   val (vFlippedImg, isVFlipped) = applyRandomVerticallyFlip(imageData,1.0)
+                   ogTrainingData.add( TrainingModel(imageData, item.Label, currentTypes) )
+                   imageData = vFlippedImg
+                   currentTypes += DataTypeModel.FLIPPED_VERTICALLY
+                   verticallyFlippedCount++
+               }
+           }
+
 
             TrainingModel(imageData, item.Label, currentTypes)
         }
@@ -134,7 +146,7 @@ class DatasetManager (
     }
 
     fun applyRandomRotation(bitmap : Bitmap, chance : Double = .1): Pair<Bitmap, Boolean> {
-        val angles = listOf(30f,45f,50f )
+        val angles = listOf(30f,45f,60f )
         if(generateBooleanWithChance(chance)){
             return Pair(rotateBitmap(bitmap, angles.random()), true)
         }

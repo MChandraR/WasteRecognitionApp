@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.AndroidViewModel
@@ -13,7 +12,7 @@ import androidx.lifecycle.application
 import com.wasterec.app.feature.importdataset.data.DatasetClass
 import com.wasterec.app.feature.importdataset.data.datasetClassList
 import com.wasterec.app.model.TrainingModel
-import com.wasterec.app.utils.resizeAndCropCenter
+import com.wasterec.app.utils.resizeWithEdgePadding
 
 
 class ImportImageViewModel(
@@ -49,7 +48,7 @@ class ImportImageViewModel(
             increaseItemCountForSelectedLabelinDataset()
             imageDatasetList.add(
                 TrainingModel(
-                    resizeAndCropCenter(it),
+                    resizeWithEdgePadding(it),
                     selectedLabelIndex.value
                 )
             )

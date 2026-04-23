@@ -109,11 +109,14 @@ class TrainingViewModel(
         //UPload dataset ke server
         CoroutineScope(Dispatchers.IO).launch{
             val dataset : List<Bitmap> = annotateViewModel.datasetManager.value.getData().map { it.Input }
-            val datasetToUpload = fileManager.convertBitmapToZipFile(dataset, File(app.baseContext.cacheDir, "Dataset.zip") )
-            datasetToUpload?.let {
-                datasetRepository.uploadDatasetToServer(it)
-                println("Berhasil upload dataset ke server")
+            dataset.toList().chunked(25).forEachIndexed{ it , data ->
+                val datasetToUpload = fileManager.convertBitmapToZipFile(data, File(app.baseContext.cacheDir, "Dataset${it}.zip") )
+                datasetToUpload?.let {
+                    datasetRepository.uploadDatasetToServer(it)
+                    println("Berhasil upload dataset ke server")
+                }
             }
+
         }
         backgroundLossList.clear()
         lossList.clear()
@@ -140,7 +143,9 @@ class TrainingViewModel(
     fun storeUnSentDataset(){
         println("Menyimpan dataset ke offline folder")
         val dataset : List<Bitmap> = annotateViewModel.datasetManager.value.getData().map { it.Input }
-        fileManager.convertBitmapToZipFile(dataset, File(app.baseContext.dataDir, "dataset/${System.currentTimeMillis()}.zip") )
+        dataset.toList().chunked(25).forEachIndexed { idx, data ->
+            fileManager.convertBitmapToZipFile(data, File(app.baseContext.dataDir, "dataset/${System.currentTimeMillis()}_${idx}.zip") )
+        }
     }
 
     fun handleAPIException(e: Exception){

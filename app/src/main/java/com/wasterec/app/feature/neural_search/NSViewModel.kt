@@ -14,16 +14,13 @@ import com.wasterec.app.model.ModelConfiguration
 import com.wasterec.app.model.TrainingModel
 import com.wasterec.app.utils.DirichletSampler
 import com.wasterec.app.utils.format
-import com.wasterec.app.utils.resizeAndCropCenter
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.wasterec.app.utils.resizeWithEdgePadding
 import kotlinx.coroutines.launch
 import org.pytorch.IValue
 import org.pytorch.torchvision.TensorImageUtils
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import kotlin.math.min
 
 data class ImageSample(val bitmap: Bitmap, val labelIndex: Int)
 class NSViewModel(val app: Application) : AndroidViewModel(app) {
@@ -91,7 +88,7 @@ class NSViewModel(val app: Application) : AndroidViewModel(app) {
                         images?.forEach { imageFile ->
                             if (imageFile.isFile && isImageFile(imageFile.name)) {
                                 // 3. Decode file menjadi Bitmap
-                                val bitmap = resizeAndCropCenter( BitmapFactory.decodeFile(imageFile.absolutePath))
+                                val bitmap = resizeWithEdgePadding( BitmapFactory.decodeFile(imageFile.absolutePath))
                                 if (bitmap != null) {
                                     datasetImages.add(TrainingModel(bitmap, idx, arrayOf()))
                                     //println("Loaded: ${imageFile.name} as Label $idx")

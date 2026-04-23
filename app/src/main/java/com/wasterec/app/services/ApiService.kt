@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 open class ApiService(
-    val baseUrl : String = "https://5y2ddlshwvm5a33gmmuxyy7jui0jwzgh.lambda-url.ap-southeast-2.on.aws/api/",
+    val baseUrl : String = "https://tsb2hcg2t2e4mwz3conksbihui0xgdlq.lambda-url.ap-southeast-1.on.aws//api/",
     var retrofit: Retrofit? = null,
     val authToken : String? = null,
 ){
