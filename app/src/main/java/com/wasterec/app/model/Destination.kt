@@ -41,9 +41,15 @@ object Destination {
     data object WeightLoading : Route
 
     @Serializable
+    data object WeightLoadingForClassification : Route
+
+    @Serializable
     data object TrainingHistoryDetail : Route
 
     @Serializable
     data object Testing : Route
+
+    @Serializable
+    data object Classify : Route
 }
 

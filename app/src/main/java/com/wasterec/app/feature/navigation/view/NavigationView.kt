@@ -13,6 +13,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.wasterec.app.feature.anotate.view.AnnotateView
 import com.wasterec.app.feature.anotate.viewmodel.AnnotateViewModel
+import com.wasterec.app.feature.classify.view.ClassifyView
+import com.wasterec.app.feature.classify.viewmodel.ClassifyViewModel
 import com.wasterec.app.feature.data_preprocessing.view.DataProcessingView
 import com.wasterec.app.feature.data_preprocessing.viewmodel.DataProcessingViewModel
 import com.wasterec.app.feature.home.viewmodel.HomeViewModel
@@ -53,7 +55,8 @@ fun NavigationView(
     finishTrainingViewModel: FinishTrainingViewModel,
     trainingHistoryViewModel: TrainingHistoryViewModel,
     trainingHistoryDetailViewModel: TrainingHistoryDetailViewModel,
-    nsViewModel : NSViewModel
+    nsViewModel : NSViewModel,
+    classifyViewModel : ClassifyViewModel
 ) {
     val startDestination = Destination.Splash
     var selectedDestination by rememberSaveable { mutableIntStateOf(0) }
@@ -73,8 +76,10 @@ fun NavigationView(
         composable<Destination.Annotate>{ AnnotateView(annotateViewModel) }
         composable<Destination.FinishTraining>{ FinishTrainingView(finishTrainingViewModel) }
         composable<Destination.WeightLoading>{ ModelLoadView(modelLoadViewModel) }
+        composable<Destination.WeightLoadingForClassification>{ ModelLoadView(modelLoadViewModel) }
         composable<Destination.TrainingHistoryDetail>{ TrainingHistoryDetailView(trainingHistoryDetailViewModel) }
         composable<Destination.Testing>{ NSView(nsViewModel) }
+        composable<Destination.Classify>{ ClassifyView(classifyViewModel) }
     }
 
 }

@@ -21,6 +21,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.wasterec.app.feature.anotate.factory.AnotateViewModelFactory
 import com.wasterec.app.feature.anotate.viewmodel.AnnotateViewModel
+import com.wasterec.app.feature.classify.viewmodel.ClassifyViewModel
+import com.wasterec.app.feature.classify.viewmodel.ClassifyViewModelFactory
 import com.wasterec.app.feature.data_preprocessing.viewmodel.DataProcessingViewModel
 import com.wasterec.app.feature.data_preprocessing.viewmodel_factory.DataProcessingViewModelFactory
 import com.wasterec.app.feature.home.view_model_factory.HomeViewModelFactory
@@ -227,6 +229,10 @@ class MainActivity : ComponentActivity() {
                 factory = NSViewModelFactory(application)
             )
 
+            val classifyViewModel : ClassifyViewModel = viewModel(
+                factory = ClassifyViewModelFactory(application, navController)
+            )
+
             //DebugView(this)
             NavigationView(
                 this,
@@ -242,8 +248,10 @@ class MainActivity : ComponentActivity() {
                 finishTrainingViewModel,
                 trainingHistoryViewModel,
                 trainingHistoryDetailViewModel,
-                nsViewModel
+                nsViewModel,
+                classifyViewModel
             )
+
 
 
 

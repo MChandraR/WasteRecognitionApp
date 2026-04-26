@@ -42,6 +42,7 @@ class HomeViewModel(
 
 
     fun getGlobalModelInfo(){
+        println(navHostController.currentDestination?.route.toString())
         globalModelRepository.fetchGlobalModel({ error, result ->
             println("Berhasil mendapatkan data global model")
 

@@ -24,6 +24,7 @@ import com.wasterec.app.feature.home.viewmodel.HomeViewModel
 import com.wasterec.app.feature.main.components.BottomNavBar
 import com.wasterec.app.feature.training_history.view.TrainingHistoryView
 import com.wasterec.app.feature.training_history.viewmodel.TrainingHistoryViewModel
+import com.wasterec.app.model.Destination
 import com.wasterec.app.ui.color.ColorAsset
 
 
@@ -38,7 +39,7 @@ fun MainView(
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* Aksi FAB */ },
+                onClick = { homeViewModel?.navHostController?.navigate(Destination.WeightLoadingForClassification) },
                 shape = CircleShape,
                 containerColor = ColorAsset.darkerWhite, // Sesuaikan warna
                 contentColor = Color.White,

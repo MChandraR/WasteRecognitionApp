@@ -12,13 +12,11 @@ import com.wasterec.app.helper.ExpiredAuthTokenException
 import com.wasterec.app.manager.ClassifierWeightFileManager
 import com.wasterec.app.manager.FileManager
 import com.wasterec.app.model.Destination
-import com.wasterec.app.model.api_response.model_info.GlobalModelInfoModel
 import com.wasterec.app.repositories.GlobalModelRepository
 import com.wasterec.app.services.SharedPreferenceService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -61,7 +59,8 @@ class ModelLoadViewModel(
                 loadClassifierParam()
             }else{
                 CoroutineScope(Dispatchers.Main).launch{
-                    navHostController.navigate(Destination.ImportDataset)
+                    if(navHostController.currentDestination?.route.toString() == "com.wasterec.app.model.Destination.WeightLoadingForClassification") navHostController.navigate(Destination.Classify)
+                    else navHostController.navigate(Destination.ImportDataset)
                 }
             }
         })
@@ -82,11 +81,12 @@ class ModelLoadViewModel(
                             responseBody = response,
                             onProgress = {
                                 backboneModelDownloadProgress.value = it
-                                CoroutineScope(Dispatchers.Main).launch{
-                                    navigateToDatasetImport()
-                                }
+
                                 if (checkIfBothDownloadProgressIsComplete()){
                                     updateModelVersion(modelVersion)
+                                    CoroutineScope(Dispatchers.Main).launch{
+                                        navigateToNextPage()
+                                    }
                                 }
                             }
                         )
@@ -113,6 +113,9 @@ class ModelLoadViewModel(
                         )
                         if(checkIfBothDownloadProgressIsComplete()){
                             updateModelVersion(modelVersion)
+                            CoroutineScope(Dispatchers.Main).launch{
+                                navigateToNextPage()
+                            }
                         }
                     }
                 }
@@ -124,12 +127,14 @@ class ModelLoadViewModel(
         return backboneModelDownloadProgress.value >= 1f && classifierWeightDownloadProgress.value >= 1f
     }
 
-    fun navigateToDatasetImport(){
+    fun navigateToNextPage(){
         println("${
             navHostController.currentDestination?.route?.split(".")?.get(5)
         } == ${Destination.WeightLoading.toString()}")
         if(backboneModelDownloadProgress.value >= 1f && navHostController.currentDestination?.route?.split(".")?.get(5) == Destination.WeightLoading.toString()){
-            navHostController.navigate(Destination.ImportDataset)
+
+            if(navHostController.currentDestination?.route.toString() == "com.wasterec.app.model.Destination.WeightLoadingForClassification") navHostController.navigate(Destination.Classify)
+            else navHostController.navigate(Destination.ImportDataset)
         }
     }
 
