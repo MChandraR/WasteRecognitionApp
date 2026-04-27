@@ -33,6 +33,7 @@ import com.wasterec.app.feature.training_history.viewmodel.TrainingHistoryViewMo
 import com.wasterec.app.model.Destination
 import com.wasterec.app.ui.color.ColorAsset
 import com.wasterec.app.ui.theme.Typography
+import com.wasterec.app.utils.getDateTimeFromTimestamp
 import kotlinx.coroutines.Dispatchers
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -79,7 +80,9 @@ fun TrainingHistoryView(
                 items(trainingHistoryViewModel?.trainingHistoryData?.size ?: 0){ idx ->
                     val trainingData = trainingHistoryViewModel?.trainingHistoryData?.get(idx) ?: return@items
                     TrainingHistoryCard(idx + 1, trainingData.session_id, "${trainingData.last_loss}",
-                        trainingData.created_at.slice(IntRange(0,18)),
+                        getDateTimeFromTimestamp(trainingData.created_at)
+                            ?.format(DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm:ss", Locale.ROOT))
+                            ?: "-",
                         modifier = Modifier.clickable(true){
                             trainingHistoryViewModel.selectedTrainingData?.value = trainingData
                             trainingHistoryViewModel.navHostController.navigate(Destination.TrainingHistoryDetail)

@@ -137,7 +137,7 @@ fun ImportDatasetView(
                     ?: 0) >= 100 && (importDatasetViewModel?.isClassCountMeetRequirement?.value
                     ?: true)) || true,
                 onClick = {
-                    importDatasetViewModel?.navHostController?.navigate(Destination.Preprocess)
+                    importDatasetViewModel?.navHostController?.navigate(Destination.Annotate)
                 }
             ) {
                 Text(

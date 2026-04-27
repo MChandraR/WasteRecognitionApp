@@ -6,7 +6,7 @@ data class TrainingDataResponse(
     val weight_id : String,
     val num_data : Int,
     val label_count : List<Int>,
-    val created_at : String,
+    val created_at : Long,
     val status : String,
     val loss : List<Float>,
     val last_loss : Float

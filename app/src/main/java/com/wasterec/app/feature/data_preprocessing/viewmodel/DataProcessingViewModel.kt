@@ -38,7 +38,7 @@ class DataProcessingViewModel(
     @RequiresApi(Build.VERSION_CODES.O)
     fun proProcessData(){
         if (!datasetManager.value.lockTrainingDataFromPreprocessing) {
-            datasetManager.value.loadData(trainingData.map { it.copy() }.toMutableList())
+//            datasetManager.value.loadData(trainingData.map { it.copy() }.toMutableList())
             datasetManager.value.preProcessTrainingData(
                 resizeImage = true,
                 onProgress = { dataProcessingProgress.floatValue = it }) {
@@ -59,5 +59,9 @@ class DataProcessingViewModel(
 //        trainingData.clear()
 //        trainingData.addAll(datasetManager.value.getData())
         navHostController.navigate(Destination.Annotate)
+    }
+
+    fun navigateToTrainingPage(){
+        navHostController.navigate(Destination.Training)
     }
 }

@@ -237,7 +237,7 @@ fun AnnotateView(
                                         ?: 0) - 1
                                 ) {
                                     annotateViewModel?.isRedirected?.value = true
-                                    annotateViewModel?.navHostController?.navigate(Destination.Training)
+                                    annotateViewModel?.navHostController?.navigate(Destination.Preprocess)
                                 }
                                 annotateViewModel?.currentAnnotateIndex?.value = nextIndex
                             },
@@ -308,7 +308,7 @@ fun AnnotateView(
                     if (!annotateViewModel.isRedirected.value &&  (annotateViewModel.currentAnnotateIndex.value
                                 ) >= annotateViewModel.datasetManager.value.getDataSize() - 1
                     ) {
-                        annotateViewModel.navHostController.navigate(Destination.Training)
+                        annotateViewModel.navHostController.navigate(Destination.Preprocess)
                         annotateViewModel.isRedirected.value = true
                     }
                     annotateViewModel.currentAnnotateIndex.value = nextIndex

@@ -50,6 +50,7 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
         predictResult.value = ""
         confidentLevel.value = 0f
         predictedLabel.value = 0
+        datasetManager.value.loadData(trainingData.map { it.copy() }.toMutableList())
         currentBitmap.value = null
         val globalModelFile = File(context.filesDir, "Backbone.ptl")
         if(globalModelFile.exists()){

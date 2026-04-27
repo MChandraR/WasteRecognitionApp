@@ -74,7 +74,7 @@ class MainActivity : ComponentActivity() {
             )}
             val selectedTrainingData : MutableState<TrainingData> = remember {
                 mutableStateOf(
-                    TrainingData("", "", "", 0,listOf(),"", "", listOf(), 0f)
+                    TrainingData("", "", "", 0,listOf(),0, "", listOf(), 0f)
                 )
             }
             val datasetManager: MutableState<DatasetManager> = remember { mutableStateOf(DatasetManager(mutableListOf()))}

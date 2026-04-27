@@ -100,7 +100,7 @@ fun DataProcessingView(
             MyButton(
                 enabled = dataProcessingViewModel?.dataProcessingProgress?.floatValue == 1f,
                 onClick = {
-                    dataProcessingViewModel?.navigateToAnnotatePage()
+                    dataProcessingViewModel?.navigateToTrainingPage()
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
