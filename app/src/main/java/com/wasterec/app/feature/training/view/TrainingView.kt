@@ -241,6 +241,7 @@ fun TrainingView(
         )
 
         MyButton(
+            enabled = !(trainingViewModel?.isTraining?.value ?: true),
             onClick = {
                 //trainingViewModel?.reInit() //THIS CAUSE DOUBLE LOCAL TRAINING
                 trainingViewModel?.navigateToFinishTrainingView()

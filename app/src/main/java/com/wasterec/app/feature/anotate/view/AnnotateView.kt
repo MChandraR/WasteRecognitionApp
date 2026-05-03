@@ -105,7 +105,11 @@ fun AnnotateView(
                                         .height(300.dp)
                                         .padding(top = 16.dp)
                                         .background(Color.Transparent)
-                                        .clip(RoundedCornerShape(10)),
+                                        .clip(RoundedCornerShape(10))
+                                        .clickable(true){
+                                            annotateViewModel?.navHostController?.navigate(
+                                                Destination.Preprocess)
+                                        },
                                     contentScale = ContentScale.Crop
                                 )
 

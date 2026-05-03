@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.wasterec.app.model.DataTypeModel
 import com.wasterec.app.model.TrainingModel
+import com.wasterec.app.utils.applyRandomCrop
 import com.wasterec.app.utils.flipHorizontal
 import com.wasterec.app.utils.flipVertical
 import com.wasterec.app.utils.forceSoftwareBitmap
@@ -28,7 +29,7 @@ class DatasetManager (
         this.trainingData.clear()
         this.trainingData = trainingData
         getEachLabelCount().forEachIndexed {  idx, value ->
-            this.chancePreprocessPerLabel[idx] = ceil(value.toFloat() * 0.3f).toInt()
+            this.chancePreprocessPerLabel[idx] = ceil(value.toFloat() * 1f).toInt()
         }
     }
 
@@ -92,7 +93,7 @@ class DatasetManager (
 
            if(chancePreprocessPerLabel[item.Label] > 0){
                chancePreprocessPerLabel[item.Label] -= 1
-               val preprocessType = Random.nextInt(0,3)
+               val preprocessType = Random.nextInt(0,4)
                if(preprocessType == 0){
                    val (rotatedImg, isRotated) = applyRandomRotation(imageData, chance = 1.0)
 
@@ -117,6 +118,12 @@ class DatasetManager (
                    imageData = vFlippedImg
                    currentTypes += DataTypeModel.FLIPPED_VERTICALLY
                    verticallyFlippedCount++
+               }
+
+               if(preprocessType == 3){
+                   val cropped = applyRandomCrop(imageData)
+                   ogTrainingData.add( TrainingModel(imageData, item.Label, currentTypes) )
+                   imageData = cropped
                }
            }
 
@@ -146,7 +153,7 @@ class DatasetManager (
     }
 
     fun applyRandomRotation(bitmap : Bitmap, chance : Double = .1): Pair<Bitmap, Boolean> {
-        val angles = listOf(30f,45f,60f )
+        val angles = listOf(30f,60f, 90f, 120f, 150f, 180f, 210f, 240f, 270f, 300f, 330f)
         if(generateBooleanWithChance(chance)){
             return Pair(rotateBitmap(bitmap, angles.random()), true)
         }

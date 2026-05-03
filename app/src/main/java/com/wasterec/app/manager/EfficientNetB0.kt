@@ -3,6 +3,7 @@ package com.wasterec.app.manager
 import android.content.Context
 import android.graphics.Bitmap
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.wasterec.app.model.ClassifierWeightModel
 import com.wasterec.app.model.ModelConfiguration
@@ -13,6 +14,7 @@ import org.pytorch.IValue
 import org.pytorch.Module
 import org.pytorch.Tensor
 import org.pytorch.torchvision.TensorImageUtils
+import kotlin.math.abs
 import kotlin.math.ln
 
 class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl") : ModelManager(context, modelPath) {
@@ -197,14 +199,14 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
 
             val avgLoss = totalLoss / dataset.size
             onProgressUpdate(epoch, avgLoss)
-//            if(avgLoss < .2f){
-//                break;
-//            }
+            if(avgLoss <= .15f){
+                break;
+            }
 //            if(abs(last3Loss.getList().get(0) - avgLoss) <= 0.003){
 //                totalEpoch = epoch-1
 //                break;
 //            }
-            //Log.i("TRAIN", "Epoch ${epoch + 1} Done. Avg Loss: $avgLoss")
+            Log.i("TRAIN", "Epoch ${epoch + 1} Done. Avg Loss: $avgLoss")
         }
 
         onFinished(totalEpoch,  mapOf("weights" to weights, "bias" to bias))
@@ -284,14 +286,11 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
 
             val avgLoss = totalLoss / dataset.size
             onProgressUpdate(epoch, avgLoss)
-//            if(avgLoss < .2f){
-//                break;
-//            }
-//            if(abs(last3Loss.getList().get(0) - avgLoss) <= 0.003){
-//                totalEpoch = epoch-1
-//                break;
-//            }
-            //Log.i("TRAIN", "Epoch ${epoch + 1} Done. Avg Loss: $avgLoss")
+            if(avgLoss < .2f){
+                break;
+            }
+
+            Log.i("TRAIN", "Epoch ${epoch + 1} Done. Avg Loss: $avgLoss")
         }
 
         onFinished(totalEpoch)

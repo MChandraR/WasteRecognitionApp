@@ -31,7 +31,7 @@ fun NSView(nsViewModel: NSViewModel){
 
         Button(
             {
-                nsViewModel.sampler()
+                nsViewModel.loadDataset()
             }
         ) {
             Text("Aha")

@@ -11,6 +11,7 @@ import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import android.graphics.Matrix
 import android.graphics.Paint
+import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Shader
 import kotlin.math.max
@@ -144,6 +145,37 @@ fun flipHorizontal(bitmap: Bitmap): Bitmap {
 
     paint.shader = shader
     canvas.drawRect(0f, 0f, bitmap.width.toFloat(), bitmap.height.toFloat(), paint)
+
+    return outputBitmap
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun applyRandomCrop(bitmaps: Bitmap, minScale: Float = 0.8f): Bitmap {
+    val bitmap = forceSoftwareBitmap(bitmaps)
+    val width = bitmap.width
+    val height = bitmap.height
+
+    // 1. Tentukan ukuran area yang akan di-crop
+    // minScale 0.8f berarti kita mengambil minimal 80% dari gambar asli (zoom in)
+    val scale = Random.nextFloat() * (1f - minScale) + minScale
+    val cropWidth = (width * scale).toInt()
+    val cropHeight = (height * scale).toInt()
+
+    // 2. Tentukan titik koordinat (x, y) awal secara acak
+    val left = Random.nextInt(0, width - cropWidth + 1)
+    val top = Random.nextInt(0, height - cropHeight + 1)
+
+    val sourceRect = Rect(left, top, left + cropWidth, top + cropHeight)
+    val destRect = Rect(0, 0, width, height)
+
+    // 3. Buat bitmap baru dan gambar area crop ke ukuran penuh
+    val outputBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(outputBitmap)
+
+    // Paint dengan FILTER_BITMAP_FLAG agar hasil zoom tidak pecah/pixelated
+    val paint = android.graphics.Paint(android.graphics.Paint.FILTER_BITMAP_FLAG)
+
+    canvas.drawBitmap(bitmap, sourceRect, destRect, paint)
 
     return outputBitmap
 }

@@ -39,7 +39,14 @@ class HomeViewModel(
     val isThereRemainDataset = mutableStateOf(true)
     val isUserAlreadyLoggedIn = mutableStateOf(false)
 
-
+    fun navigateToLoginScreen(){
+        CoroutineScope(Dispatchers.Main).launch{
+            navHostController.navigate(Destination.Login) {
+                popUpTo(0) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
+    }
 
     fun getGlobalModelInfo(){
         println(navHostController.currentDestination?.route.toString())
@@ -51,14 +58,13 @@ class HomeViewModel(
                 println("Berhasil mendapatkan data global model ${globalModelInfoModel.value?.model_name}")
             }else{
 
-                CoroutineScope(Dispatchers.Main).launch{
-                    if (error is GlobalModelError.Unauthorized){
-                        navHostController.navigate(Destination.Login) {
-                            popUpTo(0) { inclusive = true }
-                            launchSingleTop = true
-                        }
-                    }
-                    Toast.makeText(globalModelRepository.context, error.message,  Toast.LENGTH_LONG).show()
+                if (error is GlobalModelError.Unauthorized) {
+                    navigateToLoginScreen()
+                    Toast.makeText(
+                        globalModelRepository.context,
+                        error.message,
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
                 println(error.message)
             }
@@ -131,6 +137,7 @@ class HomeViewModel(
     }
 
     fun logout(){
+        navigateToLoginScreen()
         sharedPreferenceService.removeStringValue("authToken")
     }
 

@@ -62,12 +62,12 @@ class TrainingViewModel(
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
     val modelAccuracy = mutableIntStateOf(0)
     val globalModelRepository = GlobalModelRepository(app.baseContext) { handleExceptionAPI() }
-    var isTraining = false
+    var isTraining = mutableStateOf(false)
     var listOfPendingTrainingData = mutableListOf<GlobalWeightModel>()
 
     var modelConfig = mutableStateOf(ModelConfiguration(
-        learningRate = 0.1f,
-        epoch = 50,
+        learningRate = 0.01f,
+        epoch = 30,
         batchSize = 16
     )
     )
@@ -191,7 +191,7 @@ class TrainingViewModel(
     }
 
     fun clearNavigationPathToHome(){
-        if(!isTraining) {
+        if(!isTraining.value) {
             CoroutineScope(Dispatchers.Main).launch {
                 navHostController.navigate(Destination.Home) {
                     popUpTo(Destination.Home) {
@@ -209,7 +209,7 @@ class TrainingViewModel(
     @RequiresApi(Build.VERSION_CODES.O)
     //Fungsi buat memanggil model dan mulai training local
     fun startLocalTraining(){
-        isTraining = true
+        isTraining.value = true
         CoroutineScope(Dispatchers.IO).launch {
             val startTrainingTime = System.currentTimeMillis()
             datasetManager.value.lockTrainingDataFromPreprocessing = true
@@ -217,6 +217,10 @@ class TrainingViewModel(
             val energyUsageStart = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER)
             val listOfMemoryUsage = mutableListOf<Long>()
             val listOfEnergyUsage = mutableListOf<Long>()
+            efficientNetB0?.loadClassifierParams {
+                efficientNetB0?.setClassifierWeight(it.first)
+                efficientNetB0?.setClassifierBias(it.second)
+            }
             efficientNetB0?.train(
                 config = modelConfig.value,
                 dataset = annotateViewModel.datasetManager.value.getData(),
@@ -246,7 +250,7 @@ class TrainingViewModel(
                     currentEpoch.value = it
 
 
-                    isTraining = false
+                    isTraining.value = false
                     val endTrainingTime = System.currentTimeMillis()
 
 
