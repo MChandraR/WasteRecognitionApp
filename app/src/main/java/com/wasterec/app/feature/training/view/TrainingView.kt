@@ -75,8 +75,8 @@ fun TrainingView(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp)
             .background(Color.White)
+            .padding(20.dp)
         ,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally

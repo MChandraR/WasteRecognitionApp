@@ -82,6 +82,7 @@ class TrainingViewModel(
     //Fungsi untuk reinit nilai atau reset variabel
     @RequiresApi(Build.VERSION_CODES.O)
     fun reInit(){
+        currentEpoch.value = 0
         listOfPendingTrainingData.clear()
         modelProducer.value =  CartesianChartModelProducer()
         modelAccuracy.intValue = getModelAccuracy()
