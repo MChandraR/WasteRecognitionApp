@@ -59,6 +59,7 @@ fun AnnotateView(
         if(!(annotateViewModel?.isModelLoading?.value?:false)) {
             Column(
                 modifier = Modifier
+                    .background(Color.White)
                     .fillMaxSize()
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -142,32 +143,40 @@ fun AnnotateView(
                     ) {
 
                         Text(
+                             "Label :",
+                            textAlign = TextAlign.Center,
+                            fontSize = Typography.titleMedium.fontSize,
+                            color = ColorAsset.primaryBlue,
+                            modifier = Modifier.fillMaxWidth().padding(top = 20.dp)
+                        )
+
+                        Text(
                             annotateViewModel?.predictResult?.value ?: "Logam",
                             textAlign = TextAlign.Center,
                             fontSize = Typography.titleLarge.fontSize,
                             fontWeight = FontWeight.Bold,
                             color = ColorAsset.primaryBlue,
-                            modifier = Modifier.fillMaxWidth().padding(top = 20.dp)
+                            modifier = Modifier.fillMaxWidth()
                         )
 
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 20.dp)
-                        ) {
-                            Text(
-                                "Confident Lv : ",
-                                fontSize = Typography.titleLarge.fontSize,
-                                textAlign = TextAlign.Center
-                            )
-                            Text(
-                                ( if (annotateViewModel?.confidentLevel?.value != 0f)  "%.2f".format(Locale.ROOT, (annotateViewModel?.getConfidentLevelString() ?: 17.2937f )) else "-") + "%",
-                                fontSize = Typography.titleLarge.fontSize,
-                                color = ColorAsset.darkerBlue,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+//                        Row(
+//                            horizontalArrangement = Arrangement.Center,
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .padding(vertical = 20.dp)
+//                        ) {
+//                            Text(
+//                                "Confident Lv : ",
+//                                fontSize = Typography.titleLarge.fontSize,
+//                                textAlign = TextAlign.Center
+//                            )
+//                            Text(
+//                                ( if (annotateViewModel?.confidentLevel?.value != 0f)  "%.2f".format(Locale.ROOT, (annotateViewModel?.getConfidentLevelString() ?: 17.2937f )) else "-") + "%",
+//                                fontSize = Typography.titleLarge.fontSize,
+//                                color = ColorAsset.darkerBlue,
+//                                fontWeight = FontWeight.Bold
+//                            )
+//                        }
                     }
 
                     Icon(painterResource(R.drawable.outline_chevron_right_24), "",
