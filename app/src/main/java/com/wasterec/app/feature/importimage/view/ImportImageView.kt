@@ -81,7 +81,7 @@ fun ImportImageView(
         importImageViewModel?.reInit()
     }
 
-    Box(Modifier.fillMaxSize().padding(16.dp)) {
+    Box(Modifier.background(Color.White).fillMaxSize().padding(16.dp)) {
         Column(Modifier.fillMaxSize()) {
 
             Spacer(modifier = Modifier.weight(.25f))
