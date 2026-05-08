@@ -2,6 +2,7 @@ package com.wasterec.app.feature.importdataset.view
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +22,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -56,7 +58,7 @@ fun ImportDatasetView(
         importDatasetViewModel?.validateClassCount()
     }
 
-    Box (modifier = Modifier.fillMaxSize()){
+    Box (modifier = Modifier.background(Color.White).fillMaxSize()){
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
