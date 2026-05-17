@@ -165,7 +165,7 @@ fun ClassifyView(
                 }
             }
         } else {
-            classifyViewModel?.predictedResult?.value = "Failed to convert bitmap"
+            classifyViewModel?.predictedResult?.value = ""
             Box(
                 modifier = Modifier.fillMaxWidth()
                     .background(ColorAsset.lightGray, shape = RoundedCornerShape(10))
@@ -182,9 +182,8 @@ fun ClassifyView(
             modifier = Modifier,
             verticalArrangement = Arrangement.Center
         ) {
-
             Text(
-                classifyViewModel?.predictedResult?.value ?: "Logam",
+                if(classifyViewModel?.predictedResult?.value?.isEmpty() != true) "Hasil Klasifikasi : " else "Silahkan masukkan gambar terlebih dahulu",
                 textAlign = TextAlign.Center,
                 fontSize = Typography.titleLarge.fontSize,
                 fontWeight = FontWeight.Bold,
@@ -192,23 +191,14 @@ fun ClassifyView(
                 modifier = Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 20.dp)
             )
 
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    "Confident Lv : ",
-                    fontSize = Typography.titleLarge.fontSize,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                      "%.2f".format(Locale.ROOT, (classifyViewModel?.confidentLevel?.floatValue ?: 17.2937f ) * 100f)  + "%",
-                    fontSize = Typography.titleLarge.fontSize,
-                    color = ColorAsset.darkerBlue,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            Text(
+                classifyViewModel?.predictedResult?.value ?: "-",
+                textAlign = TextAlign.Center,
+                fontSize = Typography.displaySmall.fontSize,
+                fontWeight = FontWeight.Bold,
+                color = ColorAsset.primaryBlue,
+                modifier = Modifier.fillMaxWidth().padding(top = 20.dp, bottom = 20.dp)
+            )
         }
 
 

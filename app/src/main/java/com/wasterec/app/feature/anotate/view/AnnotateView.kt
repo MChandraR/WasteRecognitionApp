@@ -108,8 +108,9 @@ fun AnnotateView(
                                         .background(Color.Transparent)
                                         .clip(RoundedCornerShape(10))
                                         .clickable(true){
-                                            annotateViewModel?.navHostController?.navigate(
-                                                Destination.Preprocess)
+//                                            annotateViewModel?.navHostController?.navigate(
+//                                                Destination.Preprocess)
+                                            annotateViewModel.getAcc()
                                         },
                                     contentScale = ContentScale.Crop
                                 )

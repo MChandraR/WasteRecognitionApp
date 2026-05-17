@@ -44,7 +44,7 @@ fun DataProcessingView(
         dataProcessingViewModel?.proProcessData()
     }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize().padding(20.dp).background(Color.White)) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.background(Color.White).fillMaxSize().padding(20.dp)) {
         Spacer(modifier = Modifier.weight(.5f))
         Text("Pra-Pemrosesan Data",
             fontSize = Typography.displaySmall.fontSize,

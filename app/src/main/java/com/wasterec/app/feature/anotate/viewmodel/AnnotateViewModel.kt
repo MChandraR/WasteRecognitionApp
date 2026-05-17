@@ -15,7 +15,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.navigation.NavHostController
 import com.wasterec.app.manager.DatasetManager
 import com.wasterec.app.manager.EfficientNetB0
+import com.wasterec.app.model.Destination
 import com.wasterec.app.model.TrainingModel
+import com.wasterec.app.utils.forceSoftwareBitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,13 +35,16 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
     val label = arrayOf("Plastik", "Kertas", "Kaca",  "Logam", "Kardus", "Sampah")
     var isModelLoading : MutableState<Boolean> = mutableStateOf(true)
     var rightLabelCount : MutableIntState = mutableIntStateOf(0)
+    var totalDataCount : MutableIntState = mutableIntStateOf(0)
     var isOnInference : MutableState<Boolean> = mutableStateOf(false)
     val isRedirected : MutableState<Boolean> = mutableStateOf(false)
     var showCancellationConfirmationDialog : MutableState<Boolean> = mutableStateOf(false)
+    val localAccuracy : MutableState<Float> = mutableStateOf(0f)
 
     //Deklarasikan ulang semua nilai variabel
     @RequiresApi(Build.VERSION_CODES.O)
     fun reInit(){
+        totalDataCount.value = datasetManager.value.getDataSize()
         isRedirected.value = false
         isOnInference.value = false
         rightLabelCount.intValue = 0
@@ -63,10 +68,36 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
         isModelLoading.value = false
     }
 
+
+
     fun goToPreviousData(){
         if (currentAnnotateIndex.value > 0){
             currentAnnotateIndex.value -= 1
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getAcc(){
+        CoroutineScope(Dispatchers.IO).launch{
+            var totalLabelCorrect = 0
+            datasetManager.value.getData().forEach { trainingModel ->
+                val bmp = forceSoftwareBitmap(trainingModel.Input)
+                efficientNetB0?.let { efficientNetB0 ->
+                        withContext(Dispatchers.IO) {
+                            val output = efficientNetB0.backbonePredict(
+                                bmp.copy(Bitmap.Config.ARGB_8888, false)
+                            )
+                            val outputIdx = output.first
+                            val labelResult = label.getOrNull(outputIdx)
+                            totalLabelCorrect += if(outputIdx == trainingModel.Label) 1 else 0
+                        }
+                    }
+            }
+
+            localAccuracy.value = totalLabelCorrect.toFloat() / datasetManager.value.getDataSize().toFloat()
+        }
+        navHostController.navigate(
+            Destination.Preprocess)
     }
 
     fun goToNextData(){

@@ -74,7 +74,7 @@ class TrainingViewModel(
 
 
     fun getModelAccuracy():Int{
-        val accuracy = annotateViewModel.rightLabelCount.intValue.toFloat() / annotateViewModel.datasetManager.value.getDataSize()
+        val accuracy = annotateViewModel.rightLabelCount.intValue.toFloat() / annotateViewModel.totalDataCount.intValue
             .toFloat()
         return (accuracy * 100).toInt()
     }
