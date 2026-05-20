@@ -93,11 +93,15 @@ class AnnotateViewModel(application : Application, val context: Context, val nav
                         }
                     }
             }
+            CoroutineScope(Dispatchers.Main).launch {
+                rightLabelCount.intValue = totalLabelCorrect
+                localAccuracy.value = totalLabelCorrect.toFloat() / datasetManager.value.getDataSize().toFloat()
+                navHostController.navigate(
+                    Destination.Preprocess)
+            }
 
-            localAccuracy.value = totalLabelCorrect.toFloat() / datasetManager.value.getDataSize().toFloat()
         }
-        navHostController.navigate(
-            Destination.Preprocess)
+
     }
 
     fun goToNextData(){

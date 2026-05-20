@@ -66,11 +66,15 @@ class TrainingViewModel(
     var listOfPendingTrainingData = mutableListOf<GlobalWeightModel>()
 
     var modelConfig = mutableStateOf(ModelConfiguration(
-        learningRate = 0.01f,
-        epoch = 30,
+        learningRate = 0.001f,
+        epoch = 5,
         batchSize = 16
     )
     )
+
+    fun splitTrainingData(){
+        annotateViewModel.datasetManager
+    }
 
 
     fun getModelAccuracy():Int{
@@ -222,9 +226,16 @@ class TrainingViewModel(
                 efficientNetB0?.setClassifierWeight(it.first)
                 efficientNetB0?.setClassifierBias(it.second)
             }
+            val dataset = datasetManager.value.splitDataTrainingVal()
+
+
+            val evaluate = efficientNetB0?.evaluate(dataset.second)
+            var init_loss = evaluate?.second
+            var init_accuracy = evaluate?.first ?: 0f
+
             efficientNetB0?.train(
                 config = modelConfig.value,
-                dataset = annotateViewModel.datasetManager.value.getData(),
+                dataset = dataset.first,
                 onProgressUpdate = { epoch, loss ->
 
                     val currentMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()
@@ -250,6 +261,12 @@ class TrainingViewModel(
                     modelConfig.value.epoch = it
                     currentEpoch.value = it
 
+                    var finalLoss = 0f
+                    var finalAccuracy = 0f
+
+                    val finalEvaluation = efficientNetB0?.evaluate(dataset.second)
+                    finalLoss = finalEvaluation?.second ?: 0f
+                    finalAccuracy = finalEvaluation?.first ?: 0f
 
                     isTraining.value = false
                     val endTrainingTime = System.currentTimeMillis()
@@ -261,11 +278,15 @@ class TrainingViewModel(
                         label_count = annotateViewModel.datasetManager.value.getEachLabelCount(),
                         weights = encodeWeightsToBase64(data?.get("weights") as Array<FloatArray>),
                         bias = floatArrayToBase64(data.getValue("bias") as FloatArray),
-                        loss = backgroundLossList,
-                        last_loss = currentLoss.value,
+                        init_loss = init_loss?:0f,
+                        training_loss = backgroundLossList,
+                        final_loss = finalLoss,
                         training_time =  endTrainingTime - startTrainingTime,
                         memory_usage = listOfMemoryUsage.toList(),
-                        energy_usage = listOfEnergyUsage.toList()
+                        energy_usage = listOfEnergyUsage.toList(),
+                        init_accuracy = init_accuracy,
+                        final_accuracy = finalAccuracy,
+                        local_accuracy = annotateViewModel.localAccuracy.value
                     )
 
 

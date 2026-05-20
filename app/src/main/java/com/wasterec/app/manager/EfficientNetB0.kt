@@ -110,6 +110,74 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
         return Pair(outputIdx, confidence)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun evaluate(dataset: List<TrainingModel>): Pair<Float, Float> {
+        val weights = this.classifierWeights
+        val bias = this.classifierBias
+
+        // Validasi jika bobot belum diinisialisasi
+        if (weights == null || bias == null || dataset.isEmpty()) return Pair(0f, 0f)
+
+        val numClasses = weights.size
+        var totalLoss = 0f
+        var correctPredictions = 0
+
+        // 1. Ekstraksi fitur (Caching) agar evaluasi berjalan sangat cepat
+        val featureList = dataset.map { data ->
+            val safeBitmap = if (data.Input.config == Bitmap.Config.HARDWARE) {
+                data.Input.copy(Bitmap.Config.ARGB_8888, false)
+            } else { data.Input }
+
+            val inputTensor = TensorImageUtils.bitmapToFloat32Tensor(
+                safeBitmap,
+                TensorImageUtils.TORCHVISION_NORM_MEAN_RGB,
+                TensorImageUtils.TORCHVISION_NORM_STD_RGB
+            )
+            val feat = this.model.forward(IValue.from(inputTensor)).toTensor().dataAsFloatArray
+            Pair(feat, data.Label)
+        }
+
+        // 2. Proses Evaluasi dengan Linear Classifier (Softmax & Cross Entropy)
+        for ((feature, label) in featureList) {
+            // Hitung Logits
+            val logits = FloatArray(numClasses) { i ->
+                var sum = bias[i]
+                for (j in 0 until feature.size) {
+                    sum += feature[j] * weights[i][j]
+                }
+                sum
+            }
+
+            // Stable Softmax
+            val maxLogit = logits.maxOrNull() ?: 0f
+            val expScore = logits.map { kotlin.math.exp(it - maxLogit) }
+            val totalScore = expScore.sum()
+            val probs = expScore.map { it / totalScore }
+
+            // Tentukan Prediksi Kelas (Index dengan probabilitas tertinggi)
+            val predictedLabel = probs.indices.maxByOrNull { probs[it] } ?: -1
+            if (predictedLabel == label) {
+                correctPredictions++
+            }
+
+            // Hitung Loss (Cross Entropy) untuk label target asli
+            for (i in 0 until numClasses) {
+                if (i == label) {
+                    totalLoss += -1f * ln(probs[i].coerceAtLeast(1e-10f))
+                }
+            }
+        }
+
+        // 3. Hitung Rata-rata Loss dan Akurasi
+        val avgLoss = totalLoss / dataset.size
+        val accuracy = correctPredictions.toFloat() / dataset.size
+
+        Log.i("EVALUATE", "Evaluation Done. Accuracy: ${accuracy * 100}%, Avg Loss: $avgLoss")
+
+        // Mereturn Pair(Akurasi, Rata-rata Loss)
+        return Pair(accuracy, avgLoss)
+    }
+
     fun setClassifierWeightAndBias(newWeight : Array<FloatArray>, newBias : FloatArray){
         this.setClassifierBias(newBias)
         this.setClassifierWeight(newWeight)

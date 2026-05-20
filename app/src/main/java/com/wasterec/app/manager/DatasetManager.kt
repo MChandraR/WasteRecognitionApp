@@ -41,6 +41,31 @@ class DatasetManager (
         return this.trainingData
     }
 
+    fun splitDataTrainingVal(ratio: Float = 0.8f): Pair<List<TrainingModel>, List<TrainingModel>> {
+        val trainingList = mutableListOf<TrainingModel>()
+        val valList = mutableListOf<TrainingModel>()
+
+        // 1. Kelompokkan data berdasarkan Label (misal: semua Plastik kumpul jadi satu, Kertas jadi satu)
+        val groupedByLabel = trainingData.groupBy { it.Label }
+
+        groupedByLabel.forEach { (label, dataPerLabel) ->
+            // Acak data untuk label ini agar pembagiannya adil
+            val shuffledData = dataPerLabel.shuffled()
+
+            // 2. Hitung berapa banyak data training untuk label ini (misal: 80% dari total data label ini)
+            val trainCount = (shuffledData.size * ratio).toInt()
+
+            // 3. Potong list menggunakan subList
+            // data dari indeks 0 hingga trainCount masuk ke Training
+            trainingList.addAll(shuffledData.subList(0, trainCount))
+            // sisanya masuk ke Validation
+            valList.addAll(shuffledData.subList(trainCount, shuffledData.size))
+        }
+
+        // Kembalikan Pair(Training, Validation) sesuai struktur awalmu
+        return Pair(trainingList.shuffled(), valList.shuffled())
+    }
+
     fun setLabelForImage(dataIndex : Int, labelIndex : Int){
         if(dataIndex >= 0 && dataIndex < trainingData.size){
             trainingData[dataIndex].Label = labelIndex
