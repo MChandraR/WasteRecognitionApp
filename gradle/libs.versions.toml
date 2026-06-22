@@ -11,6 +11,7 @@ composeBom = "2025.12.01"
 navigationCompose = "2.6.5"
 vico = "2.4.1"
 uiGraphics = "1.10.6"
+jetbrainsKotlinJvm = "2.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,4 +41,5 @@ androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graph
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
 

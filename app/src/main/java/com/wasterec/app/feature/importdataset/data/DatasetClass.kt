@@ -11,10 +11,10 @@ data class DatasetClass(
 )
 
 var datasetClassList : MutableList<DatasetClass> = mutableListOf(
-    DatasetClass(R.drawable.plastic_waste, "Plastik", 12, currentCount = 0, maximumCount = 22 ),
-    DatasetClass(R.drawable.paper_waste, "Kertas", 12, currentCount = 0, maximumCount = 22 ),
-    DatasetClass(R.drawable.glass_waste, "Kaca", 12, currentCount = 0, maximumCount = 22 ),
-    DatasetClass(R.drawable.metal_waste, "Logam", 12, currentCount = 0, maximumCount = 22 ),
-    DatasetClass(R.drawable.cardboard_waste, "Kardus", 12, currentCount = 0, maximumCount = 22 ),
-    DatasetClass(R.drawable.trash_waste, "Sampah", 12, currentCount = 0, maximumCount = 22 ),
+    DatasetClass(R.drawable.plastic_waste, "Plastik", 0, currentCount = 0, maximumCount = 100 ),
+    DatasetClass(R.drawable.paper_waste, "Kertas", 0, currentCount = 0, maximumCount = 100 ),
+    DatasetClass(R.drawable.glass_waste, "Kaca", 0, currentCount = 0, maximumCount = 100 ),
+    DatasetClass(R.drawable.metal_waste, "Logam", 0, currentCount = 0, maximumCount = 100 ),
+    DatasetClass(R.drawable.cardboard_waste, "Kardus", 0, currentCount = 0, maximumCount = 100 ),
+    DatasetClass(R.drawable.trash_waste, "Sampah", 0, currentCount = 0, maximumCount = 100 ),
 )

@@ -15,6 +15,8 @@ import com.wasterec.app.model.TrainingModel
 import com.wasterec.app.utils.DirichletSampler
 import com.wasterec.app.utils.format
 import com.wasterec.app.utils.resizeWithEdgePadding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.pytorch.IValue
 import org.pytorch.torchvision.TensorImageUtils
@@ -33,40 +35,42 @@ class NSViewModel(val app: Application) : AndroidViewModel(app) {
     // List untuk menyimpan semua gambar dan labelnya
     val datasetImages = mutableListOf<TrainingModel>()
     val modelConfigurations = arrayOf(
-        ModelConfiguration(0.1f, 10, 8), ModelConfiguration(0.1f, 20, 8), ModelConfiguration(0.1f, 30, 8), ModelConfiguration(0.1f, 40, 8), ModelConfiguration(0.1f, 50, 8),
+        // === LR 0.1 ===
+        // Batch 8
+        ModelConfiguration(0.1f, 1, 8), ModelConfiguration(0.1f, 5, 8), ModelConfiguration(0.1f, 10, 8),
         // Batch 16
-        ModelConfiguration(0.1f, 10, 16), ModelConfiguration(0.1f, 20, 16), ModelConfiguration(0.1f, 30, 16), ModelConfiguration(0.1f, 40, 16), ModelConfiguration(0.1f, 50, 16),
+        ModelConfiguration(0.1f, 1, 16), ModelConfiguration(0.1f, 5, 16), ModelConfiguration(0.1f, 10, 16),
         // Batch 32
-        ModelConfiguration(0.1f, 10, 32), ModelConfiguration(0.1f, 20, 32), ModelConfiguration(0.1f, 30, 32), ModelConfiguration(0.1f, 40, 32), ModelConfiguration(0.1f, 50, 32),
+        ModelConfiguration(0.1f, 1, 32), ModelConfiguration(0.1f, 5, 32), ModelConfiguration(0.1f, 10, 32),
 
         // === LR 0.01 (Standard) ===
         // Batch 8
-        ModelConfiguration(0.01f, 10, 8), ModelConfiguration(0.01f, 20, 8), ModelConfiguration(0.01f, 30, 8), ModelConfiguration(0.01f, 40, 8), ModelConfiguration(0.01f, 50, 8),
+        ModelConfiguration(0.01f, 1, 8), ModelConfiguration(0.01f, 5, 8), ModelConfiguration(0.01f, 10, 8),
         // Batch 16
-        ModelConfiguration(0.01f, 10, 16), ModelConfiguration(0.01f, 20, 16), ModelConfiguration(0.01f, 30, 16), ModelConfiguration(0.01f, 40, 16), ModelConfiguration(0.01f, 50, 16),
+        ModelConfiguration(0.01f, 1, 16), ModelConfiguration(0.01f, 5, 16), ModelConfiguration(0.01f, 10, 16),
         // Batch 32
-        ModelConfiguration(0.01f, 10, 32), ModelConfiguration(0.01f, 20, 32), ModelConfiguration(0.01f, 30, 32), ModelConfiguration(0.01f, 40, 32), ModelConfiguration(0.01f, 50, 32),
+        ModelConfiguration(0.01f, 1, 32), ModelConfiguration(0.01f, 5, 32), ModelConfiguration(0.01f, 10, 32),
 
         // === LR 0.001 (Stable) ===
         // Batch 8
-        ModelConfiguration(0.001f, 10, 8), ModelConfiguration(0.001f, 20, 8), ModelConfiguration(0.001f, 30, 8), ModelConfiguration(0.001f, 40, 8), ModelConfiguration(0.001f, 50, 8),
+        ModelConfiguration(0.001f, 1, 8), ModelConfiguration(0.001f, 5, 8), ModelConfiguration(0.001f, 10, 8),
         // Batch 16
-        ModelConfiguration(0.001f, 10, 16), ModelConfiguration(0.001f, 20, 16), ModelConfiguration(0.001f, 30, 16), ModelConfiguration(0.001f, 40, 16), ModelConfiguration(0.001f, 50, 16),
+        ModelConfiguration(0.001f, 1, 16), ModelConfiguration(0.001f, 5, 16), ModelConfiguration(0.001f, 10, 16),
         // Batch 32
-        ModelConfiguration(0.001f, 10, 32), ModelConfiguration(0.001f, 20, 32), ModelConfiguration(0.001f, 30, 32), ModelConfiguration(0.001f, 40, 32), ModelConfiguration(0.001f, 50, 32),
+        ModelConfiguration(0.001f, 1, 32), ModelConfiguration(0.001f, 5, 32), ModelConfiguration(0.001f, 10, 32),
 
         // === LR 0.0001 (Fine-Tuning) ===
         // Batch 8
-        ModelConfiguration(0.0001f, 10, 8), ModelConfiguration(0.0001f, 20, 8), ModelConfiguration(0.0001f, 30, 8), ModelConfiguration(0.0001f, 40, 8), ModelConfiguration(0.0001f, 50, 8),
+        ModelConfiguration(0.0001f, 1, 8), ModelConfiguration(0.0001f, 5, 8), ModelConfiguration(0.0001f, 10, 8),
         // Batch 16
-        ModelConfiguration(0.0001f, 10, 16), ModelConfiguration(0.0001f, 20, 16), ModelConfiguration(0.0001f, 30, 16), ModelConfiguration(0.0001f, 40, 16), ModelConfiguration(0.0001f, 50, 16),
+        ModelConfiguration(0.0001f, 1, 16), ModelConfiguration(0.0001f, 5, 16), ModelConfiguration(0.0001f, 10, 16),
         // Batch 32
-        ModelConfiguration(0.0001f, 10, 32), ModelConfiguration(0.0001f, 20, 32), ModelConfiguration(0.0001f, 30, 32), ModelConfiguration(0.0001f, 40, 32), ModelConfiguration(0.0001f, 50, 32)
+        ModelConfiguration(0.0001f, 1, 32), ModelConfiguration(0.0001f, 5, 32), ModelConfiguration(0.0001f, 10, 32)
     )
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun loadDataset() {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             try {
                 val assetManager = app.baseContext.assets
                 val folders = assetManager.list("dataset")

@@ -17,6 +17,7 @@ data class GlobalWeightModel(
     val init_accuracy : Float,
     val final_accuracy : Float,
     val local_accuracy : Float,
+    val learning_rate : Float,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

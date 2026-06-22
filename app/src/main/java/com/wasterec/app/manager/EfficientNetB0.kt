@@ -354,9 +354,9 @@ class EfficientNetB0(val context: Context,  modelPath : String = "backbone.ptl")
 
             val avgLoss = totalLoss / dataset.size
             onProgressUpdate(epoch, avgLoss)
-            if(avgLoss < .2f){
-                break;
-            }
+//            if(avgLoss < .2f){
+//                break;
+//            }
 
             Log.i("TRAIN", "Epoch ${epoch + 1} Done. Avg Loss: $avgLoss")
         }

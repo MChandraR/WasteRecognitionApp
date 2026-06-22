@@ -84,44 +84,44 @@ class MainActivity : ComponentActivity() {
                     DatasetClass(
                         R.drawable.plastic_waste,
                         "Plastik",
-                        12,
+                        0,
                         currentCount = 0,
-                        maximumCount = 22
+                        maximumCount = 50
                     ),
                     DatasetClass(
                         R.drawable.paper_waste,
                         "Kertas",
-                        12,
+                        0,
                         currentCount = 0,
-                        maximumCount = 22
+                        maximumCount = 50
                     ),
                     DatasetClass(
                         R.drawable.glass_waste,
                         "Kaca",
-                        12,
+                        0,
                         currentCount = 0,
-                        maximumCount = 22
+                        maximumCount = 50
                     ),
                     DatasetClass(
                         R.drawable.metal_waste,
                         "Logam",
-                        12,
+                        0,
                         currentCount = 0,
-                        maximumCount = 22
+                        maximumCount = 50
                     ),
                     DatasetClass(
                         R.drawable.cardboard_waste,
                         "Kardus",
-                        12,
+                        0,
                         currentCount = 0,
-                        maximumCount = 22
+                        maximumCount = 50
                     ),
                     DatasetClass(
                         R.drawable.trash_waste,
                         "Sampah",
-                        12,
+                        0,
                         currentCount = 0,
-                        maximumCount = 22
+                        maximumCount = 50
                     ),
                 )
             }

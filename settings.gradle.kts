@@ -24,4 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Waste Rect"
 include(":app")
- 
+include(":lib")

@@ -44,6 +44,11 @@ class ModelLoadViewModel(
         classifierWeightDownloadTask?.cancel()
     }
 
+    fun reinit(){
+        classifierWeightDownloadProgress.value = 0f
+        backboneModelDownloadProgress.value = 0f
+    }
+
 
     fun getGlobalModel(){
         globalModelRepository.fetchGlobalModel({ error, result ->
